@@ -5,6 +5,7 @@ import { useToast } from 'primevue/usetoast';
 import { useLayout } from '@/layout/composables/layout';
 import { loadingOpen, loadingClose } from '../../utils/computeds';
 import { messageLogin, addMessage } from '../../utils/messages.js';
+import { API_CONFIG } from '@/config/api.config';
 
 export function useLogin() {
     const toast = useToast();
@@ -24,19 +25,18 @@ export function useLogin() {
     const login = async () => {
         loadingOpen();
         try {
-            const response = await Axios.post('/auth/login', {
+            const response = await Axios.post(API_CONFIG.AUTH.LOGIN, {
                 username: username.value,
                 password: password.value,
                 remember: remember.value
             });
 
-            // response é o corpo da resposta: { success, msg, data }
-            const payload = response.data; // payload é { token, user }
-
+            const payload = response.data;
             if (payload && payload.token) {
                 localStorage.setItem('token', payload.token);
+                localStorage.setItem('refresh_token', payload.refresh_token);
                 localStorage.setItem('user', JSON.stringify(payload.user));
-                router.push('/operacional/servicos');
+                router.push('/dashboard');
             } else {
                 toast.add({ severity: 'error', summary: 'Erro no Login', detail: 'Token inválido ou ausente.', life: 5000 });
             }

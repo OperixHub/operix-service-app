@@ -6,7 +6,15 @@ import { useConfirm } from 'primevue/useconfirm';
 import { messageAddService, messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient, messageUpdateStatusService, messageUpdateStatusPayment, addMessage } from '../../../utils/messages.js';
 import { optionsTypesTables, socket, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose } from '../../../utils/computeds.js';
 
+import { API_CONFIG } from '@/config/api.config';
+
 export function useServices() {
+    const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
+    const URI_STATUS_PAYMENT = API_CONFIG.OPERATIONAL.STATUS_PAYMENT;
+    const URI_TYPES_PRODUCT = API_CONFIG.OPERATIONAL.TYPES_PRODUCT;
+    const URI_SERVICES = API_CONFIG.OPERATIONAL.SERVICES;
+    const URI_ORDER_OF_SERVICE = API_CONFIG.OPERATIONAL.ORDER_OF_SERVICE;
+
     const toast = useToast();
     const confirmPopup = useConfirm();
 
@@ -15,7 +23,7 @@ export function useServices() {
     const statusServiceMapping = ref([]);
     const getStatusService = async () => {
         try {
-            const response = await Axios.get('/status_service');
+            const response = await Axios.get(URI_STATUS_SERVICE);
             statusServiceOptions.value = response.data.map((item) => item.cod.toString());
             statusServiceMapping.value = response.data;
             statusServiceMapping.value.forEach((value) => {
@@ -32,7 +40,7 @@ export function useServices() {
     const statusPaymentMapping = ref([]);
     const getStatusPayment = async () => {
         try {
-            const response = await Axios.get('/status_payment');
+            const response = await Axios.get(URI_STATUS_PAYMENT);
             statusPaymentOptions.value = response.data.map((item) => item.cod.toString());
             statusPaymentMapping.value = response.data;
             statusPaymentMapping.value.forEach((value) => {
@@ -48,7 +56,7 @@ export function useServices() {
     const typesProductOptions = ref([]);
     const getTypesProduct = async () => {
         try {
-            const response = await Axios.get('/types_product');
+            const response = await Axios.get(URI_TYPES_PRODUCT);
             typesProductOptions.value = response.data.map((item) => item.name);
         } catch (error) {
             console.error(error);
@@ -87,7 +95,7 @@ export function useServices() {
 
     const getUniqueOS = async (order_of_service) => {
         try {
-            const response = await Axios.get('/order_of_service/' + order_of_service);
+            const response = await Axios.get(URI_ORDER_OF_SERVICE + '/' + order_of_service);
             dataGetOS.value = response.data[0];
             return dataGetOS.value;
         } catch (error) {
@@ -102,7 +110,7 @@ export function useServices() {
     const getServices = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get('/services');
+            const response = await Axios.get(URI_SERVICES);
             dataGetService.value = response.data;
             initFilters();
         } catch (error) {
@@ -116,7 +124,7 @@ export function useServices() {
     const getServicesWarehouse = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get('/services/warehouse');
+            const response = await Axios.get(URI_SERVICES + '/warehouse');
             dataGetService.value = response.data;
             initFilters();
         } catch (error) {
@@ -129,7 +137,7 @@ export function useServices() {
 
     const updateWarehouseForService = async (id) => {
         try {
-            const response = await Axios.put('/services/warehouse/' + id + '/true', { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/true', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço de volta', life: 5000 });
@@ -150,7 +158,7 @@ export function useServices() {
     const deleteService = async (idService, cod_order) => {
         loadingOpen();
         try {
-            const response = await Axios.delete('/services/' + idService + '/' + cod_order + '/' + typeTable.value.value);
+            const response = await Axios.delete(URI_SERVICES + '/' + idService + '/' + cod_order + '/' + typeTable.value.value);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao deletar serviço', life: 5000 });
@@ -173,7 +181,7 @@ export function useServices() {
     const updateWarehouse = async (id) => {
         loadingOpen();
         try {
-            const response = await Axios.put('/services/warehouse/' + id + '/false', { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/false', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço ao depósito', life: 5000 });
@@ -213,7 +221,7 @@ export function useServices() {
     const updateInfoClient = async () => {
         loadingOpen();
         try {
-            const response = await Axios.put('/services/info/client/' + dataEditInfoClient.value.id, {
+            const response = await Axios.put(URI_SERVICES + '/info/client/' + dataEditInfoClient.value.id, {
                 product: dataEditInfoClient.value.product,
                 client: dataEditInfoClient.value.client,
                 telephone: dataEditInfoClient.value.telephone,
@@ -253,7 +261,7 @@ export function useServices() {
     const updateStatus = async () => {
         loadingOpen();
         try {
-            const response = await Axios.put('/services/status/' + dataEditStatus.value.id + '/' + dataEditStatus.value.status, { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/status/' + dataEditStatus.value.id + '/' + dataEditStatus.value.status, { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
@@ -286,7 +294,7 @@ export function useServices() {
     const updatePaymentStatus = async () => {
         loadingOpen();
         try {
-            const response = await Axios.put('/services/status/payment/' + dataEditPaymentStatus.value.id + '/' + dataEditPaymentStatus.value.payment_status, { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/status/payment/' + dataEditPaymentStatus.value.id + '/' + dataEditPaymentStatus.value.payment_status, { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
@@ -359,7 +367,7 @@ export function useServices() {
             } else {
                 dataPutOrderOfService.value = dataPutOrderOfServiceComplete.value;
             }
-            const response = await Axios.put('/order_of_service/estimate/' + data.order_of_service, {
+            const response = await Axios.put(URI_ORDER_OF_SERVICE + '/estimate/' + data.order_of_service, {
                 type: typeOS.value.value,
                 id: !dataPutOrderOfService.value.id ? null : dataPutOrderOfService.value.id,
                 amount: dataPutOrderOfService.value.amount,
@@ -380,7 +388,7 @@ export function useServices() {
     const deleteEstimateOS = async (cod, data) => {
         loadingOpen();
         try {
-            const response = await Axios.delete('/order_of_service/estimate/' + cod + '/' + data.id);
+            const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/estimate/' + cod + '/' + data.id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             const dataOpen = { order_of_service: cod };
             closeModal();

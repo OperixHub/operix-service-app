@@ -1,7 +1,12 @@
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
 import { io } from 'socket.io-client';
-const socket = io(import.meta.env.VITE_BASE_URL_API);
+const socket = io(import.meta.env.VITE_BASE_URL_API.replace('/api', ''), {
+    auth: {
+        token: localStorage.getItem('token')
+    },
+    transports: ['websocket']
+});
 
 /* Color Palette */
 const colorTypes = ref([

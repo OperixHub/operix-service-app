@@ -5,7 +5,11 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
 
+import { API_CONFIG } from '@/config/api.config';
+
 export function useStatusServices() {
+    const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
+
     const toast = useToast();
     const confirmPopup = useConfirm();
     const { handleSubmit } = useForm();
@@ -16,7 +20,7 @@ export function useStatusServices() {
     const getStatusServices = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get('/status_service');
+            const response = await Axios.get(URI_STATUS_SERVICE);
             dataGetStatusServices.value = response.data;
             dataGetStatusServices.value.forEach((value) => {
                 if (value.color) {
@@ -33,7 +37,7 @@ export function useStatusServices() {
     const deleteStatusServices = async (id) => {
         loadingOpen();
         try {
-            const response = await Axios.delete('/status_service/' + id);
+            const response = await Axios.delete(URI_STATUS_SERVICE + '/' + id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             await getStatusServices();
         } catch (error) {
@@ -63,7 +67,7 @@ export function useStatusServices() {
     const postStatusServices = async () => {
         loadingOpen();
         try {
-            const response = await Axios.post('/status_service', {
+            const response = await Axios.post(URI_STATUS_SERVICE, {
                 description: dataPostStatusServices.value.description,
                 cod: dataPostStatusServices.value.cod,
                 color: JSON.stringify(dataPostStatusServices.value.color)

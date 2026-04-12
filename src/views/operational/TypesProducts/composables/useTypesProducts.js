@@ -5,7 +5,11 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
 
+import { API_CONFIG } from '@/config/api.config';
+
 export function useTypesProducts() {
+    const URI_TYPES_PRODUCT = API_CONFIG.OPERATIONAL.TYPES_PRODUCT;
+
     const toast = useToast();
     const confirmPopup = useConfirm();
     const { handleSubmit } = useForm();
@@ -16,7 +20,7 @@ export function useTypesProducts() {
     const getTypesProduct = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get('/types_product');
+            const response = await Axios.get(URI_TYPES_PRODUCT);
             dataGetTypesProduct.value = response.data;
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response.data.msg, life: 5000 });
@@ -29,7 +33,7 @@ export function useTypesProducts() {
     const deleteTypesProduct = async (id) => {
         loadingOpen();
         try {
-            await Axios.delete('/types_product/' + id);
+            await Axios.delete(URI_TYPES_PRODUCT + '/' + id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: 'Tipo de produto deletado com sucesso', life: 5000 });
             await getTypesProduct();
         } catch (error) {
@@ -60,7 +64,7 @@ export function useTypesProducts() {
     const postTypesProduct = async () => {
         loadingOpen();
         try {
-            await Axios.post('/types_product', {
+            await Axios.post(URI_TYPES_PRODUCT, {
                 name: dataPostTypesProduct.value.name
             });
             toast.add({ severity: 'success', summary: 'Adicionado', detail: 'Novo tipo de produto adicionado com sucesso', life: 5000 });

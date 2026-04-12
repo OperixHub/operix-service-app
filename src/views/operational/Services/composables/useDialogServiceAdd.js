@@ -3,6 +3,7 @@ import { ref, inject, onMounted } from 'vue';
 import { loadingOpen, loadingClose } from '../../../utils/computeds';
 import { useToast } from 'primevue/usetoast';
 import { messageAddService, addMessage } from '../../../utils/messages.js';
+import { API_CONFIG } from '@/config/api.config';
 
 export function useDialogServiceAdd() {
     const toast = useToast();
@@ -12,7 +13,7 @@ export function useDialogServiceAdd() {
     const statusServiceMapping = ref([]);
     const getStatusService = async () => {
         try {
-            const response = await Axios.get('/status_service');
+            const response = await Axios.get(API_CONFIG.OPERATIONAL.STATUS_SERVICE);
             statusServiceMapping.value = response.data;
             statusServiceMapping.value.forEach((value) => {
                 if (value.color) {
@@ -27,7 +28,7 @@ export function useDialogServiceAdd() {
     const typesProductOptions = ref([]);
     const getTypesProduct = async () => {
         try {
-            const response = await Axios.get('/types_product');
+            const response = await Axios.get(API_CONFIG.OPERATIONAL.TYPES_PRODUCT);
             typesProductOptions.value = response.data.map((item) => item.name);
         } catch (error) {
             console.error(error);

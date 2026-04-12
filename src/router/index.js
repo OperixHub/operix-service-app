@@ -22,9 +22,29 @@ const router = createRouter({
             component: () => import('@/views/auth/Login.vue')
         },
         {
+            path: '/register',
+            name: 'register',
+            component: () => import('@/views/auth/Register.vue')
+        },
+        {
             path: '/',
             component: AppLayout,
             children: [
+                {
+                    path: '/dashboard',
+                    name: 'dashboard',
+                    beforeEnter(to, from, next) {
+                        const token = localStorage.getItem('token');
+                        const user = localStorage.getItem('user');
+                        const response = validateToken();
+                        if (!token || !user || !response) {
+                            next('/login');
+                        } else {
+                            next();
+                        }
+                    },
+                    component: () => import('@/views/Dashboard.vue')
+                },
                 {
                     path: '/operacional/servicos',
                     name: 'operational-services',
@@ -56,8 +76,8 @@ const router = createRouter({
                     component: () => import('@/views/definitions/Users/Users.vue')
                 },
                 {
-                    path: '/definicoes/status',
-                    name: 'definitions-status',
+                    path: '/operacional/situacoes',
+                    name: 'operational-status',
                     beforeEnter(to, from, next) {
                         const token = localStorage.getItem('token');
                         const user = localStorage.getItem('user');
@@ -68,11 +88,11 @@ const router = createRouter({
                             next();
                         }
                     },
-                    component: () => import('@/views/definitions/Status/Status.vue')
+                    component: () => import('@/views/operational/Status/Status.vue')
                 },
                 {
-                    path: '/definicoes/tipos-de-produto',
-                    name: 'definitions-types-products',
+                    path: '/operacional/tipos-de-produto',
+                    name: 'operational-types-products',
                     beforeEnter(to, from, next) {
                         const token = localStorage.getItem('token');
                         const user = localStorage.getItem('user');
@@ -83,7 +103,7 @@ const router = createRouter({
                             next();
                         }
                     },
-                    component: () => import('@/views/definitions/TypesProducts/TypesProducts.vue')
+                    component: () => import('@/views/operational/TypesProducts/TypesProducts.vue')
                 }
             ]
         }
