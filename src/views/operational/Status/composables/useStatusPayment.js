@@ -5,7 +5,11 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
 
+import { API_CONFIG } from '@/config/api.config';
+
 export function useStatusPayment() {
+    const URI_STATUS_PAYMENT = API_CONFIG.OPERATIONAL.STATUS_PAYMENT;
+
     const toast = useToast();
     const confirmPopup = useConfirm();
     const { handleSubmit } = useForm();
@@ -16,7 +20,7 @@ export function useStatusPayment() {
     const getStatusPayment = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get('/status_payment');
+            const response = await Axios.get(URI_STATUS_PAYMENT);
             dataGetStatusPayment.value = response.data;
             dataGetStatusPayment.value.forEach((value) => {
                 if (value.color) {
@@ -33,7 +37,7 @@ export function useStatusPayment() {
     const deleteStatusPayment = async (id) => {
         loadingOpen();
         try {
-            const response = await Axios.delete('/status_payment/' + id);
+            const response = await Axios.delete(URI_STATUS_PAYMENT + '/' + id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             await getStatusPayment();
         } catch (error) {
@@ -63,7 +67,7 @@ export function useStatusPayment() {
     const postStatusPayment = async () => {
         loadingOpen();
         try {
-            const response = await Axios.post('/status_payment', {
+            const response = await Axios.post(URI_STATUS_PAYMENT, {
                 description: dataPostStatusPayment.value.description,
                 cod: dataPostStatusPayment.value.cod,
                 color: JSON.stringify(dataPostStatusPayment.value.color)

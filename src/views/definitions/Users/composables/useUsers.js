@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { loadingOpen, loadingClose } from '../../../utils/computeds';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { API_CONFIG } from '@/config/api.config';
 
 export function useUsers() {
     const toast = useToast();
@@ -13,7 +14,7 @@ export function useUsers() {
     const getUsers = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get('/users');
+            const response = await Axios.get(API_CONFIG.IDENTITY.USERS);
             dataGetUsers.value = response.data;
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao buscar serviços do depósito', life: 5000 });
@@ -26,7 +27,7 @@ export function useUsers() {
     const deleteUser = async (id) => {
         loadingOpen();
         try {
-            await Axios.delete('/users/' + id);
+            await Axios.delete(`${API_CONFIG.IDENTITY.USERS}/${id}`);
             toast.add({ severity: 'success', summary: 'Deletado', detail: 'Usuário deletado com sucesso', life: 5000 });
             await getUsers();
         } catch (error) {

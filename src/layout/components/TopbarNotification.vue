@@ -3,11 +3,16 @@ import { ref, onMounted } from 'vue';
 import Axios from '../../service/Axios';
 import { formatData } from '../../views/utils/computeds.js';
 
+import { API_CONFIG } from '../../config/api.config';
+
+const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
+const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS.BASE;
+
 const statusServiceOptions = ref([]);
 const statusServiceMapping = ref([]);
 const getStatusService = async () => {
     try {
-        const response = await Axios.get('/status_service');
+        const response = await Axios.get(URI_STATUS_SERVICE);
         statusServiceOptions.value = response.data.map((item) => item.cod.toString());
         statusServiceMapping.value = response.data;
         statusServiceMapping.value.forEach((value) => {
@@ -37,7 +42,7 @@ const toggle = (event) => {
 
 const getNotifications = async () => {
     try {
-        const response = await Axios.get('/tools/notifications');
+        const response = await Axios.get(URI_NOTIFICATIONS);
         notifications.value = response.data;
     } catch (error) {
         console.error(error);
