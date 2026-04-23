@@ -5,6 +5,7 @@ import { useToast } from 'primevue/usetoast';
 import { useLayout } from '@/layout/composables/layout';
 import { loadingOpen, loadingClose } from '../../utils/computeds';
 import { API_CONFIG } from '@/config/api.config';
+import { getApiErrorMessage } from '@/service/api-utils';
 
 // Local message array for reactivity
 const messageRegister = ref([]);
@@ -41,14 +42,14 @@ export function useRegister() {
                 tenant: tenant.value
             });
 
-            if (response.data?.success) {
+            if (response?.success) {
                 toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Conta criada! Você pode fazer login agora.', life: 5000 });
                 router.push('/login');
             } else {
                 toast.add({ severity: 'error', summary: 'Erro no Registro', detail: 'Tente novamente mais tarde.', life: 5000 });
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Informação Inválida', detail: error.response?.data?.msg || "Erro ao registrar usuário", life: 5000 });
+            toast.add({ severity: 'error', summary: 'Informação Inválida', detail: getApiErrorMessage(error, 'Erro ao registrar usuário'), life: 5000 });
         } finally {
             loadingClose();
         }

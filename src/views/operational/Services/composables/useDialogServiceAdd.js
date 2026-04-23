@@ -4,6 +4,7 @@ import { loadingOpen, loadingClose } from '../../../utils/computeds';
 import { useToast } from 'primevue/usetoast';
 import { messageAddService, addMessage } from '../../../utils/messages.js';
 import { API_CONFIG } from '@/config/api.config';
+import { getApiData, getApiErrorMessage, getApiMessage } from '@/service/api-utils';
 
 export function useDialogServiceAdd() {
     const toast = useToast();
@@ -14,7 +15,7 @@ export function useDialogServiceAdd() {
     const getStatusService = async () => {
         try {
             const response = await Axios.get(API_CONFIG.OPERATIONAL.STATUS_SERVICE);
-            statusServiceMapping.value = response.data;
+            statusServiceMapping.value = getApiData(response, []);
             statusServiceMapping.value.forEach((value) => {
                 if (value.color) {
                     value.color = JSON.parse(value.color);
@@ -29,7 +30,7 @@ export function useDialogServiceAdd() {
     const getTypesProduct = async () => {
         try {
             const response = await Axios.get(API_CONFIG.OPERATIONAL.TYPES_PRODUCT);
-            typesProductOptions.value = response.data.map((item) => item.name);
+            typesProductOptions.value = getApiData(response, []).map((item) => item.name);
         } catch (error) {
             console.error(error);
         }
@@ -51,7 +52,7 @@ export function useDialogServiceAdd() {
     const postService = async () => {
         loadingOpen();
         try {
-            await Axios.post('/services', {
+            const response = await Axios.post(API_CONFIG.OPERATIONAL.SERVICES, {
                 product: dataPostService.value.product,
                 client: dataPostService.value.client,
                 telephone: dataPostService.value.telephone,
@@ -61,10 +62,10 @@ export function useDialogServiceAdd() {
                 created_at: dataPostService.value.created_at,
                 typeTable: 1
             });
-            toast.add({ severity: 'success', summary: 'Adicionado', detail: 'Serviço adicionado com sucesso', life: 5000 });
+            toast.add({ severity: 'success', summary: 'Adicionado', detail: getApiMessage(response, 'Serviço adicionado com sucesso'), life: 5000 });
             closeModal();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao adicionar serviço', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao adicionar serviço'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();

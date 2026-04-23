@@ -10,13 +10,21 @@ export const API_CONFIG = {
         USERS: '/users',
         TENANTS: '/tenants',
     },
+    INVENTORY: {
+        STOCK: '/stock'
+    },
     NOTIFICATIONS: {
-        BASE: '/notifications',
+        SYSTEM_INFO: '/system-info',
     },
     AUTH: {
         LOGIN: '/auth/login',
         REGISTER: '/auth/register',
         REFRESH: '/auth/refresh'
+    },
+    PERMISSIONS: {
+        ME: '/permissions/me',
+        CATALOG: '/permissions/catalog',
+        USER: (id) => `/permissions/users/${id}`
     },
     LOGS: {
         BASE: '/logs'

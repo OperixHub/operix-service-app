@@ -6,6 +6,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
 
 import { API_CONFIG } from '@/config/api.config';
+import { getApiData, getApiErrorMessage } from '@/service/api-utils';
 
 export function useStatusPayment() {
     const URI_STATUS_PAYMENT = API_CONFIG.OPERATIONAL.STATUS_PAYMENT;
@@ -21,14 +22,14 @@ export function useStatusPayment() {
         loadingOpen();
         try {
             const response = await Axios.get(URI_STATUS_PAYMENT);
-            dataGetStatusPayment.value = response.data;
+            dataGetStatusPayment.value = getApiData(response, []);
             dataGetStatusPayment.value.forEach((value) => {
                 if (value.color) {
                     value.color = JSON.parse(value.color);
                 }
             });
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar status de pagamento', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao buscar status de pagamento'), life: 5000 });
         } finally {
             loadingClose();
         }
@@ -41,7 +42,7 @@ export function useStatusPayment() {
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             await getStatusPayment();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao deletar status de pagamento', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao deletar status de pagamento'), life: 5000 });
         } finally {
             loadingClose();
         }
@@ -76,7 +77,7 @@ export function useStatusPayment() {
             clearFields();
             await getStatusPayment();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao adicionar status de pagamento', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao adicionar status de pagamento'), life: 5000 });
         } finally {
             loadingClose();
         }

@@ -1,20 +1,27 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Axios from '../../service/Axios';
 import { formatData } from '../../views/utils/computeds.js';
-
 import { API_CONFIG } from '../../config/api.config';
+import { getApiData } from '@/service/api-utils';
+import { hasPermission } from '@/core/permissions/permissions.store';
 
 const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
-const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS.BASE;
+const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS.SYSTEM_INFO;
+
+const canReadSystemInfo = computed(() => hasPermission('notifications.system-info.access'));
 
 const statusServiceOptions = ref([]);
 const statusServiceMapping = ref([]);
 const getStatusService = async () => {
+    if (!canReadSystemInfo.value) {
+        return;
+    }
+
     try {
         const response = await Axios.get(URI_STATUS_SERVICE);
-        statusServiceOptions.value = response.data.map((item) => item.cod.toString());
-        statusServiceMapping.value = response.data;
+        statusServiceOptions.value = getApiData(response, []).map((item) => item.cod.toString());
+        statusServiceMapping.value = getApiData(response, []);
         statusServiceMapping.value.forEach((value) => {
             if (value.color) {
                 value.color = JSON.parse(value.color);
@@ -33,17 +40,20 @@ const getStyleStatusService = (cod) => {
 const notifications = ref([]);
 
 const overlayNotification = ref();
-const notification_items = ref();
 
 const toggle = (event) => {
     overlayNotification.value.toggle(event);
-    notification_items.value.toggle(event);
 };
 
 const getNotifications = async () => {
+    if (!canReadSystemInfo.value) {
+        notifications.value = [];
+        return;
+    }
+
     try {
         const response = await Axios.get(URI_NOTIFICATIONS);
-        notifications.value = response.data;
+        notifications.value = getApiData(response, []);
     } catch (error) {
         console.error(error);
     }
@@ -55,11 +65,12 @@ onMounted(() => {
 });
 </script>
 <template>
-    <i v-if="notifications.length != 0" v-badge="notifications.length" class="pi pi-bell p-overlay-badge" style="cursor: pointer; font-size: 25px" label="Toggle" @click="toggle" aria-haspopup="true" />
+    <button v-if="canReadSystemInfo" class="p-link topbar-notification" @click="toggle" aria-haspopup="true">
+        <i v-if="notifications.length != 0" v-badge="notifications.length" class="pi pi-bell p-overlay-badge" />
+        <i v-else class="pi pi-bell p-overlay-badge" />
+    </button>
 
-    <i v-else class="pi pi-bell p-overlay-badge" style="cursor: pointer; font-size: 20px" label="Toggle" @click="toggle" aria-haspopup="true" />
-
-    <OverlayPanel ref="overlayNotification" appendTo="body" style="width: auto; max-width: 30%">
+    <OverlayPanel ref="overlayNotification" appendTo="body" style="width: min(32rem, 90vw)">
         <DataTable scrollable scrollHeight="800px" :value="notifications" selectionMode="single" :paginator="false">
             <template #empty> Você não tem notificações. </template>
 
@@ -84,3 +95,20 @@ onMounted(() => {
         </DataTable>
     </OverlayPanel>
 </template>
+
+<style scoped>
+.topbar-notification {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    color: var(--text-color);
+    background: rgba(15, 23, 42, 0.04);
+}
+
+.topbar-notification .pi {
+    font-size: 1.15rem;
+}
+</style>

@@ -1,11 +1,16 @@
 <script setup>
 import { computed, watch, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 import AppTopbar from './AppTopbar.vue';
 import AppFooter from './AppFooter.vue';
 import AppSidebar from './AppSidebar.vue';
 import { useLayout } from '@/layout/composables/layout';
+import { consumeFlashToast } from '@/core/ui/flash';
 
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
+const route = useRoute();
+const toast = useToast();
 
 const outsideClickListener = ref(null);
 
@@ -44,7 +49,7 @@ const bindOutsideClickListener = () => {
 };
 const unbindOutsideClickListener = () => {
     if (outsideClickListener.value) {
-        document.removeEventListener('click', outsideClickListener);
+        document.removeEventListener('click', outsideClickListener.value);
         outsideClickListener.value = null;
     }
 };
@@ -52,12 +57,35 @@ const isOutsideClicked = (event) => {
     const sidebarEl = document.querySelector('.layout-sidebar');
     const topbarEl = document.querySelector('.layout-menu-button');
 
+    if (!sidebarEl || !topbarEl) {
+        return true;
+    }
+
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
+
+watch(
+    () => route.fullPath,
+    () => {
+        const flashToast = consumeFlashToast();
+
+        if (flashToast) {
+            toast.add({
+                group: 'layout',
+                severity: flashToast.severity,
+                summary: flashToast.summary,
+                detail: flashToast.detail,
+                life: flashToast.life || 4000
+            });
+        }
+    },
+    { immediate: true }
+);
 </script>
 
 <template>
     <div class="layout-wrapper" :class="containerClass">
+        <Toast group="layout" position="top-right" />
         <app-topbar></app-topbar>
         <div class="layout-sidebar">
             <app-sidebar></app-sidebar>

@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-const ACCESS_TOKEN_KEY = 'token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
+import { clearSession, getAccessToken, getRefreshToken, syncSessionTokens } from '@/core/auth/session';
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -17,7 +15,7 @@ const processQueue = (error, token = null) => {
 };
 
 const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const refreshToken = getRefreshToken();
     if (!refreshToken) {
         throw new Error('Refresh token não encontrado');
     }
@@ -32,30 +30,22 @@ const refreshAccessToken = async () => {
             }
         );
 
-        const newAccessToken = response.data.access_token;
-        const newRefreshToken = response.data.refresh_token;
+        const newAccessToken = response.data?.data?.access_token;
+        const newRefreshToken = response.data?.data?.refresh_token;
 
-        localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-        if (newRefreshToken) {
-            localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
+        if (!newAccessToken) {
+            throw new Error('Resposta de refresh sem access token.');
         }
 
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            try {
-                const user = JSON.parse(userStr);
-                user.access_token = newAccessToken;
-                if (newRefreshToken) user.refresh_token = newRefreshToken;
-                localStorage.setItem('user', JSON.stringify(user));
-            } catch (e) { }
-        }
+        syncSessionTokens({
+            access_token: newAccessToken,
+            refresh_token: newRefreshToken
+        });
 
         return newAccessToken;
     } catch (error) {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        clearSession();
+        window.location.hash = '/login';
         throw error;
     }
 };
@@ -69,7 +59,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+        const token = getAccessToken();
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -84,11 +74,12 @@ axiosInstance.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
+        const requestUrl = originalRequest?.url || '';
+        const isAuthRequest = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/refresh');
 
-        const isTokenExpired =
-            error.response?.status === 401 &&
-            error.response?.data?.message?.includes('expirado');
-        if (!isTokenExpired || originalRequest._retry) {
+        const shouldRefresh = error.response?.status === 401 && !isAuthRequest;
+
+        if (!shouldRefresh || originalRequest._retry) {
             return Promise.reject(error);
         }
 

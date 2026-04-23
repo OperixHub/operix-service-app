@@ -7,6 +7,7 @@ import { messageAddService, messageAddEstimateOSSimple, messageAddEstimateOSComp
 import { optionsTypesTables, socket, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose } from '../../../utils/computeds.js';
 
 import { API_CONFIG } from '@/config/api.config';
+import { getApiData, getApiErrorMessage } from '@/service/api-utils';
 
 export function useServices() {
     const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
@@ -24,8 +25,8 @@ export function useServices() {
     const getStatusService = async () => {
         try {
             const response = await Axios.get(URI_STATUS_SERVICE);
-            statusServiceOptions.value = response.data.map((item) => item.cod.toString());
-            statusServiceMapping.value = response.data;
+            statusServiceOptions.value = getApiData(response, []).map((item) => item.cod.toString());
+            statusServiceMapping.value = getApiData(response, []);
             statusServiceMapping.value.forEach((value) => {
                 if (value.color) value.color = JSON.parse(value.color);
             });
@@ -41,8 +42,8 @@ export function useServices() {
     const getStatusPayment = async () => {
         try {
             const response = await Axios.get(URI_STATUS_PAYMENT);
-            statusPaymentOptions.value = response.data.map((item) => item.cod.toString());
-            statusPaymentMapping.value = response.data;
+            statusPaymentOptions.value = getApiData(response, []).map((item) => item.cod.toString());
+            statusPaymentMapping.value = getApiData(response, []);
             statusPaymentMapping.value.forEach((value) => {
                 if (value.color) value.color = JSON.parse(value.color);
             });
@@ -57,7 +58,7 @@ export function useServices() {
     const getTypesProduct = async () => {
         try {
             const response = await Axios.get(URI_TYPES_PRODUCT);
-            typesProductOptions.value = response.data.map((item) => item.name);
+            typesProductOptions.value = getApiData(response, []).map((item) => item.name);
         } catch (error) {
             console.error(error);
         }
@@ -96,10 +97,10 @@ export function useServices() {
     const getUniqueOS = async (order_of_service) => {
         try {
             const response = await Axios.get(URI_ORDER_OF_SERVICE + '/' + order_of_service);
-            dataGetOS.value = response.data[0];
+            dataGetOS.value = getApiData(response, [])[0];
             return dataGetOS.value;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar OS específica', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao buscar OS específica'), life: 5000 });
             console.error(error);
         }
     };
@@ -111,10 +112,10 @@ export function useServices() {
         loadingOpen();
         try {
             const response = await Axios.get(URI_SERVICES);
-            dataGetService.value = response.data;
+            dataGetService.value = getApiData(response, []);
             initFilters();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar serviços', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao buscar serviços'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -125,10 +126,10 @@ export function useServices() {
         loadingOpen();
         try {
             const response = await Axios.get(URI_SERVICES + '/warehouse');
-            dataGetService.value = response.data;
+            dataGetService.value = getApiData(response, []);
             initFilters();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar serviços do depósito', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao buscar serviços do depósito'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -140,7 +141,7 @@ export function useServices() {
             const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/true', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço de volta', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao enviar serviço de volta'), life: 5000 });
             console.error(error);
         }
     };
@@ -161,7 +162,7 @@ export function useServices() {
             const response = await Axios.delete(URI_SERVICES + '/' + idService + '/' + cod_order + '/' + typeTable.value.value);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao deletar serviço', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao deletar serviço'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -184,7 +185,7 @@ export function useServices() {
             const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/false', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço ao depósito', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao enviar serviço ao depósito'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -232,7 +233,7 @@ export function useServices() {
             toast.add({ severity: 'success', summary: 'Editado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao editar as informações do cliente', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao editar as informações do cliente'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -265,7 +266,7 @@ export function useServices() {
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao atualizar o status', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao atualizar o status'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -298,7 +299,7 @@ export function useServices() {
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao atualizar o status de pagamento ', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao atualizar o status de pagamento'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -379,7 +380,7 @@ export function useServices() {
             toast.add({ severity: 'success', summary: 'Adicionado', detail: response.msg, life: 5000 });
         } catch (error) {
             console.error(error);
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao adicionar registro de OS', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao adicionar registro de OS'), life: 5000 });
         } finally {
             loadingClose();
         }
@@ -394,7 +395,7 @@ export function useServices() {
             closeModal();
             await openModalOS('top', dataOpen);
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao deletar registro de OS', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao deletar registro de OS'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();

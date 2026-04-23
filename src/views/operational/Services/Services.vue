@@ -1,5 +1,6 @@
 <script setup>
 import { onBeforeMount } from 'vue';
+import PageHeader from '@/components/PageHeader.vue';
 import { useServices } from './composables/useServices';
 import DialogServiceAdd from './components/DialogServiceAdd.vue';
 import DialogViewOS from './components/DialogViewOS.vue';
@@ -133,10 +134,16 @@ const props = defineProps({
         @reset="resetInfoClient"
     />
 
-    <div class="grid">
+    <div class="page-shell">
+        <PageHeader
+            title="Serviços"
+            subtitle="Centralize o fluxo de atendimento, acompanhe ordens, movimente itens entre oficina e depósito e atualize o status sem sair da mesma tela."
+            badge="Operacional"
+        />
+
+        <div class="grid">
         <div class="col-12">
-            <div class="card">
-                <h5>SERVIÇOS</h5>
+            <div class="card services-card">
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2" v-if="typeTable.value == 1">
@@ -332,4 +339,19 @@ const props = defineProps({
             </div>
         </div>
     </div>
+    </div>
 </template>
+
+<style scoped>
+.page-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.services-card {
+    border-radius: 1.3rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+}
+</style>

@@ -6,6 +6,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
 
 import { API_CONFIG } from '@/config/api.config';
+import { getApiData, getApiErrorMessage } from '@/service/api-utils';
 
 export function useStatusServices() {
     const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
@@ -21,14 +22,14 @@ export function useStatusServices() {
         loadingOpen();
         try {
             const response = await Axios.get(URI_STATUS_SERVICE);
-            dataGetStatusServices.value = response.data;
+            dataGetStatusServices.value = getApiData(response, []);
             dataGetStatusServices.value.forEach((value) => {
                 if (value.color) {
                     value.color = JSON.parse(value.color);
                 }
             });
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar status de serviço', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao buscar status de serviço'), life: 5000 });
         } finally {
             loadingClose();
         }
@@ -41,7 +42,7 @@ export function useStatusServices() {
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             await getStatusServices();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao deletar status de serviço', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao deletar status de serviço'), life: 5000 });
         } finally {
             loadingClose();
         }
@@ -76,7 +77,7 @@ export function useStatusServices() {
             clearFields();
             await getStatusServices();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao adicionar status de serviço', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao adicionar status de serviço'), life: 5000 });
         } finally {
             loadingClose();
         }

@@ -1,5 +1,5 @@
 import pdfMake from 'pdfmake/build/pdfmake';
-import Axios from '@/service/Axios';
+import { getStoredUser } from '@/core/auth/session';
 
 class PdfGenerator {
     constructor() {
@@ -7,7 +7,7 @@ class PdfGenerator {
     }
 
     async generateReceipt(dataInfo, dataOS) {
-        const idUser = JSON.parse(localStorage.getItem('user'));
+        const idUser = getStoredUser();
 
         const INFO = JSON.parse(JSON.stringify(dataInfo));
         const OS = JSON.parse(JSON.stringify(dataOS));
@@ -128,7 +128,7 @@ class PdfGenerator {
                 },
 
                 '\n\n\n\n',
-                { image: SIGNATURE, style: 'image_signature', width: 120, height: 25 },
+                ...(SIGNATURE ? [{ image: SIGNATURE, style: 'image_signature', width: 120, height: 25 }] : []),
                 {
                     alignment: 'center',
                     columns: [
@@ -191,12 +191,7 @@ class ToolsGenerator {
     constructor() {}
 
     async getSignature(id) {
-        try {
-            const response = await Axios.get('/users/signature/' + id);
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
+        return null;
     }
 
     getFormateDateLocale() {

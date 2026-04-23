@@ -6,6 +6,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
 
 import { API_CONFIG } from '@/config/api.config';
+import { getApiData, getApiErrorMessage, getApiMessage } from '@/service/api-utils';
 
 export function useTypesProducts() {
     const URI_TYPES_PRODUCT = API_CONFIG.OPERATIONAL.TYPES_PRODUCT;
@@ -21,9 +22,9 @@ export function useTypesProducts() {
         loadingOpen();
         try {
             const response = await Axios.get(URI_TYPES_PRODUCT);
-            dataGetTypesProduct.value = response.data;
+            dataGetTypesProduct.value = getApiData(response, []);
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response.data.msg, life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao buscar tipos de produto'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -33,11 +34,11 @@ export function useTypesProducts() {
     const deleteTypesProduct = async (id) => {
         loadingOpen();
         try {
-            await Axios.delete(URI_TYPES_PRODUCT + '/' + id);
-            toast.add({ severity: 'success', summary: 'Deletado', detail: 'Tipo de produto deletado com sucesso', life: 5000 });
+            const response = await Axios.delete(URI_TYPES_PRODUCT + '/' + id);
+            toast.add({ severity: 'success', summary: 'Deletado', detail: getApiMessage(response, 'Tipo de produto deletado com sucesso'), life: 5000 });
             await getTypesProduct();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response.data.msg, life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao deletar tipo de produto'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -64,14 +65,14 @@ export function useTypesProducts() {
     const postTypesProduct = async () => {
         loadingOpen();
         try {
-            await Axios.post(URI_TYPES_PRODUCT, {
+            const response = await Axios.post(URI_TYPES_PRODUCT, {
                 name: dataPostTypesProduct.value.name
             });
-            toast.add({ severity: 'success', summary: 'Adicionado', detail: 'Novo tipo de produto adicionado com sucesso', life: 5000 });
+            toast.add({ severity: 'success', summary: 'Adicionado', detail: getApiMessage(response, 'Novo tipo de produto adicionado com sucesso'), life: 5000 });
             clearFields();
             await getTypesProduct();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response.data.msg, life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: getApiErrorMessage(error, 'Erro ao adicionar tipo de produto'), life: 5000 });
             console.error(error);
         } finally {
             loadingClose();

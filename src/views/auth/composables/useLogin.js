@@ -6,6 +6,9 @@ import { useLayout } from '@/layout/composables/layout';
 import { loadingOpen, loadingClose } from '../../utils/computeds';
 import { messageLogin, addMessage } from '../../utils/messages.js';
 import { API_CONFIG } from '@/config/api.config';
+import { getApiData, getApiErrorMessage } from '@/service/api-utils';
+import { setSession } from '@/core/auth/session';
+import { loadCurrentPermissions, resetPermissionsState } from '@/core/permissions/permissions.store';
 
 export function useLogin() {
     const toast = useToast();
@@ -31,17 +34,17 @@ export function useLogin() {
                 remember: remember.value
             });
 
-            const payload = response.data;
+            const payload = getApiData(response, {});
             if (payload && payload.token) {
-                localStorage.setItem('token', payload.token);
-                localStorage.setItem('refresh_token', payload.refresh_token);
-                localStorage.setItem('user', JSON.stringify(payload.user));
+                setSession(payload);
+                resetPermissionsState();
+                await loadCurrentPermissions(true);
                 router.push('/dashboard');
             } else {
                 toast.add({ severity: 'error', summary: 'Erro no Login', detail: 'Token inválido ou ausente.', life: 5000 });
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Informação Inválida', detail: error.response?.data?.msg || "Erro ao fazer login", life: 5000 });
+            toast.add({ severity: 'error', summary: 'Informação Inválida', detail: getApiErrorMessage(error, 'Erro ao fazer login'), life: 5000 });
         } finally {
             loadingClose();
         }

@@ -1,25 +1,27 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue';
-import { useServices } from './operational/Services/composables/useServices';
+import { computed, onMounted, ref } from 'vue';
 import Chart from 'primevue/chart';
+import PageHeader from '@/components/PageHeader.vue';
+import { useServices } from './operational/Services/composables/useServices';
 
 const { dataGetService, getServices, getStatusService, statusServiceMapping } = useServices();
 
 const stats = computed(() => {
     const total = dataGetService.value.length;
-    const inProgress = dataGetService.value.filter(s => s.status !== 13).length; // Supondo 13 como concluído
-    const completed = dataGetService.value.filter(s => s.status === 13).length;
-    const urgent = dataGetService.value.filter(s => s.status === 10).length; // Supondo 10 como urgente/atrasado
-    
+    const inProgress = dataGetService.value.filter((service) => service.status !== 13).length;
+    const completed = dataGetService.value.filter((service) => service.status === 13).length;
+    const urgent = dataGetService.value.filter((service) => service.status === 10).length;
+
     return { total, inProgress, completed, urgent };
 });
 
 const chartData = ref(null);
 const chartOptions = ref({
+    maintainAspectRatio: false,
     plugins: {
         legend: {
             labels: {
-                color: '#495057'
+                color: '#334155'
             }
         }
     },
@@ -27,41 +29,40 @@ const chartOptions = ref({
         y: {
             beginAtZero: true,
             ticks: {
-                color: '#495057'
+                color: '#64748b'
             },
             grid: {
-                color: '#ebedef'
+                color: 'rgba(148, 163, 184, 0.18)'
             }
         },
         x: {
             ticks: {
-                color: '#495057'
+                color: '#64748b'
             },
             grid: {
-                color: '#ebedef'
+                display: false
             }
         }
     }
 });
 
 const setChartData = () => {
-    // Agrupar por status
     const counts = {};
-    dataGetService.value.forEach(s => {
-        const status = statusServiceMapping.value.find(m => m.cod === s.status);
-        const name = status?.description || 'Outros';
-        counts[name] = (counts[name] || 0) + 1;
+
+    dataGetService.value.forEach((service) => {
+        const status = statusServiceMapping.value.find((item) => item.cod === service.status);
+        const label = status?.description || 'Outros';
+        counts[label] = (counts[label] || 0) + 1;
     });
 
     chartData.value = {
         labels: Object.keys(counts),
         datasets: [
             {
-                label: 'Serviços por Status',
+                label: 'Serviços por status',
                 data: Object.values(counts),
-                backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#26C6DA', '#7E57C2', '#EC407A', '#FF7043', '#D4E157', '#9CCC65', '#26A69A'],
-                borderColor: '#fff',
-                borderWidth: 2
+                backgroundColor: ['#1d4ed8', '#059669', '#f59e0b', '#0f766e', '#7c3aed', '#e11d48'],
+                borderRadius: 10
             }
         ]
     };
@@ -75,94 +76,155 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="grid">
-        <div class="col-12 lg:col-6 xl:col-3">
-            <div class="card mb-0 shadow-2 hover:shadow-4 transition-all transition-duration-300">
-                <div class="flex justify-content-between mb-3">
-                    <div>
-                        <span class="block text-500 font-medium mb-3">Total de Serviços</span>
-                        <div class="text-900 font-bold text-xl">{{ stats.total }}</div>
-                    </div>
-                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-ticket text-blue-500 text-xl"></i>
-                    </div>
-                </div>
-                <span class="text-green-500 font-medium">Ativos no sistema </span>
-            </div>
-        </div>
-        <div class="col-12 lg:col-6 xl:col-3">
-            <div class="card mb-0 shadow-2 hover:shadow-4 transition-all transition-duration-300">
-                <div class="flex justify-content-between mb-3">
-                    <div>
-                        <span class="block text-500 font-medium mb-3">Em Andamento</span>
-                        <div class="text-900 font-bold text-xl">{{ stats.inProgress }}</div>
-                    </div>
-                    <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-spin pi-spinner text-orange-500 text-xl"></i>
-                    </div>
-                </div>
-                <span class="text-orange-500 font-medium">Aguardando conclusão</span>
-            </div>
-        </div>
-        <div class="col-12 lg:col-6 xl:col-3">
-            <div class="card mb-0 shadow-2 hover:shadow-4 transition-all transition-duration-300">
-                <div class="flex justify-content-between mb-3">
-                    <div>
-                        <span class="block text-500 font-medium mb-3">Concluídos</span>
-                        <div class="text-900 font-bold text-xl">{{ stats.completed }}</div>
-                    </div>
-                    <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-check-circle text-green-500 text-xl"></i>
-                    </div>
-                </div>
-                <span class="text-green-500 font-medium">Sucesso total</span>
-            </div>
-        </div>
-        <div class="col-12 lg:col-6 xl:col-3">
-            <div class="card mb-0 shadow-2 hover:shadow-4 transition-all transition-duration-300">
-                <div class="flex justify-content-between mb-3">
-                    <div>
-                        <span class="block text-500 font-medium mb-3">Urgentes/Atrasados</span>
-                        <div class="text-900 font-bold text-xl">{{ stats.urgent }}</div>
-                    </div>
-                    <div class="flex align-items-center justify-content-center bg-red-100 border-round" style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-exclamation-triangle text-red-500 text-xl"></i>
-                    </div>
-                </div>
-                <span class="text-red-500 font-medium">Requer atenção</span>
-            </div>
-        </div>
+    <div class="page-shell">
+        <PageHeader
+            title="Dashboard"
+            subtitle="Resumo operacional da oficina, com visão rápida do volume de serviços e pontos que pedem atenção."
+            badge="Visão Geral"
+        />
 
-        <div class="col-12 xl:col-6">
-            <div class="card shadow-2">
-                <h5>Visão Geral por Status</h5>
-                <Chart type="bar" :data="chartData" :options="chartOptions" class="h-20rem" />
-            </div>
-        </div>
+        <section class="stats-grid">
+            <article class="stat-card stat-card--blue">
+                <span class="stat-card__label">Total de serviços</span>
+                <strong class="stat-card__value">{{ stats.total }}</strong>
+                <span class="stat-card__hint">Todos os registros atualmente no fluxo.</span>
+            </article>
+            <article class="stat-card stat-card--amber">
+                <span class="stat-card__label">Em andamento</span>
+                <strong class="stat-card__value">{{ stats.inProgress }}</strong>
+                <span class="stat-card__hint">Ordens que ainda dependem de execução.</span>
+            </article>
+            <article class="stat-card stat-card--green">
+                <span class="stat-card__label">Concluídos</span>
+                <strong class="stat-card__value">{{ stats.completed }}</strong>
+                <span class="stat-card__hint">Serviços encerrados com sucesso.</span>
+            </article>
+            <article class="stat-card stat-card--rose">
+                <span class="stat-card__label">Prioridade alta</span>
+                <strong class="stat-card__value">{{ stats.urgent }}</strong>
+                <span class="stat-card__hint">Itens que merecem acompanhamento imediato.</span>
+            </article>
+        </section>
 
-        <div class="col-12 xl:col-6">
-            <div class="card shadow-2">
-                <h5>Últimos Serviços</h5>
-                <DataTable :value="dataGetService.slice(0, 5)" :rows="5" responsiveLayout="scroll">
-                    <Column field="order_of_service" header="OS" :sortable="true" style="width: 15%"></Column>
-                    <Column field="client" header="Cliente" :sortable="true" style="width: 35%"></Column>
-                    <Column field="product" header="Produto" :sortable="true" style="width: 35%"></Column>
-                    <Column field="status" header="Status" style="width: 15%">
-                        <template #body="slotProps">
-                            <Badge :value="slotProps.data.status" severity="info"></Badge>
+        <section class="dashboard-grid">
+            <article class="content-card content-card--chart">
+                <div class="section-heading">
+                    <div>
+                        <h2>Status do funil</h2>
+                        <p>Distribuição atual das ordens de serviço por etapa.</p>
+                    </div>
+                </div>
+                <div class="chart-shell">
+                    <Chart type="bar" :data="chartData" :options="chartOptions" />
+                </div>
+            </article>
+
+            <article class="content-card">
+                <div class="section-heading">
+                    <div>
+                        <h2>Últimos serviços</h2>
+                        <p>Uma leitura rápida do que entrou recentemente no fluxo.</p>
+                    </div>
+                </div>
+                <DataTable :value="dataGetService.slice(0, 5)" responsiveLayout="scroll">
+                    <Column field="order_of_service" header="OS" />
+                    <Column field="client" header="Cliente" />
+                    <Column field="product" header="Produto" />
+                    <Column header="Status">
+                        <template #body="{ data }">
+                            <Tag :value="data.status" severity="info" />
                         </template>
                     </Column>
                 </DataTable>
-            </div>
-        </div>
+            </article>
+        </section>
     </div>
 </template>
 
 <style scoped>
-.card {
-    background: var(--surface-card);
-    padding: 2rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
+.page-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.dashboard-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+
+.stat-card,
+.content-card {
+    border-radius: 1.3rem;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+}
+
+.stat-card {
+    padding: 1.25rem;
+    color: #fff;
+}
+
+.stat-card--blue {
+    background: linear-gradient(145deg, #1d4ed8, #1e293b);
+}
+
+.stat-card--amber {
+    background: linear-gradient(145deg, #f59e0b, #9a3412);
+}
+
+.stat-card--green {
+    background: linear-gradient(145deg, #059669, #14532d);
+}
+
+.stat-card--rose {
+    background: linear-gradient(145deg, #e11d48, #4c1d95);
+}
+
+.stat-card__label,
+.stat-card__hint {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.stat-card__value {
+    display: block;
+    margin: 0.35rem 0;
+    font-size: 2rem;
+}
+
+.content-card {
+    padding: 1.4rem;
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.content-card--chart {
+    min-height: 24rem;
+}
+
+.section-heading h2 {
+    margin: 0;
+}
+
+.section-heading p {
+    margin: 0.35rem 0 0;
+    color: var(--text-color-secondary);
+}
+
+.chart-shell {
+    height: 20rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 960px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
