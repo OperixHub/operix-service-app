@@ -27,7 +27,7 @@ onMounted(async () => {
             redirect_uri: redirectUri,
             code_verifier: verifier
         });
-        const payload = response.data || response;
+        const payload = response.data;
 
         persistSession(payload);
         if (!payload.user?.onboarding_required) {

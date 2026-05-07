@@ -36,7 +36,7 @@ export function useLogin() {
                 remember: remember.value
             });
 
-            const payload = response.data || response;
+            const payload = response.data;
             if (payload && payload.token) {
                 persistSession(payload);
                 await loadAuthorizationSnapshot();
@@ -55,7 +55,7 @@ export function useLogin() {
         loadingConfig.value = true;
         try {
             const response = await Axios.get(API_CONFIG.AUTH.CONFIG);
-            authConfig.value = response.data || response;
+            authConfig.value = response.data;
         } catch (error) {
             authConfig.value = null;
             addMessage('login', 'warn', 'Não foi possível carregar a configuração de autenticação.');
@@ -79,7 +79,7 @@ export function useLogin() {
                 identity_provider: 'google'
             });
 
-            const payload = response.data || response;
+            const payload = response.data;
             window.location.href = payload.authorization_url;
         } catch (error) {
             addMessage('login', 'error', error.response?.data?.msg || 'Erro ao iniciar login com Google.');

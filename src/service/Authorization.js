@@ -4,7 +4,7 @@ import { updateAuthorization } from '@/service/AuthSession';
 
 export async function loadAuthorizationSnapshot() {
     const response = await Axios.get(API_CONFIG.IDENTITY.PERMISSIONS_ME);
-    const payload = response.data || response;
+    const payload = response.data;
     updateAuthorization({
         permissions: payload.effective_permissions,
         access: payload.access,

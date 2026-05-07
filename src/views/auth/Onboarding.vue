@@ -37,7 +37,7 @@ const complete = async () => {
             cnpj: cnpj.value || null,
             description: description.value || null
         });
-        const payload = response.data || response;
+        const payload = response.data;
         updateCurrentUser({ ...payload, onboarding_required: false });
         await loadAuthorizationSnapshot();
         toast.add({ severity: 'success', summary: 'Onboarding concluído', detail: 'Empresa configurada com sucesso.', life: 4000 });
