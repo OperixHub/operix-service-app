@@ -6,7 +6,7 @@ const props = defineProps({
     getUsers: { type: Function, required: true }
 });
 
-const { dataPostUser, displayModalAdd, openModalAdd, closeModal, customBase64Uploader, validatePostUser } = useUserForm(props.getUsers);
+const { dataPostUser, moduleOptions, displayModalAdd, openModalAdd, closeModal, validatePostUser } = useUserForm(props.getUsers);
 
 defineExpose({ open: openModalAdd });
 </script>
@@ -17,6 +17,12 @@ defineExpose({ open: openModalAdd });
             <Message v-for="msg of messageAddUser" :severity="msg.severity" :key="msg.content">{{ msg.content }}</Message>
         </transition-group>
         <div class="grid p-fluid mt-1">
+            <div class="field col-12">
+                <span class="p-float-label">
+                    <InputText type="text" id="addName" v-model="dataPostUser.name" />
+                    <label for="addName"><span style="color: red">*</span> Nome </label>
+                </span>
+            </div>
             <div class="field col-12 md:col-6">
                 <span class="p-float-label">
                     <InputText type="text" id="addUsername" v-model="dataPostUser.username" />
@@ -43,13 +49,20 @@ defineExpose({ open: openModalAdd });
             </div>
             <div class="field col-12 md:col-6">
                 <span class="p-float-label">
-                    <FileUpload id="addSignature" mode="basic" url="/api/upload" accept="image/*" customUpload @uploader="customBase64Uploader" chooseLabel="Assinatura" />
+                    <InputText type="text" id="addRoleTitle" v-model="dataPostUser.role_title" />
+                    <label for="addRoleTitle">Cargo/Papel</label>
                 </span>
             </div>
             <div class="field col-12 md:col-6">
                 <span class="p-float-label">
                     <Checkbox id="addAdmin" v-model="dataPostUser.admin" :binary="true" />
                     <label for="addAdmin" style="margin-left: 20px"> Administrador</label>
+                </span>
+            </div>
+            <div class="field col-12">
+                <span class="p-float-label">
+                    <MultiSelect id="addModules" v-model="dataPostUser.modules" :options="moduleOptions" optionLabel="label" optionValue="key" display="chip" class="w-full" />
+                    <label for="addModules">Módulos</label>
                 </span>
             </div>
         </div>

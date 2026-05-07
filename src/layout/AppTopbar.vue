@@ -3,11 +3,11 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import TopbarNotification from './components/TopbarNotification.vue';
 import { useRouter } from 'vue-router';
+import { clearSession } from '@/service/AuthSession';
 const router = useRouter();
 
 const logout = async () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearSession();
     const loginPath = '/';
     globalThis.history.replaceState({}, 'Login', loginPath);
     router.push(loginPath);
