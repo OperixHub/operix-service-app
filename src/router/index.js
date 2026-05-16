@@ -80,6 +80,16 @@ const router = createRouter({
                     path: '/operacional/tipos-de-produto',
                     name: 'operational-types-products',
                     component: () => import('@/views/operational/TypesProducts/TypesProducts.vue')
+                },
+                {
+                    path: '/inventario/estoque',
+                    name: 'inventory-stock',
+                    component: () => import('@/views/inventory/Stock/Stock.vue')
+                },
+                {
+                    path: '/notificacoes/informacoes-do-sistema',
+                    name: 'notifications-system-info',
+                    component: () => import('@/views/notifications/SystemInfo/SystemInfo.vue')
                 }
             ]
         }

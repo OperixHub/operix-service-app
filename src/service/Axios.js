@@ -2,7 +2,6 @@ import axios from 'axios';
 import { clearSession, getRefreshToken, persistSession } from '@/service/AuthSession';
 
 const ACCESS_TOKEN_KEY = 'token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -31,13 +30,13 @@ const refreshAccessToken = async () => {
         );
 
         const payload = response.data?.data || response.data;
-        const newAccessToken = payload.access_token;
+        const newAccessToken = payload.token;
         const newRefreshToken = payload.refresh_token;
 
         persistSession({
             token: newAccessToken,
             refresh_token: newRefreshToken || refreshToken,
-            user: JSON.parse(localStorage.getItem('user') || 'null'),
+            user: payload.user || JSON.parse(localStorage.getItem('user') || 'null'),
         });
 
         return newAccessToken;
@@ -72,10 +71,21 @@ axiosInstance.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
+        const responseMessage = error.response?.data?.message || error.response?.data?.msg || '';
 
         const isTokenExpired =
             error.response?.status === 401 &&
-            error.response?.data?.message?.includes('expirado');
+            responseMessage.includes('expirado');
+        const isInvalidToken =
+            error.response?.status === 401 &&
+            (responseMessage.includes('Token inválido') || responseMessage.includes('Faça login novamente'));
+
+        if (isInvalidToken) {
+            clearSession();
+            window.location.hash = '/login';
+            return Promise.reject(error);
+        }
+
         if (!isTokenExpired || originalRequest._retry) {
             return Promise.reject(error);
         }

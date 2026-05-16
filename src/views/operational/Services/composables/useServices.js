@@ -490,7 +490,7 @@ export function useServices() {
         messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient,
         messageUpdateStatusService, messageUpdateStatusPayment, messageAddService,
         // status
-        statusServiceOptions, statusPaymentOptions,
+        statusServiceOptions, statusServiceMapping, statusPaymentOptions,
         getStyleStatusService, getStyleStatusPayment,
         // data
         dataGetOS, dataGetService,

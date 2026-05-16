@@ -32,7 +32,6 @@ const complete = async () => {
 
     loading.value = true;
     try {
-        console.log('teste')
         const response = await Axios.post(API_CONFIG.AUTH.ONBOARDING, {
             company_name: companyName.value,
             cnpj: cnpj.value || null,

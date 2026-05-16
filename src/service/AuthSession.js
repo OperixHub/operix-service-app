@@ -4,6 +4,7 @@ const ACCESS_TOKEN_KEY = 'token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const USER_KEY = 'user';
 const PERMISSIONS_KEY = 'permissions';
+const PERMISSION_DETAILS_KEY = 'permission_details';
 const ACCESS_CONTEXT_KEY = 'access_context';
 const PKCE_VERIFIER_KEY = 'operix_pkce_verifier';
 const PKCE_STATE_KEY = 'operix_pkce_state';
@@ -58,6 +59,14 @@ export function getPermissions() {
     }
 }
 
+export function getPermissionDetails() {
+    try {
+        return JSON.parse(localStorage.getItem(PERMISSION_DETAILS_KEY) || '[]');
+    } catch (_error) {
+        return [];
+    }
+}
+
 export function hasPermission(permissionKey) {
     return getPermissions().includes(permissionKey);
 }
@@ -79,6 +88,9 @@ export function persistSession(payload) {
     if (payload.permissions) {
         localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(payload.permissions));
     }
+    if (payload.permission_details) {
+        localStorage.setItem(PERMISSION_DETAILS_KEY, JSON.stringify(payload.permission_details));
+    }
     if (payload.access) {
         localStorage.setItem(ACCESS_CONTEXT_KEY, JSON.stringify(payload.access));
     }
@@ -88,9 +100,12 @@ export function updateCurrentUser(user) {
     localStorage.setItem(USER_KEY, JSON.stringify(user || null));
 }
 
-export function updateAuthorization({ permissions = null, access = null }) {
+export function updateAuthorization({ permissions = null, permissionDetails = null, access = null }) {
     if (permissions) {
         localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(permissions));
+    }
+    if (permissionDetails) {
+        localStorage.setItem(PERMISSION_DETAILS_KEY, JSON.stringify(permissionDetails));
     }
     if (access) {
         localStorage.setItem(ACCESS_CONTEXT_KEY, JSON.stringify(access));
@@ -102,6 +117,7 @@ export function clearSession() {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(PERMISSIONS_KEY);
+    localStorage.removeItem(PERMISSION_DETAILS_KEY);
     localStorage.removeItem(ACCESS_CONTEXT_KEY);
     sessionStorage.removeItem(PKCE_VERIFIER_KEY);
     sessionStorage.removeItem(PKCE_STATE_KEY);

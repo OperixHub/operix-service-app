@@ -2,15 +2,18 @@
 import { computed } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
 import { buildNavigation } from '@/router/navigation.registry';
-import { getPermissions } from '@/service/AuthSession';
+import { getPermissionDetails, getPermissions } from '@/service/AuthSession';
 
-const model = computed(() => [{ items: buildNavigation(getPermissions()) }]);
+const model = computed(() => buildNavigation({
+    permissions: getPermissions(),
+    permissionDetails: getPermissionDetails()
+}));
 </script>
 
 <template>
     <div class="sidebar">
         <ul class="layout-menu">
-            <template v-for="(item, i) in model" :key="item">
+            <template v-for="(item, i) in model" :key="item.to || item.label">
                 <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
                 <li v-if="item.separator" class="menu-separator"></li>
             </template>

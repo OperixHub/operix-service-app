@@ -7,6 +7,7 @@ export async function loadAuthorizationSnapshot() {
     const payload = response.data;
     updateAuthorization({
         permissions: payload.effective_permissions,
+        permissionDetails: payload.permissions,
         access: payload.access,
     });
     return payload;

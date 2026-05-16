@@ -6,6 +6,9 @@ export const API_CONFIG = {
         SERVICES: '/services',
         ORDER_OF_SERVICE: '/order-of-service',
     },
+    INVENTORY: {
+        STOCK: '/stock',
+    },
     IDENTITY: {
         USERS: '/users',
         TENANTS: '/tenants',
@@ -16,7 +19,7 @@ export const API_CONFIG = {
         PROFILE_SYSTEM: '/profile/system',
     },
     NOTIFICATIONS: {
-        BASE: '/notifications',
+        SYSTEM_INFO: '/system-info',
     },
     AUTH: {
         CONFIG: '/auth/config',
@@ -24,6 +27,7 @@ export const API_CONFIG = {
         CALLBACK: '/auth/callback',
         LOGIN: '/auth/login',
         REFRESH: '/auth/refresh',
+        LOGOUT: '/auth/logout',
         ME: '/auth/me',
         ONBOARDING: '/auth/onboarding'
     },

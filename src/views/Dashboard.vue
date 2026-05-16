@@ -5,11 +5,24 @@ import Chart from 'primevue/chart';
 
 const { dataGetService, getServices, getStatusService, statusServiceMapping } = useServices();
 
+const statusCodeByDescription = computed(() => {
+    const mapping = {};
+    (statusServiceMapping.value || []).forEach((item) => {
+        mapping[String(item.description || '').toLowerCase()] = item.cod;
+    });
+    return mapping;
+});
+
 const stats = computed(() => {
-    const total = dataGetService.value.length;
-    const inProgress = dataGetService.value.filter(s => s.status !== 13).length; // Supondo 13 como concluído
-    const completed = dataGetService.value.filter(s => s.status === 13).length;
-    const urgent = dataGetService.value.filter(s => s.status === 10).length; // Supondo 10 como urgente/atrasado
+    const services = dataGetService.value || [];
+    const total = services.length;
+    const completedCode = statusCodeByDescription.value.concluido;
+    const urgentCodes = Object.entries(statusCodeByDescription.value)
+        .filter(([label]) => label.includes('urg') || label.includes('atras'))
+        .map(([, cod]) => cod);
+    const completed = completedCode ? services.filter((service) => service.status === completedCode).length : 0;
+    const urgent = urgentCodes.length > 0 ? services.filter((service) => urgentCodes.includes(service.status)).length : 0;
+    const inProgress = total - completed;
     
     return { total, inProgress, completed, urgent };
 });
@@ -47,8 +60,8 @@ const chartOptions = ref({
 const setChartData = () => {
     // Agrupar por status
     const counts = {};
-    dataGetService.value.forEach(s => {
-        const status = statusServiceMapping.value.find(m => m.cod === s.status);
+    (dataGetService.value || []).forEach(s => {
+        const status = (statusServiceMapping.value || []).find(m => m.cod === s.status);
         const name = status?.description || 'Outros';
         counts[name] = (counts[name] || 0) + 1;
     });

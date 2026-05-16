@@ -3,7 +3,6 @@ import { ref, onBeforeMount } from 'vue';
 import { useUsers } from './composables/useUsers';
 import DialogAddUser from './components/DialogAddUser.vue';
 
-const popup = ref(null);
 const dialogAddUser = ref(null);
 
 const { dataGetUsers, getUsers, confirmDeleteUser } = useUsers();
@@ -35,12 +34,6 @@ onBeforeMount(() => {
                     <Badge v-else severity="warning"><i class="pi pi-times mt-1" /></Badge>
                 </template>
             </Column>
-            <Column bodyClass="text-center" field="signature" header="Assinatura">
-                <template #body="{ data }">
-                    <Badge v-if="data.signature" severity="success"><i class="pi pi-check mt-1" /></Badge>
-                    <Badge v-else severity="warning"><i class="pi pi-times mt-1" /></Badge>
-                </template>
-            </Column>
             <Column bodyClass="text-center">
                 <template #body="{ data }">
                     <Button ref="popup" @click="confirmDeleteUser($event, data.id)" icon="pi pi-trash" class="p-button-rounded p-button-danger" v-tooltip.top="'Excluir'" />
@@ -49,4 +42,3 @@ onBeforeMount(() => {
         </DataTable>
     </div>
 </template>
-
