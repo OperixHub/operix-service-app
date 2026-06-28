@@ -5,6 +5,7 @@ import Axios from '@/service/Axios';
 import { API_CONFIG } from '@/config/api.config';
 import { consumePkceState, persistSession } from '@/service/AuthSession';
 import { loadAuthorizationSnapshot } from '@/service/Authorization';
+import { socket } from '@/views/utils/computeds';
 
 const router = useRouter();
 const message = ref('Finalizando autenticação...');
@@ -30,6 +31,10 @@ onMounted(async () => {
         const payload = response.data;
 
         persistSession(payload);
+        socket.auth.token = payload.token;
+        if (socket.disconnected) {
+            socket.connect();
+        }
         if (!payload.user?.onboarding_required) {
             await loadAuthorizationSnapshot();
         }

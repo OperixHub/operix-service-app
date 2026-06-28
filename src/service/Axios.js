@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_CONFIG } from '@/config/api.config';
 import { clearSession, getRefreshToken, persistSession } from '@/service/AuthSession';
 
 const ACCESS_TOKEN_KEY = 'token';
@@ -24,7 +25,7 @@ const refreshAccessToken = async () => {
 
     try {
         const response = await axios.post(
-            `${import.meta.env.VITE_BASE_URL_API}/auth/refresh`,
+            import.meta.env.VITE_BASE_URL_API + API_CONFIG.AUTH.REFRESH,
             { refresh_token: refreshToken },
             { headers: { 'Content-Type': 'application/json' } }
         );
@@ -58,7 +59,7 @@ axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem(ACCESS_TOKEN_KEY);
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = 'Bearer ' + token;
         }
         return config;
     },
@@ -95,7 +96,7 @@ axiosInstance.interceptors.response.use(
                 failedQueue.push({ resolve, reject });
             })
                 .then((token) => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    originalRequest.headers.Authorization = 'Bearer ' + token;
                     return axiosInstance(originalRequest);
                 })
                 .catch((err) => Promise.reject(err));
@@ -106,7 +107,7 @@ axiosInstance.interceptors.response.use(
 
         try {
             const newToken = await refreshAccessToken();
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            originalRequest.headers.Authorization = 'Bearer ' + newToken;
             processQueue(null, newToken);
             return axiosInstance(originalRequest);
         } catch (refreshError) {

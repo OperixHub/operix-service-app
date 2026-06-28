@@ -8,13 +8,8 @@ import { API_CONFIG } from '@/config/api.config';
 export function useUserForm(getUsers) {
     const toast = useToast();
 
-    const dataPostUser = ref([]);
-    const moduleOptions = ref([
-        { key: 'operational', label: 'Operacional' },
-        { key: 'inventory', label: 'Inventário' },
-        { key: 'organization', label: 'Organização' },
-        { key: 'notifications', label: 'Notificações' }
-    ]);
+    const dataPostUser = ref({});
+    const moduleOptions = ref([]);
     const displayModalAdd = ref(false);
 
     const openModalAdd = () => {
@@ -23,9 +18,31 @@ export function useUserForm(getUsers) {
     };
 
     const closeModal = () => {
-        if (displayModalAdd.value === true) {
+        if (displayModalAdd.value) {
             displayModalAdd.value = false;
-            dataPostUser.value = [];
+            dataPostUser.value = {};
+        }
+    };
+
+    const loadModuleOptions = async () => {
+        try {
+            const response = await Axios.get(API_CONFIG.IDENTITY.PERMISSIONS_CATALOG);
+            const modules = response.data?.modules || [];
+            moduleOptions.value = modules
+                .filter((module) => module.key !== 'dashboard')
+                .map((module) => ({
+                    key: module.key,
+                    label: module.label,
+                    description: module.description
+                }));
+        } catch (error) {
+            moduleOptions.value = [
+                { key: 'operational', label: 'Operacional', description: 'Fluxos operacionais' },
+                { key: 'inventory', label: 'Inventário', description: 'Gestão de estoque' },
+                { key: 'organization', label: 'Organização', description: 'Usuários e configurações' },
+                { key: 'notifications', label: 'Notificações', description: 'Alertas e informações do sistema' }
+            ];
+            console.error(error);
         }
     };
 
@@ -45,7 +62,7 @@ export function useUserForm(getUsers) {
             await getUsers();
             closeModal();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao adicionar usuário', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao adicionar usuário', life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -68,6 +85,7 @@ export function useUserForm(getUsers) {
         displayModalAdd,
         openModalAdd,
         closeModal,
+        loadModuleOptions,
         validatePostUser
     };
 }

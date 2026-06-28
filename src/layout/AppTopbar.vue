@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 import Axios from '@/service/Axios';
 import { API_CONFIG } from '@/config/api.config';
 import { clearSession, getRefreshToken } from '@/service/AuthSession';
+import { socket } from '@/views/utils/computeds';
 const router = useRouter();
 
 const logout = async () => {
@@ -21,6 +22,7 @@ const logout = async () => {
         // Sempre encerra a sessão local, mesmo se a revogação remota falhar.
     } finally {
         clearSession();
+        socket.disconnect();
     }
 
     const loginPath = '/';

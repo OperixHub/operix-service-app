@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useLayout } from '@/layout/composables/layout';
-import { loadingOpen, loadingClose } from '../../utils/computeds';
+import { loadingOpen, loadingClose, socket } from '../../utils/computeds';
 import { messageLogin, addMessage } from '../../utils/messages.js';
 import { API_CONFIG } from '@/config/api.config';
 import { persistSession, savePkceState } from '@/service/AuthSession';
@@ -39,6 +39,10 @@ export function useLogin() {
             const payload = response.data;
             if (payload && payload.token) {
                 persistSession(payload);
+                socket.auth.token = payload.token;
+                if (socket.disconnected) {
+                    socket.connect();
+                }
                 await loadAuthorizationSnapshot();
                 router.push(payload.user?.onboarding_required ? '/onboarding' : '/dashboard');
             } else {

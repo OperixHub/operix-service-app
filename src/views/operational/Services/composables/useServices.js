@@ -124,7 +124,7 @@ export function useServices() {
     const getServicesWarehouse = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get(URI_SERVICES + '/warehouse');
+            const response = await Axios.get(URI_SERVICES + '/almoxarifado');
             dataGetService.value = response.data;
             initFilters();
         } catch (error) {
@@ -137,7 +137,7 @@ export function useServices() {
 
     const updateWarehouseForService = async (id) => {
         try {
-            const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/true', { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/true', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço de volta', life: 5000 });
@@ -181,7 +181,7 @@ export function useServices() {
     const updateWarehouse = async (id) => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/false', { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/false', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço ao depósito', life: 5000 });
@@ -221,7 +221,7 @@ export function useServices() {
     const updateInfoClient = async () => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/info/client/' + dataEditInfoClient.value.id, {
+            const response = await Axios.put(URI_SERVICES + '/info/cliente/' + dataEditInfoClient.value.id, {
                 product: dataEditInfoClient.value.product,
                 client: dataEditInfoClient.value.client,
                 telephone: dataEditInfoClient.value.telephone,
@@ -294,7 +294,7 @@ export function useServices() {
     const updatePaymentStatus = async () => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/status/payment/' + dataEditPaymentStatus.value.id + '/' + dataEditPaymentStatus.value.payment_status, { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/status/pagamento/' + dataEditPaymentStatus.value.id + '/' + dataEditPaymentStatus.value.payment_status, { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
@@ -332,7 +332,8 @@ export function useServices() {
                 : { 0: { id: null, description: '', price: null } };
             displayModalOS.value = true;
             positionModalOS.value = position;
-            typeOS.value = dataViewEstimateOS.value[0].amount !== ''
+            const firstEstimate = dataViewEstimateOS.value[0];
+            typeOS.value = firstEstimate && firstEstimate.amount !== undefined && firstEstimate.amount !== ''
                 ? { label: 'Detalhada', value: 'completa' }
                 : { label: 'Simplificada', value: 'simples' };
         } else {
@@ -367,7 +368,7 @@ export function useServices() {
             } else {
                 dataPutOrderOfService.value = dataPutOrderOfServiceComplete.value;
             }
-            const response = await Axios.put(URI_ORDER_OF_SERVICE + '/estimate/' + data.order_of_service, {
+            const response = await Axios.put(URI_ORDER_OF_SERVICE + '/orcamento/' + data.order_of_service, {
                 type: typeOS.value.value,
                 id: !dataPutOrderOfService.value.id ? null : dataPutOrderOfService.value.id,
                 amount: dataPutOrderOfService.value.amount,
@@ -388,7 +389,7 @@ export function useServices() {
     const deleteEstimateOS = async (cod, data) => {
         loadingOpen();
         try {
-            const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/estimate/' + cod + '/' + data.id);
+            const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/orcamento/' + cod + '/' + data.id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             const dataOpen = { order_of_service: cod };
             closeModal();

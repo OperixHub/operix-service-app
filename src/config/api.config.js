@@ -1,37 +1,37 @@
 export const API_CONFIG = {
     OPERATIONAL: {
-        STATUS_SERVICE: '/status-service',
-        STATUS_PAYMENT: '/status-payment',
-        TYPES_PRODUCT: '/types-product',
-        SERVICES: '/services',
-        ORDER_OF_SERVICE: '/order-of-service',
+        STATUS_SERVICE: '/status-servico',
+        STATUS_PAYMENT: '/status-pagamento',
+        TYPES_PRODUCT: '/tipos-produto',
+        SERVICES: '/servicos',
+        ORDER_OF_SERVICE: '/ordem-servico',
     },
     INVENTORY: {
-        STOCK: '/stock',
+        STOCK: '/estoque',
     },
     IDENTITY: {
-        USERS: '/users',
-        TENANTS: '/tenants',
-        PERMISSIONS_ME: '/permissions/me',
-        PERMISSIONS_CATALOG: '/permissions/catalog',
-        PROFILE_ME: '/profile/me',
-        PROFILE_COMPANY: '/profile/company',
-        PROFILE_SYSTEM: '/profile/system',
+        USERS: '/usuarios',
+        TENANTS: '/locatarios',
+        PERMISSIONS_ME: '/permissoes/me',
+        PERMISSIONS_CATALOG: '/permissoes/catalogo',
+        PROFILE_ME: '/perfil/eu',
+        PROFILE_COMPANY: '/perfil/empresa',
+        PROFILE_SYSTEM: '/perfil/sistema',
     },
     NOTIFICATIONS: {
-        SYSTEM_INFO: '/system-info',
+        SYSTEM_INFO: '/informacoes-sistema',
     },
     AUTH: {
-        CONFIG: '/auth/config',
-        AUTHORIZE: '/auth/authorize',
-        CALLBACK: '/auth/callback',
-        LOGIN: '/auth/login',
-        REFRESH: '/auth/refresh',
-        LOGOUT: '/auth/logout',
-        ME: '/auth/me',
-        ONBOARDING: '/auth/onboarding'
+        CONFIG: '/autenticacao/configuracao',
+        AUTHORIZE: '/autenticacao/autorizar',
+        CALLBACK: '/autenticacao/retorno',
+        LOGIN: '/autenticacao/login',
+        REFRESH: '/autenticacao/renovar',
+        LOGOUT: '/autenticacao/sair',
+        ME: '/autenticacao/eu',
+        ONBOARDING: '/autenticacao/onboarding'
     },
     LOGS: {
-        BASE: '/logs'
+        BASE: '/registros'
     }
 };
