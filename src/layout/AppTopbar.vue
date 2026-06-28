@@ -3,13 +3,30 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import TopbarNotification from './components/TopbarNotification.vue';
 import { useRouter } from 'vue-router';
+import Axios from '@/service/Axios';
+import { API_CONFIG } from '@/config/api.config';
+import { clearSession, getRefreshToken } from '@/service/AuthSession';
+import { socket } from '@/views/utils/computeds';
 const router = useRouter();
 
 const logout = async () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    const refreshToken = getRefreshToken();
+
+    try {
+        if (refreshToken) {
+            await Axios.post(API_CONFIG.AUTH.LOGOUT, {
+                refresh_token: refreshToken
+            });
+        }
+    } catch (_error) {
+        // Sempre encerra a sessão local, mesmo se a revogação remota falhar.
+    } finally {
+        clearSession();
+        socket.disconnect();
+    }
+
     const loginPath = '/';
-    globalThis.history.replaceState({}, 'Login', loginPath);
+    window.history.replaceState({}, 'Login', loginPath);
     router.push(loginPath);
 };
 
@@ -24,10 +41,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     unbindOutsideClickListener();
-});
-
-const logoUrl = computed(() => {
-    return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.png`;
 });
 
 const topbarMenuClasses = computed(() => {
@@ -48,7 +61,7 @@ const bindOutsideClickListener = () => {
 };
 const unbindOutsideClickListener = () => {
     if (outsideClickListener.value) {
-        document.removeEventListener('click', outsideClickListener);
+        document.removeEventListener('click', outsideClickListener.value);
         outsideClickListener.value = null;
     }
 };

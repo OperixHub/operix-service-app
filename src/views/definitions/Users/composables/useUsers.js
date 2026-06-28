@@ -17,7 +17,7 @@ export function useUsers() {
             const response = await Axios.get(API_CONFIG.IDENTITY.USERS);
             dataGetUsers.value = response.data;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao buscar serviços do depósito', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar usuários.', life: 5000 });
             console.error(error);
         } finally {
             loadingClose();

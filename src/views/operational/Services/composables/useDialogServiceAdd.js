@@ -1,5 +1,5 @@
 import Axios from '@/service/Axios';
-import { ref, inject, onMounted } from 'vue';
+import { ref, inject } from 'vue';
 import { loadingOpen, loadingClose } from '../../../utils/computeds';
 import { useToast } from 'primevue/usetoast';
 import { messageAddService, addMessage } from '../../../utils/messages.js';
@@ -51,7 +51,7 @@ export function useDialogServiceAdd() {
     const postService = async () => {
         loadingOpen();
         try {
-            await Axios.post('/services', {
+            await Axios.post(API_CONFIG.OPERATIONAL.SERVICES, {
                 product: dataPostService.value.product,
                 client: dataPostService.value.client,
                 telephone: dataPostService.value.telephone,

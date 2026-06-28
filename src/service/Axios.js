@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_CONFIG } from '@/config/api.config';
+import { clearSession, getRefreshToken, persistSession } from '@/service/AuthSession';
 
 const ACCESS_TOKEN_KEY = 'token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -17,45 +18,32 @@ const processQueue = (error, token = null) => {
 };
 
 const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const refreshToken = getRefreshToken();
     if (!refreshToken) {
         throw new Error('Refresh token não encontrado');
     }
 
     try {
         const response = await axios.post(
-            `${import.meta.env.VITE_BASE_URL_API}/auth/refresh`,
+            import.meta.env.VITE_BASE_URL_API + API_CONFIG.AUTH.REFRESH,
             { refresh_token: refreshToken },
-            {
-                headers: { 'Content-Type': 'application/json' },
-                transformResponse: [(data) => data],
-            }
+            { headers: { 'Content-Type': 'application/json' } }
         );
 
-        const newAccessToken = response.data.access_token;
-        const newRefreshToken = response.data.refresh_token;
+        const payload = response.data?.data || response.data;
+        const newAccessToken = payload.token;
+        const newRefreshToken = payload.refresh_token;
 
-        localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-        if (newRefreshToken) {
-            localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
-        }
-
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            try {
-                const user = JSON.parse(userStr);
-                user.access_token = newAccessToken;
-                if (newRefreshToken) user.refresh_token = newRefreshToken;
-                localStorage.setItem('user', JSON.stringify(user));
-            } catch (e) { }
-        }
+        persistSession({
+            token: newAccessToken,
+            refresh_token: newRefreshToken || refreshToken,
+            user: payload.user || JSON.parse(localStorage.getItem('user') || 'null'),
+        });
 
         return newAccessToken;
     } catch (error) {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        clearSession();
+        window.location.hash = '/login';
         throw error;
     }
 };
@@ -71,7 +59,7 @@ axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem(ACCESS_TOKEN_KEY);
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = 'Bearer ' + token;
         }
         return config;
     },
@@ -84,10 +72,21 @@ axiosInstance.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
+        const responseMessage = error.response?.data?.message || error.response?.data?.msg || '';
 
         const isTokenExpired =
             error.response?.status === 401 &&
-            error.response?.data?.message?.includes('expirado');
+            responseMessage.includes('expirado');
+        const isInvalidToken =
+            error.response?.status === 401 &&
+            (responseMessage.includes('Token inválido') || responseMessage.includes('Faça login novamente'));
+
+        if (isInvalidToken) {
+            clearSession();
+            window.location.hash = '/login';
+            return Promise.reject(error);
+        }
+
         if (!isTokenExpired || originalRequest._retry) {
             return Promise.reject(error);
         }
@@ -97,7 +96,7 @@ axiosInstance.interceptors.response.use(
                 failedQueue.push({ resolve, reject });
             })
                 .then((token) => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    originalRequest.headers.Authorization = 'Bearer ' + token;
                     return axiosInstance(originalRequest);
                 })
                 .catch((err) => Promise.reject(err));
@@ -108,7 +107,7 @@ axiosInstance.interceptors.response.use(
 
         try {
             const newToken = await refreshAccessToken();
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            originalRequest.headers.Authorization = 'Bearer ' + newToken;
             processQueue(null, newToken);
             return axiosInstance(originalRequest);
         } catch (refreshError) {

@@ -6,7 +6,7 @@ import { formatData } from '../../views/utils/computeds.js';
 import { API_CONFIG } from '../../config/api.config';
 
 const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
-const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS.BASE;
+const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS.SYSTEM_INFO;
 
 const statusServiceOptions = ref([]);
 const statusServiceMapping = ref([]);
@@ -21,7 +21,8 @@ const getStatusService = async () => {
             }
         });
     } catch (error) {
-        console.error(error);
+        statusServiceOptions.value = [];
+        statusServiceMapping.value = [];
     }
 };
 
@@ -33,11 +34,9 @@ const getStyleStatusService = (cod) => {
 const notifications = ref([]);
 
 const overlayNotification = ref();
-const notification_items = ref();
 
 const toggle = (event) => {
     overlayNotification.value.toggle(event);
-    notification_items.value.toggle(event);
 };
 
 const getNotifications = async () => {
@@ -45,7 +44,7 @@ const getNotifications = async () => {
         const response = await Axios.get(URI_NOTIFICATIONS);
         notifications.value = response.data;
     } catch (error) {
-        console.error(error);
+        notifications.value = [];
     }
 };
 
@@ -78,7 +77,10 @@ onMounted(() => {
 
             <Column header="Status" style="text-align: center">
                 <template #body="slotProps">
-                    <Tag :value="getStyleStatusService(slotProps.data.status).description" :style="{ background: getStyleStatusService(slotProps.data.status).color.hex }" />
+                    <Tag
+                        :value="getStyleStatusService(slotProps.data.status)?.description || String(slotProps.data.status || '-')"
+                        :style="getStyleStatusService(slotProps.data.status)?.color?.hex ? { background: getStyleStatusService(slotProps.data.status).color.hex } : {}"
+                    />
                 </template>
             </Column>
         </DataTable>
