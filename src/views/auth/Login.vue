@@ -48,7 +48,7 @@ const {
                     </div>
 
                     <InputText id="email" type="email" v-model="email" :disabled="typeForm !== TYPE_FORM_INITIAL" placeholder="E-mail" class="w-full mb-2" style="padding: 1rem" />
-                    <div v-if="typeForm === TYPE_FORM_REGISTER" class="flex align-items-center justify-content-end mb-4 gap-5">
+                    <div v-if="typeForm !== TYPE_FORM_INITIAL" class="flex align-items-center justify-content-end mb-2 gap-5">
                         <a class="font-medium no-underline text-blue-500 text-right cursor-pointer" @click.prevent="goToLogin(true)">Alterar e-mail</a>
                     </div>
 
