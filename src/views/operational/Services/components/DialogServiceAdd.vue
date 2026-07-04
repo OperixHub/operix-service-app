@@ -11,7 +11,7 @@ onMounted(() => {
 });
 </script>
 <template>
-    <Dialog header="Adicionar Serviço" v-model:visible="displayModalAdd" position="top" :breakpoints="{ '960px': '75vw' }" :style="{ width: '50vw' }" :modal="true">
+    <Dialog header="Adicionar Serviço" v-model:visible="displayModalAdd" position="top" :breakpoints="{ '960px': '85vw', '640px': '100vw' }" :style="{ width: 'clamp(22rem, 70vw, 58rem)' }" :modal="true">
         <transition-group tag="div">
             <Message v-for="msg of messageAddService" :severity="msg.severity" :key="msg.content">{{ msg.content }}</Message>
         </transition-group>

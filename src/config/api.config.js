@@ -1,24 +1,38 @@
 export const API_CONFIG = {
     OPERATIONAL: {
-        STATUS_SERVICE: '/status-service',
-        STATUS_PAYMENT: '/status-payment',
-        TYPES_PRODUCT: '/types-product',
-        SERVICES: '/services',
-        ORDER_OF_SERVICE: '/order-of-service',
+        STATUS_SERVICE: '/status-servico',
+        STATUS_PAYMENT: '/status-pagamento',
+        TYPES_PRODUCT: '/tipos-produto',
+        SERVICES: '/servicos',
+        ORDER_OF_SERVICE: '/ordem-servico',
     },
     IDENTITY: {
-        USERS: '/users',
-        TENANTS: '/tenants',
+        USERS: '/usuarios',
+        TENANTS: '/locatarios',
     },
     NOTIFICATIONS: {
-        BASE: '/notifications',
+        BASE: '/informacoes-sistema',
+    },
+    INVENTORY: {
+        STOCK: '/estoque',
+        SALES: '/vendas',
+        WARRANTIES: '/garantias',
+        SERVICE_PARTS: (serviceId) => `/servicos/${serviceId}/pecas`
     },
     AUTH: {
-        LOGIN: '/auth/login',
-        REGISTER: '/auth/register',
-        REFRESH: '/auth/refresh'
+        LOGIN: '/autenticacao/login',
+        REGISTER: '/autenticacao/registrar',
+        VERIFY_EMAIL: '/autenticacao/verificar-email',
+        FORGOT_PASSWORD: '/autenticacao/recuperar-senha',
+        RESET_PASSWORD: '/autenticacao/redefinir-senha',
+        ONBOARDING: '/autenticacao/onboarding',
+        REFRESH: '/autenticacao/renovar',
+        LOGOUT: '/autenticacao/sair',
+        ME: '/autenticacao/eu',
+        AUTHORIZE: '/autenticacao/autorizar',
+        CALLBACK: '/autenticacao/retorno'
     },
     LOGS: {
-        BASE: '/logs'
+        BASE: '/registros'
     }
 };

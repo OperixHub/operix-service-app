@@ -1,6 +1,6 @@
 import Axios from '@/service/Axios';
 import pdfGenerator from '@/service/PdfGenerator.js';
-import { ref, onBeforeMount, provide } from 'vue';
+import { ref, provide } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { messageAddService, messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient, messageUpdateStatusService, messageUpdateStatusPayment, addMessage } from '../../../utils/messages.js';
@@ -14,6 +14,7 @@ export function useServices() {
     const URI_TYPES_PRODUCT = API_CONFIG.OPERATIONAL.TYPES_PRODUCT;
     const URI_SERVICES = API_CONFIG.OPERATIONAL.SERVICES;
     const URI_ORDER_OF_SERVICE = API_CONFIG.OPERATIONAL.ORDER_OF_SERVICE;
+    const URI_STOCK = API_CONFIG.INVENTORY.STOCK;
 
     const toast = useToast();
     const confirmPopup = useConfirm();
@@ -60,6 +61,93 @@ export function useServices() {
             typesProductOptions.value = response.data.map((item) => item.name);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    /* Service parts / warranties */
+    const stockOptions = ref([]);
+    const rawStock = ref([]);
+    const displayModalServicePart = ref(false);
+    const positionModalServicePart = ref('top');
+    const selectedServicePartContext = ref({});
+    const servicePartLoading = ref(false);
+    const dataServicePart = ref({
+        stock_id: null,
+        quantity: 1,
+        unit_price: null,
+        warranty_months: 3,
+        serial_number: '',
+        notes: ''
+    });
+
+    const resetServicePartForm = () => {
+        dataServicePart.value = {
+            stock_id: null,
+            quantity: 1,
+            unit_price: null,
+            warranty_months: 3,
+            serial_number: '',
+            notes: ''
+        };
+    };
+
+    const getStockOptions = async () => {
+        const response = await Axios.get(URI_STOCK);
+        rawStock.value = response.data || [];
+        stockOptions.value = rawStock.value.map((item) => ({
+            label: `${item.name} (${item.code}) - saldo ${item.quantity}`,
+            value: item.id
+        }));
+    };
+
+    const onServicePartStockChange = () => {
+        const selected = rawStock.value.find((item) => item.id === dataServicePart.value.stock_id);
+        if (selected && dataServicePart.value.unit_price === null) {
+            dataServicePart.value.unit_price = Number(selected.salePrice ?? selected.saleprice ?? 0);
+        }
+    };
+
+    const openModalServicePart = async (position, data) => {
+        resetServicePartForm();
+        selectedServicePartContext.value = data;
+        positionModalServicePart.value = position;
+        try {
+            await getStockOptions();
+            displayModalServicePart.value = true;
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao carregar estoque', life: 5000 });
+        }
+    };
+
+    const closeModalServicePart = () => {
+        displayModalServicePart.value = false;
+        selectedServicePartContext.value = {};
+        resetServicePartForm();
+    };
+
+    const saveServicePart = async () => {
+        if (!selectedServicePartContext.value.id || !dataServicePart.value.stock_id || !dataServicePart.value.quantity) {
+            toast.add({ severity: 'warn', summary: 'Dados incompletos', detail: 'Informe peça e quantidade.', life: 4000 });
+            return;
+        }
+
+        servicePartLoading.value = true;
+        try {
+            const response = await Axios.post(API_CONFIG.INVENTORY.SERVICE_PARTS(selectedServicePartContext.value.id), {
+                stock_id: dataServicePart.value.stock_id,
+                quantity: dataServicePart.value.quantity,
+                unit_price: dataServicePart.value.unit_price,
+                warranty_months: dataServicePart.value.warranty_months,
+                serial_number: dataServicePart.value.serial_number || null,
+                notes: dataServicePart.value.notes || null
+            });
+            toast.add({ severity: 'success', summary: 'Peça registrada', detail: response.msg, life: 5000 });
+            closeModalServicePart();
+            await getServices();
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao registrar peça do serviço', life: 5000 });
+        } finally {
+            servicePartLoading.value = false;
         }
     };
 
@@ -124,7 +212,7 @@ export function useServices() {
     const getServicesWarehouse = async () => {
         loadingOpen();
         try {
-            const response = await Axios.get(URI_SERVICES + '/warehouse');
+            const response = await Axios.get(URI_SERVICES + '/almoxarifado');
             dataGetService.value = response.data;
             initFilters();
         } catch (error) {
@@ -137,7 +225,7 @@ export function useServices() {
 
     const updateWarehouseForService = async (id) => {
         try {
-            const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/true', { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/true', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço de volta', life: 5000 });
@@ -181,7 +269,7 @@ export function useServices() {
     const updateWarehouse = async (id) => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/warehouse/' + id + '/false', { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/false', { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço ao depósito', life: 5000 });
@@ -221,7 +309,7 @@ export function useServices() {
     const updateInfoClient = async () => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/info/client/' + dataEditInfoClient.value.id, {
+            const response = await Axios.put(URI_SERVICES + '/info/cliente/' + dataEditInfoClient.value.id, {
                 product: dataEditInfoClient.value.product,
                 client: dataEditInfoClient.value.client,
                 telephone: dataEditInfoClient.value.telephone,
@@ -294,7 +382,7 @@ export function useServices() {
     const updatePaymentStatus = async () => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/status/payment/' + dataEditPaymentStatus.value.id + '/' + dataEditPaymentStatus.value.payment_status, { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/status/pagamento/' + dataEditPaymentStatus.value.id + '/' + dataEditPaymentStatus.value.payment_status, { typeTable: typeTable.value.value });
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
@@ -367,7 +455,7 @@ export function useServices() {
             } else {
                 dataPutOrderOfService.value = dataPutOrderOfServiceComplete.value;
             }
-            const response = await Axios.put(URI_ORDER_OF_SERVICE + '/estimate/' + data.order_of_service, {
+            const response = await Axios.put(URI_ORDER_OF_SERVICE + '/orcamento/' + data.order_of_service, {
                 type: typeOS.value.value,
                 id: !dataPutOrderOfService.value.id ? null : dataPutOrderOfService.value.id,
                 amount: dataPutOrderOfService.value.amount,
@@ -388,7 +476,7 @@ export function useServices() {
     const deleteEstimateOS = async (cod, data) => {
         loadingOpen();
         try {
-            const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/estimate/' + cod + '/' + data.id);
+            const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/orcamento/' + cod + '/' + data.id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             const dataOpen = { order_of_service: cod };
             closeModal();
@@ -453,6 +541,9 @@ export function useServices() {
             displayModalEditInfo.value = false;
             Object.assign(dataEditInfoClient.value, { id: '', product: '', client: '', telephone: '', adress: '', observation: '' });
         }
+        if (displayModalServicePart.value === true) {
+            closeModalServicePart();
+        }
     };
 
     /* Change table */
@@ -503,6 +594,8 @@ export function useServices() {
         displayModalEditPaymentStatus, positionModalEditPaymentStatus, dataEditPaymentStatus,
         displayModalEditStatus, positionModalEditStatus, dataEditStatus,
         displayModalEditInfo, positionModalEditInfo, dataEditInfoClient,
+        displayModalServicePart, positionModalServicePart, selectedServicePartContext,
+        dataServicePart, stockOptions, servicePartLoading,
         displayModalAdd,
         // methods - data fetch
         getStatusService, getStatusPayment, getTypesProduct, getServices,
@@ -513,6 +606,7 @@ export function useServices() {
         openModalEditPaymentStatus, validateUpdateStatusPayment,
         openModalEditStatus, validateUpdateStatusService,
         openModalEditInfo, validateEditInfoClient, isInfoClientChanged, resetInfoClient,
+        openModalServicePart, closeModalServicePart, saveServicePart, onServicePartStockChange,
         confirmDeleteService, confirmUpdateWarehouse, confirmUpdateForServices,
         toggle, openOverlay, idop, op, copyText
     };

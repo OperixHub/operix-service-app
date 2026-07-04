@@ -1,12 +1,12 @@
 import axios from 'axios';
-
-const ACCESS_TOKEN_KEY = 'token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
+import { clearSession, getAccessToken, setSession } from './AuthSession';
+import { connectSocket, disconnectSocket } from '@/views/utils/computeds';
 
 let isRefreshing = false;
 let failedQueue = [];
+
 const processQueue = (error, token = null) => {
-    failedQueue.forEach(prom => {
+    failedQueue.forEach((prom) => {
         if (error) {
             prom.reject(error);
         } else {
@@ -16,60 +16,74 @@ const processQueue = (error, token = null) => {
     failedQueue = [];
 };
 
-const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-    if (!refreshToken) {
-        throw new Error('Refresh token não encontrado');
+const baseURL = import.meta.env.VITE_BASE_URL_API;
+
+const loadCurrentSession = async () => {
+    const token = getAccessToken();
+    if (!token) {
+        throw new Error('Token de acesso ausente');
     }
 
+    const response = await axios.get(`${baseURL}/autenticacao/eu`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        withCredentials: true
+    });
+    const snapshot = response.data?.data || response.data;
+
+    setSession({
+        token,
+        user: snapshot.user,
+        permissions: snapshot.permissions || [],
+        access: snapshot.access || null
+    });
+
+    return snapshot;
+};
+
+const refreshAccessToken = async () => {
     try {
         const response = await axios.post(
-            `${import.meta.env.VITE_BASE_URL_API}/auth/refresh`,
-            { refresh_token: refreshToken },
+            `${baseURL}/autenticacao/renovar`,
+            {},
             {
                 headers: { 'Content-Type': 'application/json' },
-                transformResponse: [(data) => data],
+                withCredentials: true
             }
         );
 
-        const newAccessToken = response.data.access_token;
-        const newRefreshToken = response.data.refresh_token;
+        const session = response.data?.data || response.data;
+        const newAccessToken = session?.token;
 
-        localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-        if (newRefreshToken) {
-            localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
+        if (!newAccessToken) {
+            throw new Error('Token renovado ausente');
         }
 
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            try {
-                const user = JSON.parse(userStr);
-                user.access_token = newAccessToken;
-                if (newRefreshToken) user.refresh_token = newRefreshToken;
-                localStorage.setItem('user', JSON.stringify(user));
-            } catch (e) { }
-        }
-
+        setSession(session);
+        await loadCurrentSession();
+        connectSocket();
         return newAccessToken;
     } catch (error) {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        clearSession();
+        disconnectSocket();
+        window.location.hash = '/login';
         throw error;
     }
 };
 
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_BASE_URL_API,
+    baseURL,
+    withCredentials: true,
     headers: {
-        'Content-Type': 'application/json',
-    },
+        'Content-Type': 'application/json'
+    }
 });
 
 axiosInstance.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+        const token = getAccessToken();
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -79,16 +93,14 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-    (response) => {
-        return response.data;
-    },
+    (response) => response.data,
     async (error) => {
         const originalRequest = error.config;
-
         const isTokenExpired =
             error.response?.status === 401 &&
-            error.response?.data?.message?.includes('expirado');
-        if (!isTokenExpired || originalRequest._retry) {
+            error.response?.data?.message?.toLowerCase().includes('expirado');
+
+        if (!isTokenExpired || originalRequest?._retry) {
             return Promise.reject(error);
         }
 
@@ -120,4 +132,5 @@ axiosInstance.interceptors.response.use(
     }
 );
 
+export { loadCurrentSession, refreshAccessToken };
 export default axiosInstance;

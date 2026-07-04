@@ -1,7 +1,7 @@
 {
-    "name": "Lima Refigeração",
-    "short_name": "Lima Ref",
-    "description": "Sistema de gerenciamento de serviços",
+    "name": "Operix",
+    "short_name": "Operix",
+    "description": "Sistema de gestão inteligente para prestadores de serviço",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
@@ -10,7 +10,7 @@
     "theme_color": "#1e40af",
     "icons": [
         {
-            "src": "/layout/images/logo-dark.png",
+            "src": "/layout/images/logo-icone-transparente.png",
             "sizes": "72x72",
             "type": "image/png"
         }

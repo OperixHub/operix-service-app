@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionando...</title>
+    <script>
+        (function () {
+            const params = window.location.search ? window.location.search.replace(/^\?/, '') : '';
+            const target = window.location.origin + '/#/auth/callback' + (params ? '?' + params : '');
+            window.location.replace(target);
+        })();
+    </script>
+</head>
+<body>
+    <p>Redirecionando para a autenticação...</p>
+</body>
+</html>

@@ -26,18 +26,12 @@ onBeforeMount(() => {
                 </div>
             </template>
         </Toolbar>
-        <DataTable :value="dataGetUsers" :rowHover="true" showGridlines tableStyle="min-width: 50rem">
+        <DataTable :value="dataGetUsers" :rowHover="true" showGridlines responsiveLayout="scroll" tableStyle="min-width: 42rem">
             <Column bodyClass="text-center" field="username" header="Nome de Usuário"></Column>
             <Column bodyClass="text-center" field="email" header="Email"></Column>
             <Column bodyClass="text-center" field="admin" header="Administrador">
                 <template #body="{ data }">
                     <Badge v-if="data.admin" severity="success"><i class="pi pi-check mt-1" /></Badge>
-                    <Badge v-else severity="warning"><i class="pi pi-times mt-1" /></Badge>
-                </template>
-            </Column>
-            <Column bodyClass="text-center" field="signature" header="Assinatura">
-                <template #body="{ data }">
-                    <Badge v-if="data.signature" severity="success"><i class="pi pi-check mt-1" /></Badge>
                     <Badge v-else severity="warning"><i class="pi pi-times mt-1" /></Badge>
                 </template>
             </Column>
@@ -49,4 +43,3 @@ onBeforeMount(() => {
         </DataTable>
     </div>
 </template>
-

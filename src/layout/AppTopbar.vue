@@ -3,14 +3,21 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import TopbarNotification from './components/TopbarNotification.vue';
 import { useRouter } from 'vue-router';
+import Axios from '@/service/Axios';
+import { API_CONFIG } from '@/config/api.config';
+import { clearSession } from '@/service/AuthSession';
+import { disconnectSocket } from '@/views/utils/computeds';
 const router = useRouter();
 
 const logout = async () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    const loginPath = '/';
-    globalThis.history.replaceState({}, 'Login', loginPath);
-    router.push(loginPath);
+    try {
+        await Axios.post(API_CONFIG.AUTH.LOGOUT, {});
+    } catch {
+        // A limpeza local precisa acontecer mesmo se a sessão no servidor já expirou.
+    }
+    clearSession();
+    disconnectSocket();
+    router.replace('/login');
 };
 
 const { changeThemeSettings, layoutConfig, onMenuToggle } = useLayout();
@@ -24,10 +31,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     unbindOutsideClickListener();
-});
-
-const logoUrl = computed(() => {
-    return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.png`;
 });
 
 const topbarMenuClasses = computed(() => {

@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 const messageLogin = ref([]);
+const messageRegister = ref([]);
 const messageAddUser = ref([]);
 const messageAddService = ref([]);
 const messageAddEstimateOSSimple = ref([]);
@@ -8,6 +9,14 @@ const messageEditInfoClient = ref([]);
 const messageUpdateStatusService = ref([]);
 const messageUpdateStatusPayment = ref([]);
 const addMessage = (type, severity, content) => {
+    if (type == 'register') {
+        messageRegister.value.length = 0;
+        messageRegister.value.push({ severity, content });
+    }
+    if (type == 'login') {
+        messageLogin.value.length = 0;
+        messageLogin.value.push({ severity, content });
+    }
     if (type == 'login') {
         messageLogin.value.length = 0;
         messageLogin.value.push({ severity, content });
@@ -35,4 +44,4 @@ const addMessage = (type, severity, content) => {
     }
 };
 
-export { messageAddUser, messageAddService, messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient, messageUpdateStatusService, messageUpdateStatusPayment, messageLogin, addMessage };
+export { messageAddUser, messageAddService, messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient, messageUpdateStatusService, messageUpdateStatusPayment, messageLogin, messageRegister, addMessage };

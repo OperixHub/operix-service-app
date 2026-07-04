@@ -1,12 +1,27 @@
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
 import { io } from 'socket.io-client';
+import { getAccessToken } from '@/service/AuthSession';
+
 const socket = io(import.meta.env.VITE_BASE_URL_API.replace('/api', ''), {
-    auth: {
-        token: localStorage.getItem('token')
+    autoConnect: false,
+    auth: (callback) => {
+        callback({ token: getAccessToken() });
     },
     transports: ['websocket']
 });
+
+const connectSocket = () => {
+    if (getAccessToken() && !socket.connected) {
+        socket.connect();
+    }
+};
+
+const disconnectSocket = () => {
+    if (socket.connected) {
+        socket.disconnect();
+    }
+};
 
 /* Color Palette */
 const colorTypes = ref([
@@ -107,4 +122,4 @@ const loadingClose = () => {
     Swal.close();
 };
 
-export { optionsTypesTables, socket, colorTypes, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose };
+export { optionsTypesTables, socket, connectSocket, disconnectSocket, colorTypes, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose };

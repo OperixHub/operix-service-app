@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
     modelValue: { type: Boolean, default: false },
     position: { type: String, default: 'top' },
@@ -16,7 +18,59 @@ const props = defineProps({
     pdfGenerator: { type: Object, required: true }
 });
 
-const emit = defineEmits(['update:modelValue', 'update:typeOS', 'save', 'delete']);
+const emit = defineEmits([
+    'update:modelValue',
+    'update:typeOS',
+    'update:dataPutOrderOfServiceSimple',
+    'update:dataPutOrderOfServiceComplete',
+    'save',
+    'delete'
+]);
+
+const getSimpleEstimate = () => ({ ...props.dataPutOrderOfServiceSimple });
+
+const updateSimpleEstimate = (patch) => {
+    const next = getSimpleEstimate();
+    next[0] = {
+        ...(next[0] || {}),
+        ...patch
+    };
+    emit('update:dataPutOrderOfServiceSimple', next);
+};
+
+const simpleDescription = computed({
+    get: () => props.dataPutOrderOfServiceSimple?.[0]?.description,
+    set: (value) => updateSimpleEstimate({ description: value })
+});
+
+const simplePrice = computed({
+    get: () => props.dataPutOrderOfServiceSimple?.[0]?.price,
+    set: (value) => updateSimpleEstimate({ price: value })
+});
+
+const completeAmount = computed({
+    get: () => props.dataPutOrderOfServiceComplete.amount,
+    set: (value) => emit('update:dataPutOrderOfServiceComplete', {
+        ...props.dataPutOrderOfServiceComplete,
+        amount: value
+    })
+});
+
+const completeDescription = computed({
+    get: () => props.dataPutOrderOfServiceComplete.description,
+    set: (value) => emit('update:dataPutOrderOfServiceComplete', {
+        ...props.dataPutOrderOfServiceComplete,
+        description: value
+    })
+});
+
+const completePrice = computed({
+    get: () => props.dataPutOrderOfServiceComplete.price,
+    set: (value) => emit('update:dataPutOrderOfServiceComplete', {
+        ...props.dataPutOrderOfServiceComplete,
+        price: value
+    })
+});
 </script>
 
 <template>
@@ -25,11 +79,11 @@ const emit = defineEmits(['update:modelValue', 'update:typeOS', 'save', 'delete'
         :visible="modelValue"
         @update:visible="emit('update:modelValue', $event)"
         :position="position"
-        :breakpoints="{ '960px': '75vw' }"
-        :style="{ width: '50vw' }"
+        :breakpoints="{ '960px': '90vw', '640px': '100vw' }"
+        :style="{ width: 'clamp(22rem, 78vw, 72rem)' }"
         :modal="true"
     >
-        <div class="flex justify-content-center mb-4">
+        <div class="flex justify-content-center mb-4 overflow-x-auto">
             <SelectButton :modelValue="typeOS" @update:modelValue="emit('update:typeOS', $event)" :options="typeOsOptions" optionLabel="label" dataKey="label" />
         </div>
 
@@ -42,13 +96,13 @@ const emit = defineEmits(['update:modelValue', 'update:typeOS', 'save', 'delete'
                 <div class="grid p-fluid mt-1">
                     <div class="field col-12 md:col-6">
                         <span class="p-float-label">
-                            <Textarea id="addDescriptionOS" v-model="dataPutOrderOfServiceSimple[0].description" rows="3" />
+                            <Textarea id="addDescriptionOS" v-model="simpleDescription" rows="3" />
                             <label for="addDescriptionOS"><span style="color: red">*</span> Descrição</label>
                         </span>
                     </div>
-                    <div class="field col-12 md:col-3">
+                    <div class="field col-12 md:col-3 responsive-actions">
                         <span class="p-float-label">
-                            <InputNumber id="addPriceOS" v-model="dataPutOrderOfServiceSimple[0].price" :minFractionDigits="2" />
+                            <InputNumber id="addPriceOS" v-model="simplePrice" :minFractionDigits="2" />
                             <label for="addPriceOS"><span style="color: red">*</span> Preço</label>
                         </span>
                     </div>
@@ -70,23 +124,23 @@ const emit = defineEmits(['update:modelValue', 'update:typeOS', 'save', 'delete'
                 <div class="grid p-fluid mt-1">
                     <div class="field col-12 md:col-3">
                         <span class="p-float-label">
-                            <InputNumber id="addQuantOS" v-model="dataPutOrderOfServiceComplete.amount" />
+                            <InputNumber id="addQuantOS" v-model="completeAmount" />
                             <label for="addQuantOS"><span style="color: red">*</span> Quantidade</label>
                         </span>
                     </div>
                     <div class="field col-12 md:col-5">
                         <span class="p-float-label">
-                            <InputText id="addDescriptionOSC" v-model="dataPutOrderOfServiceComplete.description" />
+                            <InputText id="addDescriptionOSC" v-model="completeDescription" />
                             <label for="addDescriptionOSC"><span style="color: red">*</span> Descrição</label>
                         </span>
                     </div>
                     <div class="field col-12 md:col-2">
                         <span class="p-float-label">
-                            <InputNumber id="addPriceOSC" v-model="dataPutOrderOfServiceComplete.price" :minFractionDigits="2" />
+                            <InputNumber id="addPriceOSC" v-model="completePrice" :minFractionDigits="2" />
                             <label for="addPriceOSC"><span style="color: red">*</span> Preço</label>
                         </span>
                     </div>
-                    <div class="field col-12 md:col-1">
+                    <div class="field col-12 md:col-2 responsive-actions">
                         <Button icon="pi pi-plus" class="p-button-outlined p-button-info" @click="emit('save', rowData)" v-tooltip.top="'Adicionar Registro'" />
                     </div>
                 </div>
@@ -107,7 +161,7 @@ const emit = defineEmits(['update:modelValue', 'update:typeOS', 'save', 'delete'
             </Column>
             <template #footer>
                 <div class="grid p-fluid mt-1">
-                    <div class="col-12 md:col-6">
+                    <div class="col-12 md:col-8">
                         <div class="p-inputgroup">
                             <span class="p-inputgroup-addon"> VALOR </span>
                             <span class="p-inputgroup-addon"> R$ {{ dataGetOS.value }}.00 </span>

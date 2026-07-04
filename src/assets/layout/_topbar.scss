@@ -88,6 +88,8 @@
 
 @media (max-width: 991px) {
     .layout-topbar {
+        height: 4.5rem;
+        padding: 0 1rem;
         justify-content: space-between;
 
         .layout-topbar-logo {
@@ -115,6 +117,27 @@
             .layout-topbar-button {
                 margin-left: 1rem;
             }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .layout-topbar {
+        .layout-topbar-logo {
+            font-size: 1rem;
+
+            img {
+                height: 2rem;
+            }
+        }
+
+        .layout-topbar-button {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        .layout-topbar-menu .layout-topbar-button {
+            margin-left: .25rem;
         }
     }
 }

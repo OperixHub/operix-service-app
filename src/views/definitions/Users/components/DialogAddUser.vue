@@ -6,13 +6,13 @@ const props = defineProps({
     getUsers: { type: Function, required: true }
 });
 
-const { dataPostUser, displayModalAdd, openModalAdd, closeModal, customBase64Uploader, validatePostUser } = useUserForm(props.getUsers);
+const { dataPostUser, moduleOptions, displayModalAdd, openModalAdd, closeModal, validatePostUser } = useUserForm(props.getUsers);
 
 defineExpose({ open: openModalAdd });
 </script>
 
 <template>
-    <Dialog header="Adicionar Usuário" v-model:visible="displayModalAdd" position="top" :breakpoints="{ '960px': '75vw' }" :style="{ width: '28vw' }" :modal="true">
+    <Dialog header="Adicionar Usuário" v-model:visible="displayModalAdd" position="top" :breakpoints="{ '960px': '75vw', '640px': '100vw' }" :style="{ width: 'clamp(22rem, 48vw, 42rem)' }" :modal="true">
         <transition-group tag="div">
             <Message v-for="msg of messageAddUser" :severity="msg.severity" :key="msg.content">{{ msg.content }}</Message>
         </transition-group>
@@ -42,15 +42,35 @@ defineExpose({ open: openModalAdd });
                 </span>
             </div>
             <div class="field col-12 md:col-6">
-                <span class="p-float-label">
-                    <FileUpload id="addSignature" mode="basic" url="/api/upload" accept="image/*" customUpload @uploader="customBase64Uploader" chooseLabel="Assinatura" />
-                </span>
-            </div>
-            <div class="field col-12 md:col-6">
-                <span class="p-float-label">
+                <div class="flex align-items-center gap-2 h-full">
                     <Checkbox id="addAdmin" v-model="dataPostUser.admin" :binary="true" />
-                    <label for="addAdmin" style="margin-left: 20px"> Administrador</label>
+                    <label for="addAdmin">Administrador com acesso completo</label>
+                </div>
+            </div>
+            <div class="field col-12">
+                <span class="p-float-label">
+                    <MultiSelect
+                        id="addModules"
+                        v-model="dataPostUser.modules"
+                        :options="moduleOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        display="chip"
+                        class="w-full"
+                        :disabled="dataPostUser.admin"
+                    >
+                        <template #option="{ option }">
+                            <div>
+                                <div class="font-medium">{{ option.label }}</div>
+                                <small class="text-600">{{ option.description }}</small>
+                            </div>
+                        </template>
+                    </MultiSelect>
+                    <label for="addModules">Módulos permitidos</label>
                 </span>
+                <small class="text-600 block mt-2">
+                    Usuários administradores têm acesso a todas as rotas. Usuários comuns veem somente os módulos selecionados.
+                </small>
             </div>
         </div>
         <template #footer>

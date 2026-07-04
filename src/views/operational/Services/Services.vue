@@ -6,6 +6,7 @@ import DialogViewOS from './components/DialogViewOS.vue';
 import DialogEditStatus from './components/DialogEditStatus.vue';
 import DialogEditPaymentStatus from './components/DialogEditPaymentStatus.vue';
 import DialogEditInfoClient from './components/DialogEditInfoClient.vue';
+import DialogServicePart from './components/DialogServicePart.vue';
 
 const {
     optionsTypesTables, formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator,
@@ -22,6 +23,8 @@ const {
     displayModalEditPaymentStatus, positionModalEditPaymentStatus, dataEditPaymentStatus,
     displayModalEditStatus, positionModalEditStatus, dataEditStatus,
     displayModalEditInfo, positionModalEditInfo, dataEditInfoClient,
+    displayModalServicePart, positionModalServicePart, selectedServicePartContext,
+    dataServicePart, stockOptions, servicePartLoading,
     getStatusService, getStatusPayment, getTypesProduct, getServices,
     clearFilter, changeTable, openModalAdd, closeModal,
     openModalOS, validateUpdateEstimateOS, deleteEstimateOS,
@@ -29,8 +32,9 @@ const {
     openModalEditPaymentStatus, validateUpdateStatusPayment,
     openModalEditStatus, validateUpdateStatusService,
     openModalEditInfo, validateEditInfoClient, isInfoClientChanged, resetInfoClient,
+    openModalServicePart, closeModalServicePart, saveServicePart, onServicePartStockChange,
     confirmDeleteService, confirmUpdateWarehouse, confirmUpdateForServices,
-    toggle, openOverlay, idop, op, copyText
+    toggle, openOverlay, op, copyText
 } = useServices();
 
 onBeforeMount(() => {
@@ -38,29 +42,6 @@ onBeforeMount(() => {
     getStatusPayment();
     getStatusService();
     getServices();
-});
-
-const props = defineProps({
-  rowData: {
-    type: Array,
-    required: false,
-    default: () => []
-  },
-  dataGetOs: {
-    type: Array,
-    required: false,
-    default: () => []
-  },
-  typeOs: {
-    type: Array,
-    required: false,
-    default: () => []
-  },
-  dataViewEstimateOs: {
-    type: Array,
-    required: false,
-    default: () => []
-  }
 });
 
 </script>
@@ -91,6 +72,8 @@ const props = defineProps({
         :send-whats-app-message="sendWhatsAppMessage"
         :pdf-generator="pdfGenerator"
         @update:typeOS="typeOS = $event"
+        @update:data-put-order-of-service-simple="dataPutOrderOfServiceSimple = $event"
+        @update:data-put-order-of-service-complete="dataPutOrderOfServiceComplete = $event"
         @save="validateUpdateEstimateOS"
         @delete="deleteEstimateOS"
     />
@@ -104,6 +87,7 @@ const props = defineProps({
         :messages="messageUpdateStatusService"
         :get-style-status="getStyleStatusService"
         :format-data="formatData"
+        @update:data-edit-status="dataEditStatus = $event"
         @save="validateUpdateStatusService"
         @cancel="closeModal"
     />
@@ -117,6 +101,7 @@ const props = defineProps({
         :messages="messageUpdateStatusPayment"
         :get-style-status="getStyleStatusPayment"
         :format-data="formatData"
+        @update:data-edit-payment-status="dataEditPaymentStatus = $event"
         @save="validateUpdateStatusPayment"
         @cancel="closeModal"
     />
@@ -128,9 +113,23 @@ const props = defineProps({
         :types-product-options="typesProductOptions"
         :messages="messageEditInfoClient"
         :is-info-client-changed="isInfoClientChanged"
+        @update:data-edit-info-client="dataEditInfoClient = $event"
         @save="validateEditInfoClient"
         @cancel="closeModal"
         @reset="resetInfoClient"
+    />
+
+    <DialogServicePart
+        v-model="displayModalServicePart"
+        :position="String(positionModalServicePart)"
+        :service="selectedServicePartContext"
+        :form="dataServicePart"
+        :stock-options="stockOptions"
+        :loading="servicePartLoading"
+        @update:form="dataServicePart = $event"
+        @stock-change="onServicePartStockChange"
+        @save="saveServicePart"
+        @cancel="closeModalServicePart"
     />
 
     <div class="grid">
@@ -321,6 +320,7 @@ const props = defineProps({
                             <Button v-tooltip.top="'Ações'" icon="pi pi-ellipsis-v" @click="toggle($event, data.id)" class="p-button-rounded surface-500 surface-border" />
                             <OverlayPanel v-if="openOverlay(data.id)" ref="op">
                                 <Button icon="pi pi-user-edit" @click="openModalEditInfo('top', data)" class="p-button-rounded p-button-warning" v-tooltip.top="'Ver informações'" />
+                                <Button icon="pi pi-box" @click="openModalServicePart('top', data)" class="ml-1 p-button-rounded p-button-help" v-tooltip.top="'Registrar peça usada'" />
                                 <Button icon="pi pi-share-alt" @click="sendInfoClientsWhats(data)" class="ml-1 p-button-rounded p-button-success" v-tooltip.top="'Enviar informações'" />
                                 <Button v-if="typeTable.value == 1" icon="pi pi-sign-in" @click="confirmUpdateWarehouse($event, data.id)" class="ml-1 p-button-rounded p-button-info" v-tooltip.top="'Enviar ao depósito'" />
                                 <Button v-if="typeTable.value == 2" icon="pi pi-sign-out" @click="confirmUpdateForServices($event, data.id)" class="ml-1 p-button-rounded p-button-info" v-tooltip.top="'Retornar para serviço'" />

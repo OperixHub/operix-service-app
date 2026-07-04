@@ -1,6 +1,5 @@
 {
-    "homepage": "https://desenvx.github.io/lima-ref",
-    "name": "lima-ref-app",
+    "name": "operix",
     "version": "0.0.1",
     "main": "main.js",
     "engines": {
@@ -26,6 +25,7 @@
         "serve": "^14.2.1",
         "socket.io-client": "^4.7.2",
         "sweetalert2": "^11.7.27",
+        "validator": "^13.15.35",
         "vee-validate": "^4.11.8",
         "vue": "^3.2.41",
         "vue-router": "^4.1.5"

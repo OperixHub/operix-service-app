@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
     modelValue: { type: Boolean, default: false },
     position: { type: String, default: 'top' },
@@ -10,7 +12,15 @@ const props = defineProps({
     formatData: { type: Function, required: true }
 });
 
-const emit = defineEmits(['update:modelValue', 'save', 'cancel']);
+const emit = defineEmits(['update:modelValue', 'update:dataEditPaymentStatus', 'save', 'cancel']);
+
+const paymentStatus = computed({
+    get: () => props.dataEditPaymentStatus.payment_status,
+    set: (value) => emit('update:dataEditPaymentStatus', {
+        ...props.dataEditPaymentStatus,
+        payment_status: value
+    })
+});
 </script>
 
 <template>
@@ -19,8 +29,8 @@ const emit = defineEmits(['update:modelValue', 'save', 'cancel']);
         :visible="modelValue"
         @update:visible="emit('update:modelValue', $event)"
         :position="position"
-        :breakpoints="{ '960px': '75vw' }"
-        :style="{ width: '15vw' }"
+        :breakpoints="{ '960px': '75vw', '640px': '100vw' }"
+        :style="{ width: 'clamp(20rem, 32vw, 28rem)' }"
         :modal="true"
     >
         <transition-group tag="div">
@@ -29,7 +39,7 @@ const emit = defineEmits(['update:modelValue', 'save', 'cancel']);
         <div class="grid p-fluid mt-1">
             <div class="field col-12 md:col-12">
                 <span class="p-float-label">
-                    <Dropdown id="editPaymentStatus" v-model="dataEditPaymentStatus.payment_status" :options="statusOptions" class="p-column-filter" :showClear="true" optionLabel="label">
+                    <Dropdown id="editPaymentStatus" v-model="paymentStatus" :options="statusOptions" class="p-column-filter" :showClear="true" optionLabel="label">
                         <template #value="slotProps">
                             <div v-if="slotProps.value">
                                 <Tag :value="getStyleStatus(parseInt(slotProps.value)).description" :style="{ background: getStyleStatus(parseInt(slotProps.value)).color.hex }" />
