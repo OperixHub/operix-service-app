@@ -9,7 +9,7 @@ import { API_CONFIG } from '@/config/api.config';
 import { setSession } from '@/service/AuthSession';
 import { connectSocket } from '@/views/utils/computeds';
 import { getFirstAllowedMenuPath } from '@/config/menu.config';
-import {isEmail} from 'validator';
+import { isEmail } from 'validator';
 
 const base64UrlEncode = (buffer) => {
     return btoa(String.fromCharCode(...new Uint8Array(buffer)))
@@ -63,6 +63,21 @@ export function useLogin() {
         return password.value === confirmPassword.value;
     });
 
+    /**
+     * Verifica na API se o e-mail já está cadastrado e ativo.
+     * Retorna { exists, active } ou lança erro.
+     */
+    const checkEmail = async () => {
+        const response = await Axios.post(API_CONFIG.AUTH.CHECK_EMAIL, {
+            email: email.value
+        });
+        return response.data;
+    };
+
+    /**
+     * Registra novo usuário: cria tenant placeholder + usuário com permissões full.
+     * Ao receber a sessão, redireciona para o onboarding.
+     */
     const register = async () => {
         loadingOpen();
         try {
@@ -72,20 +87,26 @@ export function useLogin() {
                 confirm_password: confirmPassword.value
             });
 
-            if (response.success) {
-                verificationUrl.value = response.data?.verification_url || '';
-                addMessage('register', 'success', 'Cadastro iniciado. Verifique seu e-mail para continuar.');
-                toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Verifique seu e-mail para ativar a conta.', life: 5000 });
+            const payload = response.data;
+            if (payload && payload.token) {
+                setSession(payload);
+                await loadCurrentSession();
+                connectSocket();
+                router.push('/onboarding');
             } else {
-                toast.add({ severity: 'error', summary: 'Erro no Registro', detail: 'Tente novamente mais tarde.', life: 5000 });
+                toast.add({ severity: 'error', summary: 'Erro no Cadastro', detail: 'Resposta inválida do servidor.', life: 5000 });
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Informação Inválida', detail: error.response?.data?.msg || 'Erro ao registrar usuário', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro no Cadastro', detail: error.response?.data?.msg || 'Erro ao registrar usuário.', life: 5000 });
         } finally {
             loadingClose();
         }
     };
 
+    /**
+     * Realiza login de usuário existente.
+     * Vai direto ao app (não passa pelo onboarding pois o tenant já existe).
+     */
     const login = async () => {
         loadingOpen();
         try {
@@ -105,7 +126,7 @@ export function useLogin() {
                 toast.add({ severity: 'error', summary: 'Erro no Login', detail: 'Token inválido ou ausente.', life: 5000 });
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Informação Inválida', detail: error.response?.data?.msg || 'Erro ao fazer login', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Informação Inválida', detail: error.response?.data?.msg || 'Erro ao fazer login.', life: 5000 });
         } finally {
             loadingClose();
         }
@@ -132,14 +153,19 @@ export function useLogin() {
 
             window.location.href = response.data.authorization_url;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Google indisponível', detail: error.response?.data?.msg || 'Erro ao iniciar login Google', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Google indisponível', detail: error.response?.data?.msg || 'Erro ao iniciar login Google.', life: 5000 });
         } finally {
             loadingClose();
         }
     };
 
+    /**
+     * Lógica central do botão principal.
+     * - TYPE_FORM_INITIAL: verifica o e-mail na API e decide qual form mostrar
+     * - TYPE_FORM_REGISTER (COD_REGISTER): valida campos e registra
+     * - TYPE_FORM_LOGIN (COD_LOGIN): valida campos e faz login
+     */
     const validate = async (action) => {
-        console.log('Action:', action);
         if (action === COD_REGISTER) {
             if (!email.value || !password.value || !confirmPassword.value) {
                 addMessage('register', 'error', 'Preencha todos os campos obrigatórios.');
@@ -151,17 +177,32 @@ export function useLogin() {
                 await register();
             }
         } else if (action === COD_LOGIN) {
-            if (!email.value && !password.value) {
+            if (!email.value || !password.value) {
                 addMessage('login', 'error', 'Preencha todos os campos obrigatórios.');
             } else {
                 await login();
             }
         } else {
+            // Etapa inicial: verificar se o e-mail existe antes de decidir o form
             if (!email.value || !isEmail(email.value)) {
-                addMessage('login', 'error', 'Informe um email válido.');
-            } else {
-                typeForm.value = TYPE_FORM_REGISTER;
-                await goToLogin();
+                addMessage('login', 'error', 'Informe um e-mail válido.');
+                return;
+            }
+
+            loadingOpen();
+            try {
+                const { exists, active } = await checkEmail();
+                if (exists && active) {
+                    // Usuário existente e ativo → form de login
+                    typeForm.value = TYPE_FORM_LOGIN;
+                } else {
+                    // Usuário inexistente ou inativo → form de cadastro
+                    typeForm.value = TYPE_FORM_REGISTER;
+                }
+            } catch (error) {
+                toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Não foi possível verificar o e-mail.', life: 5000 });
+            } finally {
+                loadingClose();
             }
         }
     };
@@ -169,6 +210,8 @@ export function useLogin() {
     const goToLogin = (shouldResetForm = false) => {
         if (shouldResetForm) {
             typeForm.value = TYPE_FORM_INITIAL;
+            password.value = '';
+            confirmPassword.value = '';
         }
         router.push('/login');
     };
@@ -184,6 +227,13 @@ export function useLogin() {
     };
 
     return {
+        ref,
+        COD_REGISTER,
+        COD_LOGIN,
+        TYPE_FORM_INITIAL,
+        TYPE_FORM_REGISTER,
+        TYPE_FORM_LOGIN,
+        typeForm,
         email,
         password,
         confirmPassword,
@@ -193,15 +243,10 @@ export function useLogin() {
         messageLogin,
         remember,
         logoUrl,
-        TYPE_FORM_INITIAL,
-        TYPE_FORM_REGISTER,
-        TYPE_FORM_LOGIN,
-        typeForm,
-        ref,
         validate,
         loginWithGoogle,
         goToLogin,
         openVerificationUrl,
-        goToForgotPassword
+        goToForgotPassword,
     };
 }

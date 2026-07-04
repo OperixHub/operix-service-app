@@ -32,15 +32,28 @@ onMounted(async () => {
             code_verifier: codeVerifier
         });
 
-        setSession(response.data);
+        const payload = response.data;
+        setSession(payload);
         const snapshot = await loadCurrentSession();
         connectSocket();
+
         sessionStorage.removeItem('operix_oauth_state');
         sessionStorage.removeItem('operix_oauth_verifier');
         sessionStorage.removeItem('operix_oauth_redirect_uri');
-        router.replace(getFirstAllowedMenuPath(snapshot.user, snapshot.permissions));
+
+        // Novo usuário Google → redireciona para onboarding
+        if (payload.is_new_user) {
+            router.replace('/onboarding');
+        } else {
+            router.replace(getFirstAllowedMenuPath(snapshot.user, snapshot.permissions));
+        }
     } catch (error) {
-        toast.add({ severity: 'error', summary: 'Erro no Login Google', detail: error.response?.data?.msg || error.message || 'Não foi possível concluir login Google.', life: 5000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Erro no Login Google',
+            detail: error.response?.data?.msg || error.message || 'Não foi possível concluir login Google.',
+            life: 5000
+        });
         router.replace('/login');
     }
 });

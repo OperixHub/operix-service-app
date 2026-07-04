@@ -73,13 +73,8 @@ const {
                         placeholder="Confirme a senha"
                         class="w-full mb-2"
                         :feedback="false"
-                        :class="{ 'password-ok': passwordsMatch === true, 'password-error': passwordsMatch === false }"
                         :inputStyle="{ padding: '1rem', width: '100%' }"
                     />
-                    <div class="password-compatibility" :class="{ ok: passwordsMatch === true, error: passwordsMatch === false }">
-                        <i :class="passwordsMatch === true ? 'pi pi-check-circle' : passwordsMatch === false ? 'pi pi-times-circle' : ''" />
-                        <span>{{ passwordsMatch === true ? 'As senhas conferem.' : passwordsMatch === false ? 'As senhas não conferem.' : '' }}</span>
-                    </div>
 
                     <Button v-if="typeForm === TYPE_FORM_INITIAL" label="Continuar com e-mail" class="w-full p-3 text-lg" @click="validate(typeForm)" />
                     <Button v-if="typeForm === TYPE_FORM_REGISTER && verificationUrl" label="Abrir link de verificação" class="w-full p-3 mt-4 p-button-outlined" @click="openVerificationUrl()" />

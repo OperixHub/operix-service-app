@@ -1,5 +1,5 @@
 <script setup>
-import Axios, { refreshAccessToken } from '@/service/Axios';
+import Axios, { refreshAccessToken, loadCurrentSession } from '@/service/Axios';
 import { API_CONFIG } from '@/config/api.config';
 import { getFirstAllowedMenuPath } from '@/config/menu.config';
 import { getCurrentPermissions, getCurrentUser } from '@/service/AuthSession';
@@ -20,23 +20,22 @@ const message = ref('');
 
 const submit = async () => {
     message.value = '';
-    if (!companyName.value || !name.value || !username.value) {
-        message.value = 'Preencha nome da empresa, seu nome e nome de usuário.';
-        return;
-    }
+
+    // Monta o payload apenas com os campos que o usuário preencheu
+    const payload = {};
+    if (companyName.value.trim()) payload.company_name = companyName.value.trim();
+    if (name.value.trim()) payload.name = name.value.trim();
+    if (username.value.trim()) payload.username = username.value.trim();
+    if (cnpj.value.trim()) payload.cnpj = cnpj.value.trim();
+    if (description.value.trim()) payload.description = description.value.trim();
 
     loadingOpen();
     try {
-        await Axios.post(API_CONFIG.AUTH.ONBOARDING, {
-            company_name: companyName.value,
-            name: name.value,
-            username: username.value,
-            cnpj: cnpj.value || null,
-            description: description.value || null
-        });
-        await refreshAccessToken();
+        await Axios.post(API_CONFIG.AUTH.ONBOARDING, payload);
+        // Recarrega a sessão para refletir o nome/username atualizados no token
+        const snapshot = await loadCurrentSession();
         toast.add({ severity: 'success', summary: 'Onboarding concluído', detail: 'Conta configurada com sucesso.', life: 5000 });
-        router.replace(getFirstAllowedMenuPath(getCurrentUser(), getCurrentPermissions()));
+        router.replace(getFirstAllowedMenuPath(snapshot.user, snapshot.permissions));
     } catch (error) {
         message.value = error.response?.data?.msg || 'Erro ao concluir onboarding.';
     } finally {
@@ -52,8 +51,8 @@ const submit = async () => {
             <div class="auth-card surface-card py-7 px-5 sm:px-8">
                 <div class="text-center mb-5">
                     <i class="pi pi-building text-5xl text-primary mb-4" />
-                    <div class="text-900 text-3xl font-medium mb-3">Complete seu onboarding</div>
-                    <span class="text-600 font-medium">Agora informe os dados da empresa e seu perfil de administrador.</span>
+                    <div class="text-900 text-3xl font-medium mb-3">Configure sua conta</div>
+                    <span class="text-600 font-medium">Personalize os dados da empresa e do seu perfil. Todos os campos são opcionais.</span>
                 </div>
 
                 <Message v-if="message" severity="error">{{ message }}</Message>
@@ -74,7 +73,8 @@ const submit = async () => {
                     <label for="description" class="block text-900 text-left font-medium mb-2"> DESCRIÇÃO <span class="text-500">(opcional)</span></label>
                     <Textarea id="description" v-model="description" rows="3" autoResize class="w-full mb-5" />
 
-                    <Button label="Concluir Onboarding" icon="pi pi-check" class="w-full p-3 text-xl" @click="submit()" />
+                    <Button label="Concluir" icon="pi pi-check" class="w-full p-3 text-xl" @click="submit()" />
+                    <Button label="Pular por agora" icon="pi pi-arrow-right" class="w-full p-3 mt-3 p-button-text p-button-secondary" @click="submit()" />
                 </div>
             </div>
         </div>

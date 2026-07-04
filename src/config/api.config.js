@@ -22,7 +22,7 @@ export const API_CONFIG = {
     AUTH: {
         LOGIN: '/autenticacao/login',
         REGISTER: '/autenticacao/registrar',
-        VERIFY_EMAIL: '/autenticacao/verificar-email',
+        CHECK_EMAIL: '/autenticacao/verificar-email-existencia',
         FORGOT_PASSWORD: '/autenticacao/recuperar-senha',
         RESET_PASSWORD: '/autenticacao/redefinir-senha',
         ONBOARDING: '/autenticacao/onboarding',
