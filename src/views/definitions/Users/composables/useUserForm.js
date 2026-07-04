@@ -31,7 +31,7 @@ export function useUserForm(getUsers) {
     };
 
     const closeModal = () => {
-        if (displayModalAdd.value === true) {
+        if (displayModalAdd.value) {
             displayModalAdd.value = false;
             dataPostUser.value = {
                 admin: false,
@@ -55,7 +55,7 @@ export function useUserForm(getUsers) {
             await getUsers();
             closeModal();
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao adicionar usuário', life: 5000 });
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao adicionar usuário', life: 5000 });
             console.error(error);
         } finally {
             loadingClose();
@@ -63,7 +63,7 @@ export function useUserForm(getUsers) {
     };
 
     const validatePostUser = async () => {
-        if (!dataPostUser.value.username || !dataPostUser.value.email || !dataPostUser.value.password || !dataPostUser.value.confirmPassword) {
+        if (!dataPostUser.value.name || !dataPostUser.value.username || !dataPostUser.value.email || !dataPostUser.value.password || !dataPostUser.value.confirmPassword) {
             addMessage('addUser', 'error', 'Preencha todos os campos obrigatórios.');
         } else if (dataPostUser.value.password !== dataPostUser.value.confirmPassword) {
             addMessage('addUser', 'error', 'Senhas incoerentes.');

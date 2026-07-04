@@ -85,7 +85,7 @@ axiosInstance.interceptors.request.use(
     (config) => {
         const token = getAccessToken();
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = 'Bearer ' + token;
         }
         return config;
     },
@@ -109,7 +109,7 @@ axiosInstance.interceptors.response.use(
                 failedQueue.push({ resolve, reject });
             })
                 .then((token) => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    originalRequest.headers.Authorization = 'Bearer ' + token;
                     return axiosInstance(originalRequest);
                 })
                 .catch((err) => Promise.reject(err));
@@ -120,7 +120,7 @@ axiosInstance.interceptors.response.use(
 
         try {
             const newToken = await refreshAccessToken();
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            originalRequest.headers.Authorization = 'Bearer ' + newToken;
             processQueue(null, newToken);
             return axiosInstance(originalRequest);
         } catch (refreshError) {

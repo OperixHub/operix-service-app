@@ -68,6 +68,11 @@ const router = createRouter({
                     component: () => import('@/views/definitions/Users/Users.vue')
                 },
                 {
+                    path: '/definicoes/configuracoes',
+                    name: 'definitions-settings',
+                    component: () => import('@/views/definitions/Settings/Settings.vue')
+                },
+                {
                     path: '/operacional/situacoes',
                     name: 'operational-status',
                     meta: { permission: 'operational.status.access' },

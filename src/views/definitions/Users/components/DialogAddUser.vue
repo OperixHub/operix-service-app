@@ -17,6 +17,12 @@ defineExpose({ open: openModalAdd });
             <Message v-for="msg of messageAddUser" :severity="msg.severity" :key="msg.content">{{ msg.content }}</Message>
         </transition-group>
         <div class="grid p-fluid mt-1">
+            <div class="field col-12">
+                <span class="p-float-label">
+                    <InputText type="text" id="addName" v-model="dataPostUser.name" />
+                    <label for="addName"><span style="color: red">*</span> Nome </label>
+                </span>
+            </div>
             <div class="field col-12 md:col-6">
                 <span class="p-float-label">
                     <InputText type="text" id="addUsername" v-model="dataPostUser.username" />
@@ -71,6 +77,12 @@ defineExpose({ open: openModalAdd });
                 <small class="text-600 block mt-2">
                     Usuários administradores têm acesso a todas as rotas. Usuários comuns veem somente os módulos selecionados.
                 </small>
+            </div>
+            <div class="field col-12">
+                <span class="p-float-label">
+                    <MultiSelect id="addModules" v-model="dataPostUser.modules" :options="moduleOptions" optionLabel="label" optionValue="key" display="chip" class="w-full" />
+                    <label for="addModules">Módulos</label>
+                </span>
             </div>
         </div>
         <template #footer>

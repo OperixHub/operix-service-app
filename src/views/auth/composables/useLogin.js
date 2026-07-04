@@ -183,6 +183,8 @@ export function useLogin() {
         }
     };
 
+    onMounted(loadAuthConfig);
+
     return {
         email,
         password,
@@ -192,6 +194,8 @@ export function useLogin() {
         messageRegister,
         messageLogin,
         remember,
+        authConfig,
+        loadingConfig,
         logoUrl,
         TYPE_FORM_INITIAL,
         TYPE_FORM_REGISTER,

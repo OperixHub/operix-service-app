@@ -75,13 +75,15 @@ const completePrice = computed({
 
 <template>
     <Dialog
-        :header="`Orçamento - ( ${rowData.order_of_service} / ${rowData.product} / ${rowData.client} )`"
+        :header="'Orçamento da OS ' + (rowData.order_of_service || '-')"
         :visible="modelValue"
         @update:visible="emit('update:modelValue', $event)"
         :position="position"
         :breakpoints="{ '960px': '90vw', '640px': '100vw' }"
         :style="{ width: 'clamp(22rem, 78vw, 72rem)' }"
         :modal="true"
+        :draggable="false"
+        class="service-estimate-dialog"
     >
         <div class="flex justify-content-center mb-4 overflow-x-auto">
             <SelectButton :modelValue="typeOS" @update:modelValue="emit('update:typeOS', $event)" :options="typeOsOptions" optionLabel="label" dataKey="label" />
@@ -176,3 +178,99 @@ const completePrice = computed({
         </DataTable>
     </Dialog>
 </template>
+
+<style scoped>
+.estimate-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.estimate-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem 1rem;
+    border-radius: 1.25rem;
+    background:
+        linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(16, 185, 129, 0.08)),
+        var(--surface-card);
+    border: 1px solid var(--surface-border);
+}
+
+.estimate-hero__chips {
+    align-content: flex-start;
+}
+
+.estimate-card {
+    height: 100%;
+}
+
+.estimate-meta,
+.estimate-metrics {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.estimate-meta > div,
+.estimate-metrics > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.estimate-meta > div:last-child,
+.estimate-metrics > div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.estimate-meta span,
+.estimate-metrics span {
+    color: var(--text-color-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.estimate-meta strong,
+.estimate-metrics strong {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.estimate-meta__note {
+    line-height: 1.5;
+}
+
+.estimate-form-card {
+    padding: 1rem;
+    border-radius: 1rem;
+    background: var(--surface-50);
+    border: 1px solid var(--surface-border);
+}
+
+.estimate-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem 0 0;
+    border-top: 1px solid var(--surface-border);
+}
+
+@media (max-width: 960px) {
+    .estimate-hero,
+    .estimate-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .estimate-hero__chips {
+        justify-content: flex-start;
+    }
+}
+</style>

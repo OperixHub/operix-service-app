@@ -420,7 +420,8 @@ export function useServices() {
                 : { 0: { id: null, description: '', price: null } };
             displayModalOS.value = true;
             positionModalOS.value = position;
-            typeOS.value = dataViewEstimateOS.value[0].amount !== ''
+            const firstEstimate = dataViewEstimateOS.value[0];
+            typeOS.value = firstEstimate && firstEstimate.amount !== undefined && firstEstimate.amount !== ''
                 ? { label: 'Detalhada', value: 'completa' }
                 : { label: 'Simplificada', value: 'simples' };
         } else {
@@ -581,7 +582,7 @@ export function useServices() {
         messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient,
         messageUpdateStatusService, messageUpdateStatusPayment, messageAddService,
         // status
-        statusServiceOptions, statusPaymentOptions,
+        statusServiceOptions, statusServiceMapping, statusPaymentOptions,
         getStyleStatusService, getStyleStatusPayment,
         // data
         dataGetOS, dataGetService,

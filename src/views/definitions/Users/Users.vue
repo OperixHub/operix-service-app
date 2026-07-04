@@ -3,7 +3,6 @@ import { ref, onBeforeMount } from 'vue';
 import { useUsers } from './composables/useUsers';
 import DialogAddUser from './components/DialogAddUser.vue';
 
-const popup = ref(null);
 const dialogAddUser = ref(null);
 
 const { dataGetUsers, getUsers, confirmDeleteUser } = useUsers();
