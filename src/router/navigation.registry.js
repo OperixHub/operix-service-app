@@ -8,13 +8,12 @@ const moduleConfig = {
 
 const routeConfig = {
     '/dashboard': { icon: 'pi pi-fw pi-home', permission: 'dashboard.access' },
-    '/operacional/servicos': { icon: 'pi pi-fw pi-ticket', permission: 'operational.services.access' },
-    '/operacional/situacoes': { icon: 'pi pi-fw pi-sitemap', permission: 'operational.status.access' },
-    '/operacional/tipos-de-produto': { icon: 'pi pi-fw pi-box', permission: 'operational.types-products.access' },
-    '/inventario/estoque': { icon: 'pi pi-fw pi-warehouse', permission: 'inventory.stock.access' },
-    '/definicoes/usuarios': { icon: 'pi pi-fw pi-user', permission: 'organization.users.access' },
-    '/definicoes/configuracoes': { icon: 'pi pi-fw pi-sliders-h', permission: 'organization.settings.access' },
-    '/notificacoes/informacoes-do-sistema': { icon: 'pi pi-fw pi-bell', permission: 'notifications.system-info.access' }
+    '/operacional/servicos': { icon: 'pi pi-fw pi-ticket', permission: 'operational.access' },
+    '/inventario/estoque': { icon: 'pi pi-fw pi-warehouse', permission: 'inventory.access' },
+    '/configuracoes/usuarios': { icon: 'pi pi-fw pi-user', permission: 'configurations.access' },
+    '/configuracoes/configuracoes': { icon: 'pi pi-fw pi-sliders-h', permission: 'configurations.access' },
+    '/configuracoes/dados-basicos': { icon: 'pi pi-fw pi-sitemap', permission: 'configurations.access' },
+    '/notificacoes/informacoes-do-sistema': { icon: 'pi pi-fw pi-bell', permission: 'notifications.access' }
 };
 
 const fallbackNavigationRegistry = [
@@ -30,8 +29,6 @@ const fallbackNavigationRegistry = [
         icon: moduleConfig.operational.icon,
         children: [
             { label: 'Serviços', icon: routeConfig['/operacional/servicos'].icon, to: '/operacional/servicos', permission: routeConfig['/operacional/servicos'].permission },
-            { label: 'Situações', icon: routeConfig['/operacional/situacoes'].icon, to: '/operacional/situacoes', permission: routeConfig['/operacional/situacoes'].permission },
-            { label: 'Tipos de Produto', icon: routeConfig['/operacional/tipos-de-produto'].icon, to: '/operacional/tipos-de-produto', permission: routeConfig['/operacional/tipos-de-produto'].permission }
         ]
     },
     {
@@ -42,11 +39,11 @@ const fallbackNavigationRegistry = [
         ]
     },
     {
-        label: 'Definições',
+        label: 'Configurações',
         icon: moduleConfig.organization.icon,
         children: [
-            { label: 'Usuários', icon: routeConfig['/definicoes/usuarios'].icon, to: '/definicoes/usuarios', permission: routeConfig['/definicoes/usuarios'].permission },
-            { label: 'Configurações', icon: routeConfig['/definicoes/configuracoes'].icon, to: '/definicoes/configuracoes', permission: routeConfig['/definicoes/configuracoes'].permission }
+            { label: 'Usuários', icon: routeConfig['/configuracoes/usuarios'].icon, to: '/configuracoes/usuarios', permission: routeConfig['/configuracoes/usuarios'].permission },
+            { label: 'Dados Básicos', icon: routeConfig['/configuracoes/dados-basicos'].icon, to: '/configuracoes/dados-basicos', permission: routeConfig['/configuracoes/dados-basicos'].permission },
         ]
     },
     {

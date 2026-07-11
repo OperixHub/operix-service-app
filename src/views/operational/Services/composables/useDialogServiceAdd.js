@@ -56,10 +56,9 @@ export function useDialogServiceAdd() {
                 client: dataPostService.value.client,
                 telephone: dataPostService.value.telephone,
                 adress: dataPostService.value.adress,
-                status: dataPostService.value.status.cod,
+                status_id: dataPostService.value.status.id,
                 observation: dataPostService.value.observation,
-                created_at: dataPostService.value.created_at,
-                typeTable: 1
+                created_at: dataPostService.value.created_at
             });
             toast.add({ severity: 'success', summary: 'Adicionado', detail: 'Serviço adicionado com sucesso', life: 5000 });
             closeModal();
@@ -72,7 +71,7 @@ export function useDialogServiceAdd() {
     };
 
     const validatePostService = async () => {
-        if (!dataPostService.value.product || !dataPostService.value.client || !dataPostService.value.telephone || !dataPostService.value.status.cod) {
+        if (!dataPostService.value.product || !dataPostService.value.client || !dataPostService.value.telephone || !dataPostService.value.status.id) {
             addMessage('addService', 'error', 'Preencha todos os campos obrigatórios.');
         } else {
             await postService();

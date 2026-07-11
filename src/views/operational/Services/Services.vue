@@ -9,8 +9,8 @@ import DialogEditInfoClient from './components/DialogEditInfoClient.vue';
 import DialogServicePart from './components/DialogServicePart.vue';
 
 const {
-    optionsTypesTables, formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator,
-    typeTable, loading, filters, typeOS, typeOsOptions,
+    optionsTypesTables, formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator, formatTelephone,
+    loading, filters, typeOS, typeOsOptions,
     messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient,
     messageUpdateStatusService, messageUpdateStatusPayment,
     statusServiceOptions, statusPaymentOptions,
@@ -50,7 +50,6 @@ onBeforeMount(() => {
     <ConfirmPopup />
     <Toast />
 
-    <!-- Dialogs globais (fora da DataTable) -->
     <DialogServiceAdd />
 
     <DialogViewOS
@@ -135,21 +134,15 @@ onBeforeMount(() => {
     <div class="grid">
         <div class="col-12">
             <div class="card">
-                <h5>SERVIÇOS</h5>
+                <h5>Serviços</h5>
                 <Toolbar class="mb-4">
                     <template v-slot:start>
-                        <div class="my-2" v-if="typeTable.value == 1">
+                        <div class="my-2">
                             <Button label="Adicionar" icon="pi pi-plus" class="p-button-primary mr-2" @click="openModalAdd()" />
                         </div>
                     </template>
                     <template v-slot:end>
                         <div class="flex justify-content-between flex-column sm:flex-row mt-2">
-                            <div class="p-inputgroup p-column-filter mb-2 mr-4" style="width: auto; height: 45px">
-                                <span class="p-inputgroup-addon"> Local </span>
-                                <span class="p-inputgroup-addon">
-                                    <Dropdown v-model="typeTable" label="teste" :options="optionsTypesTables" optionLabel="label" @change="changeTable(typeTable.value)" />
-                                </span>
-                            </div>
                             <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" class="p-button-outlined mb-2 mr-2" @click="clearFilter()" />
                         </div>
                     </template>
@@ -178,15 +171,11 @@ onBeforeMount(() => {
                                 <h6 class="line-height-3 m-0">{{ dataViewObservation.observation }}</h6>
                             </Dialog>
                             <div style="position: relative; display: inline-block;">
-                                <Chip v-if="typeTable.value == 1"
+                                <Chip
                                         :label="String(data.order_of_service)"
                                         @click="openModalOS('top', data)"
                                         v-tooltip.top="'Visualizar/Atualizar Orçamento'"
                                         style="cursor: pointer" />
-
-                                <span v-if="typeTable.value == 2">
-                                    {{ data.order_of_service }}
-                                </span>
 
                                 <i v-if="data.observation"
                                     @click="openModalViewObservation('top', data)"
@@ -248,14 +237,12 @@ onBeforeMount(() => {
                     <!-- Telefone -->
                     <Column bodyClass="text-center" field="telephone" header="Contato" :showFilterMatchModes="false" dataType="text" style="width: auto">
                         <template #body="{ data }">
-                            {{ data.telephone }}
+                            <a @click="copyText(data.telephone)" style="cursor: pointer; margin-right: 5px;">
+                                {{ formatTelephone(data.telephone) }}
+                            </a>
                             <a :href="`https://wa.me/${data.telephone}`" target="_blank">
                                 <Tag severity="success" v-tooltip.top="'Abrir no Whatsapp'"><i class="pi pi-whatsapp"></i></Tag>
                             </a>
-                            <a @click="copyText(data.telephone)" style="cursor: pointer">
-                                <Tag class="ml-1 surface-500" v-tooltip.top="'Copiar Telefone'"><i class="pi pi-copy"></i></Tag>
-                            </a>
-
                         </template>
                         <template #filter="{ filterModel }">
                             <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="" />
@@ -263,12 +250,12 @@ onBeforeMount(() => {
                     </Column>
 
                     <!-- Situação -->
-                    <Column bodyClass="text-center" field="status" header="Situação" :showFilterMatchModes="false" style="width: 7vw">
+                    <Column bodyClass="text-center" field="status_id" header="Situação" :showFilterMatchModes="false" style="width: 7vw">
                         <template #body="{ data }">
                             <Tag
                                 @click="openModalEditStatus('top', data)"
-                                :value="getStyleStatusService(data.status)?.description"
-                                :style="{ background: getStyleStatusService(data.status)?.color.hex }"
+                                :value="getStyleStatusService(data.status_id)?.description"
+                                :style="{ background: getStyleStatusService(data.status_id)?.color.hex }"
                                 v-tooltip.top="'Atualizar Situação do Serviço'"
                                 style="cursor: pointer"
                             />
@@ -293,8 +280,8 @@ onBeforeMount(() => {
                         <template #body="{ data }">
                             <Tag
                                 @click="openModalEditPaymentStatus('top', data)"
-                                :value="getStyleStatusPayment(data.payment_status).description"
-                                :style="{ background: getStyleStatusPayment(data.payment_status).color.hex }"
+                                :value="getStyleStatusPayment(data.payment_status_id)?.description"
+                                :style="{ background: getStyleStatusPayment(data.payment_status_id)?.color.hex }"
                                 v-tooltip.top="'Atualizar Situação do Pagamento'"
                                 style="cursor: pointer"
                             />
@@ -322,8 +309,6 @@ onBeforeMount(() => {
                                 <Button icon="pi pi-user-edit" @click="openModalEditInfo('top', data)" class="p-button-rounded p-button-warning" v-tooltip.top="'Ver informações'" />
                                 <Button icon="pi pi-box" @click="openModalServicePart('top', data)" class="ml-1 p-button-rounded p-button-help" v-tooltip.top="'Registrar peça usada'" />
                                 <Button icon="pi pi-share-alt" @click="sendInfoClientsWhats(data)" class="ml-1 p-button-rounded p-button-success" v-tooltip.top="'Enviar informações'" />
-                                <Button v-if="typeTable.value == 1" icon="pi pi-sign-in" @click="confirmUpdateWarehouse($event, data.id)" class="ml-1 p-button-rounded p-button-info" v-tooltip.top="'Enviar ao depósito'" />
-                                <Button v-if="typeTable.value == 2" icon="pi pi-sign-out" @click="confirmUpdateForServices($event, data.id)" class="ml-1 p-button-rounded p-button-info" v-tooltip.top="'Retornar para serviço'" />
                                 <Button @click="confirmDeleteService($event, data)" icon="pi pi-trash" class="ml-1 p-button-rounded p-button-danger" v-tooltip.top="'Excluir'" />
                             </OverlayPanel>
                         </template>

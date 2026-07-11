@@ -4,7 +4,7 @@ import { ref, provide } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { messageAddService, messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient, messageUpdateStatusService, messageUpdateStatusPayment, addMessage } from '../../../utils/messages.js';
-import { optionsTypesTables, socket, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose } from '../../../utils/computeds.js';
+import { socket, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose, formatTelephone} from '../../../utils/computeds.js';
 
 import { API_CONFIG } from '@/config/api.config';
 
@@ -25,7 +25,7 @@ export function useServices() {
     const getStatusService = async () => {
         try {
             const response = await Axios.get(URI_STATUS_SERVICE);
-            statusServiceOptions.value = response.data.map((item) => item.cod.toString());
+            statusServiceOptions.value = response.data.map((item) => item.id.toString());
             statusServiceMapping.value = response.data;
             statusServiceMapping.value.forEach((value) => {
                 if (value.color) value.color = JSON.parse(value.color);
@@ -34,15 +34,18 @@ export function useServices() {
             console.error(error);
         }
     };
-    const getStyleStatusService = (cod) => statusServiceMapping.value.find((item) => item.cod === cod) || null;
+    const getStyleStatusService = (id) => { 
+        return statusServiceMapping.value.find((item) => item.id === id) || null; 
+    };
 
     /* Payment Status */
     const statusPaymentOptions = ref([]);
     const statusPaymentMapping = ref([]);
     const getStatusPayment = async () => {
         try {
+        
             const response = await Axios.get(URI_STATUS_PAYMENT);
-            statusPaymentOptions.value = response.data.map((item) => item.cod.toString());
+            statusPaymentOptions.value = response.data.map((item) => item.id.toString());
             statusPaymentMapping.value = response.data;
             statusPaymentMapping.value.forEach((value) => {
                 if (value.color) value.color = JSON.parse(value.color);
@@ -51,7 +54,9 @@ export function useServices() {
             console.error(error);
         }
     };
-    const getStyleStatusPayment = (cod) => statusPaymentMapping.value.find((item) => item.cod === cod) || null;
+    const getStyleStatusPayment = (id) => {
+        return statusPaymentMapping.value.find((item) => item.id === id) || null;
+    };
 
     /* Products Types */
     const typesProductOptions = ref([]);
@@ -151,8 +156,7 @@ export function useServices() {
         }
     };
 
-    /* Table / Filters */
-    const typeTable = ref({ value: 1, label: 'Oficina' });
+    /* Filters */
     const loading = ref(null);
     const filters = ref(null);
     const initFilters = () => {
@@ -223,15 +227,6 @@ export function useServices() {
         }
     };
 
-    const updateWarehouseForService = async (id) => {
-        try {
-            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/true', { typeTable: typeTable.value.value });
-            toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
-        } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço de volta', life: 5000 });
-            console.error(error);
-        }
-    };
     const confirmUpdateForServices = (event, idService) => {
         confirmPopup.require({
             target: event.target,
@@ -246,7 +241,7 @@ export function useServices() {
     const deleteService = async (idService, cod_order) => {
         loadingOpen();
         try {
-            const response = await Axios.delete(URI_SERVICES + '/' + idService + '/' + cod_order + '/' + typeTable.value.value);
+            const response = await Axios.delete(URI_SERVICES + '/' + idService + '/' + cod_order);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao deletar serviço', life: 5000 });
@@ -269,7 +264,7 @@ export function useServices() {
     const updateWarehouse = async (id) => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/false', { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/false');
             toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço ao depósito', life: 5000 });
@@ -314,8 +309,7 @@ export function useServices() {
                 client: dataEditInfoClient.value.client,
                 telephone: dataEditInfoClient.value.telephone,
                 adress: dataEditInfoClient.value.adress,
-                observation: dataEditInfoClient.value.observation,
-                typeTable: typeTable.value.value
+                observation: dataEditInfoClient.value.observation
             });
             toast.add({ severity: 'success', summary: 'Editado', detail: response.msg, life: 5000 });
             closeModal();
@@ -342,14 +336,20 @@ export function useServices() {
         messageUpdateStatusService.value.length = 0;
         displayModalEditStatus.value = true;
         positionModalEditStatus.value = position;
-        dataEditStatus.value.label = getStyleStatusService(data.status).description;
+        dataEditStatus.value.label = getStyleStatusService(data.status_id).description;
         dataEditStatus.value.id = data.id;
-        dataEditStatus.value.status = data.status;
+        dataEditStatus.value.status = data.status_id;
     };
-    const updateStatus = async () => {
+
+    
+    const MODEL_UPDATE_STATUS_SERVICE = {
+        id: null,
+        status_id: null
+    }
+    const updateStatus = async (updateData) => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/status/' + dataEditStatus.value.id + '/' + dataEditStatus.value.status, { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/status/' + updateData.id, { status_id: updateData.status_id });
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
@@ -363,9 +363,12 @@ export function useServices() {
         if (!dataEditStatus.value.status) {
             addMessage('updateStatusService', 'error', 'Campo obrigatório.');
         } else {
-            await updateStatus();
+            MODEL_UPDATE_STATUS_SERVICE.id = dataEditStatus.value.id;
+            MODEL_UPDATE_STATUS_SERVICE.status_id = dataEditStatus.value.status;
+            await updateStatus(MODEL_UPDATE_STATUS_SERVICE);
         }
     };
+
 
     /* Edit payment status */
     const dataEditPaymentStatus = ref({ id: null, payment_status: null, label: '' });
@@ -375,14 +378,32 @@ export function useServices() {
         messageUpdateStatusPayment.value.length = 0;
         displayModalEditPaymentStatus.value = true;
         positionModalEditPaymentStatus.value = position;
-        dataEditPaymentStatus.value.label = getStyleStatusPayment(data.payment_status).description;
+        dataEditPaymentStatus.value.label = getStyleStatusPayment(data.payment_status_id).description;
         dataEditPaymentStatus.value.id = data.id;
-        dataEditPaymentStatus.value.payment_status = data.payment_status;
+        dataEditPaymentStatus.value.payment_status = data.payment_status_id;
     };
-    const updatePaymentStatus = async () => {
+
+
+    const MODEL_UPDATE_STATUS_PAYMENT = {
+        id: null,
+        payment_status_id: null
+    }
+
+    const validateUpdateStatusPayment = async () => {
+        let selected_payment_status = dataEditPaymentStatus.value.payment_status;
+        if (!selected_payment_status) {
+            addMessage('updateStatusPayment', 'error', 'Campo obrigatório.');
+            return;
+        } 
+            
+        MODEL_UPDATE_STATUS_PAYMENT.payment_status_id = selected_payment_status
+        await updatePaymentStatus(MODEL_UPDATE_STATUS_PAYMENT);
+    };
+
+    const updatePaymentStatus = async (payment_status) => {
         loadingOpen();
         try {
-            const response = await Axios.put(URI_SERVICES + '/status/pagamento/' + dataEditPaymentStatus.value.id + '/' + dataEditPaymentStatus.value.payment_status, { typeTable: typeTable.value.value });
+            const response = await Axios.put(URI_SERVICES + '/status/pagamento/' + payment_status.id, {payment_status_id: payment_status.payment_status_id});
             toast.add({ severity: 'success', summary: 'Atualizado', detail: response.msg, life: 5000 });
             closeModal();
         } catch (error) {
@@ -390,13 +411,6 @@ export function useServices() {
             console.error(error);
         } finally {
             loadingClose();
-        }
-    };
-    const validateUpdateStatusPayment = async () => {
-        if (!dataEditPaymentStatus.value.payment_status) {
-            addMessage('updateStatusPayment', 'error', 'Campo obrigatório.');
-        } else {
-            await updatePaymentStatus();
         }
     };
 
@@ -547,11 +561,6 @@ export function useServices() {
         }
     };
 
-    /* Change table */
-    const changeTable = async (type) => {
-        if (type === 1) await getServices();
-        else if (type === 2) await getServicesWarehouse();
-    };
 
     /* Overlay */
     const idop = ref(null);
@@ -566,7 +575,7 @@ export function useServices() {
     const copyText = async (numTelefone) => {
         try {
             await navigator.clipboard.writeText(numTelefone);
-            toast.add({ severity: 'success', summary: 'Contato copiado', detail: 'Telefone copiado com sucesso!', life: 5000 });
+            toast.add({ severity: 'success', summary: 'Contato copiado', detail: '', life: 5000 });
         } catch (err) {
             console.error("Erro ao copiar: ", err);
         }
@@ -575,9 +584,9 @@ export function useServices() {
 
     return {
         // utils
-        optionsTypesTables, formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator,
+        formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator, formatTelephone,
         // state
-        typeTable, loading, filters, typeOS, typeOsOptions,
+        loading, filters, typeOS, typeOsOptions,
         // messages
         messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient,
         messageUpdateStatusService, messageUpdateStatusPayment, messageAddService,
@@ -601,7 +610,7 @@ export function useServices() {
         // methods - data fetch
         getStatusService, getStatusPayment, getTypesProduct, getServices,
         // methods - actions
-        clearFilter, changeTable, openModalAdd, closeModal,
+        clearFilter, openModalAdd, closeModal,
         openModalOS, validateUpdateEstimateOS, deleteEstimateOS,
         openModalViewObservation, openModalViewAdress,
         openModalEditPaymentStatus, validateUpdateStatusPayment,

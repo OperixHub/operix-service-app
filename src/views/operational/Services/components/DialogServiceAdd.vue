@@ -43,7 +43,7 @@ onMounted(() => {
             <div class="field col-12 md:col-4">
                 <span class="p-float-label">
                     <Dropdown id="addStatus" :options="statusServiceMapping" v-model="dataPostService.status" optionLabel="description" />
-                    <label for="addStatus"><span style="color: red">*</span> Status</label>
+                    <label for="addStatus"><span style="color: red">*</span> Situação</label>
                 </span>
             </div>
             <div class="field col-12 md:col-9">

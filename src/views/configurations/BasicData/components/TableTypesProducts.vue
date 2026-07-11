@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useTypesProducts } from './composables/useTypesProducts';
+import { useTypesProducts } from '../composables/useTypesProducts';
 
 const popup = ref(null);
 
@@ -15,13 +15,13 @@ onMounted(() => {
     <ConfirmPopup />
     <Toast />
     <div class="card">
-        <h5>TIPOS DE PRODUTO</h5>
+        <h5>Tipos de Produtos</h5>
         <Toolbar class="mb-4">
             <template v-slot:start>
                 <form @submit="onSubmit" class="flex flex-column align-items-center gap-2">
                     <div class="grid p-fluid" style="margin: auto">
                         <span class="p-float-label">
-                            <InputText type="text" id="addName" v-model="dataPostTypesProduct.name" style="width: auto" />
+                            <InputText type="text" id="addName" v-model="dataPostTypesProduct.name"  />
                             <label for="addName"><span style="color: red">*</span> Nome </label>
                         </span>
 

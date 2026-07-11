@@ -1,6 +1,6 @@
 import Axios from '@/service/Axios';
 import { ref } from 'vue';
-import { colorTypes, loadingOpen, loadingClose } from '../../../utils/computeds';
+import { loadingOpen, loadingClose } from '../../../utils/computeds';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
@@ -8,14 +8,22 @@ import { useForm } from 'vee-validate';
 import { API_CONFIG } from '@/config/api.config';
 
 export function useStatusServices() {
+    const MODEL_STATUS_SERVICE = {
+        description: null,
+        color: {severity: null, hex: null }
+    };
     const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
+    const COLOR_DEFAULT = '3B82F6';
 
     const toast = useToast();
     const confirmPopup = useConfirm();
     const { handleSubmit } = useForm();
 
     const dataGetStatusServices = ref([]);
-    const dataPostStatusServices = ref([]);
+    const dataPostStatusServices = ref({
+        description: '',
+        color: '3B82F6'
+    });
 
     const getStatusServices = async () => {
         loadingOpen();
@@ -60,17 +68,18 @@ export function useStatusServices() {
         });
     };
 
-    const clearFields = () => {
-        dataPostStatusServices.value = [];
+    const clearFields = () => dataPostStatusServices.value = {
+        description: '',
+        color: COLOR_DEFAULT
     };
 
-    const postStatusServices = async () => {
+    const postStatusServices = async (statusService) => {
         loadingOpen();
         try {
             const response = await Axios.post(URI_STATUS_SERVICE, {
-                description: dataPostStatusServices.value.description,
-                cod: dataPostStatusServices.value.cod,
-                color: JSON.stringify(dataPostStatusServices.value.color)
+                description: statusService.description,
+                cod: statusService.cod,
+                color: JSON.stringify(statusService.color)
             });
             toast.add({ severity: 'success', summary: 'Adicionado', detail: response.msg, life: 5000 });
             clearFields();
@@ -83,15 +92,16 @@ export function useStatusServices() {
     };
 
     const onSubmit = handleSubmit(async () => {
-        if (dataPostStatusServices.value.description && dataPostStatusServices.value.cod && dataPostStatusServices.value.color) {
-            await postStatusServices();
+        if (dataPostStatusServices.value.description && dataPostStatusServices.value.color) {
+            MODEL_STATUS_SERVICE.description = dataPostStatusServices.value.description;
+            MODEL_STATUS_SERVICE.color.hex = '#' + dataPostStatusServices.value.color;
+            await postStatusServices(MODEL_STATUS_SERVICE);
         } else {
             toast.add({ severity: 'error', summary: 'Erro', detail: 'Preencha todos os campos!', life: 5000 });
         }
     });
 
     return {
-        colorTypes,
         dataGetStatusServices,
         dataPostStatusServices,
         getStatusServices,

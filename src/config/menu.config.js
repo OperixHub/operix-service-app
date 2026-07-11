@@ -16,18 +16,6 @@ export const MENU_SECTIONS = [
                         icon: 'pi pi-fw pi-ticket',
                         to: '/operacional/servicos',
                         permission: 'operational.services.access'
-                    },
-                    {
-                        label: 'Situações',
-                        icon: 'pi pi-fw pi-sitemap',
-                        to: '/operacional/situacoes',
-                        permission: 'operational.status.access'
-                    },
-                    {
-                        label: 'Tipos de Produto',
-                        icon: 'pi pi-fw pi-box',
-                        to: '/operacional/tipos-de-produto',
-                        permission: 'operational.types-products.access'
                     }
                 ]
             },
@@ -50,14 +38,20 @@ export const MENU_SECTIONS = [
                 ]
             },
             {
-                label: 'Definições',
+                label: 'Configurações',
                 icon: 'pi pi-fw pi-cog',
                 items: [
                     {
                         label: 'Usuários',
                         icon: 'pi pi-fw pi-user',
-                        to: '/definicoes/usuarios',
+                        to: '/configuracoes/usuarios',
                         permission: 'organization.users.access'
+                    },
+                    {
+                        label: 'Dados Básicos',
+                        icon: 'pi pi-fw pi-sitemap',
+                        to: '/configuracoes/dados-basicos',
+                        permission: 'operational.status.access'
                     }
                 ]
             }

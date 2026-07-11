@@ -23,21 +23,20 @@ const disconnectSocket = () => {
     }
 };
 
-/* Color Palette */
-const colorTypes = ref([
-    { severity: null, hex: '#757575' },
-    { severity: null, hex: '#8F48D2' },
-    { severity: 'info', hex: '#3B82F6' },
-    { severity: 'warning', hex: '#F59E0B' },
-    { severity: 'danger', hex: '#EF4444' },
-    { severity: 'success', hex: '#22C55E' }
-]);
+export const onlyNumbers = (value = '') =>
+    value.replace(/\D/g, '');
 
-/* Tables Types */
-const optionsTypesTables = ref([
-    { value: 1, label: 'Oficina' },
-    { value: 2, label: 'Depósito' }
-]);
+export const formatTelephone = (value = '') => {
+    const phone = onlyNumbers(value);
+
+    if (phone.length === 11)
+        return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+
+    if (phone.length === 10)
+        return phone.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+
+    return value;
+};
 
 /* Formated Data D/M/A */
 const formatData = (dataString) => {
@@ -122,4 +121,4 @@ const loadingClose = () => {
     Swal.close();
 };
 
-export { optionsTypesTables, socket, connectSocket, disconnectSocket, colorTypes, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose };
+export { socket, connectSocket, disconnectSocket, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose };

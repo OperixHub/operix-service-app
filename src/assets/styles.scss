@@ -1,7 +1,20 @@
 $gutter: 1rem;
-@import '@/assets/layout/layout.scss';
-@import 'primeflex/primeflex.scss';
-@import 'primeicons/primeicons.css';
+
+:root {
+    --font-family: 'Inter', sans-serif;
+}
+
+html {
+    font-family: var(--font-family);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-family);
+}
 
 .page-card,
 .card {

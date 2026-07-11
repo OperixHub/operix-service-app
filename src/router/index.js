@@ -19,11 +19,6 @@ const router = createRouter({
             component: () => import('@/views/auth/AuthCallback.vue')
         },
         {
-            path: '/register',
-            name: 'register',
-            component: () => import('@/views/auth/Register.vue')
-        },
-        {
             path: '/verificar-email',
             name: 'verify-email',
             component: () => import('@/views/auth/VerifyEmail.vue')
@@ -62,27 +57,21 @@ const router = createRouter({
                     component: () => import('@/views/operational/Services/Services.vue')
                 },
                 {
-                    path: '/definicoes/usuarios',
-                    name: 'definitions-users',
+                    path: '/configuracoes/usuarios',
+                    name: 'configurations-users',
                     meta: { permission: 'organization.users.access' },
-                    component: () => import('@/views/definitions/Users/Users.vue')
+                    component: () => import('@/views/configurations/Users/Users.vue')
                 },
                 {
-                    path: '/definicoes/configuracoes',
-                    name: 'definitions-settings',
-                    component: () => import('@/views/definitions/Settings/Settings.vue')
+                    path: '/configuracoes/configuracoes',
+                    name: 'configurations-settings',
+                    component: () => import('@/views/configurations/Settings/Settings.vue')
                 },
                 {
-                    path: '/operacional/situacoes',
-                    name: 'operational-status',
-                    meta: { permission: 'operational.status.access' },
-                    component: () => import('@/views/operational/Status/Status.vue')
-                },
-                {
-                    path: '/operacional/tipos-de-produto',
-                    name: 'operational-types-products',
-                    meta: { permission: 'operational.types-products.access' },
-                    component: () => import('@/views/operational/TypesProducts/TypesProducts.vue')
+                    path: '/configuracoes/dados-basicos',
+                    name: 'configurations-basic-data',
+                    meta: { permission: 'configurations.access' },
+                    component: () => import('@/views/configurations/BasicData/BasicData.vue')
                 },
                 {
                     path: '/inventario/vendas',

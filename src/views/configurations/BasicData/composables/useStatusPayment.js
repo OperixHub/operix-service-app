@@ -1,6 +1,6 @@
 import Axios from '@/service/Axios';
 import { ref } from 'vue';
-import { colorTypes, loadingOpen, loadingClose } from '../../../utils/computeds';
+import { loadingOpen, loadingClose } from '../../../utils/computeds';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useForm } from 'vee-validate';
@@ -8,14 +8,25 @@ import { useForm } from 'vee-validate';
 import { API_CONFIG } from '@/config/api.config';
 
 export function useStatusPayment() {
+    const MODEL_STATUS_PAYMENT = {
+        description: null,
+        color: {severity: null, hex: null },
+        default: false
+    };
+    const COLOR_DEFAULT = '3B82F6';
     const URI_STATUS_PAYMENT = API_CONFIG.OPERATIONAL.STATUS_PAYMENT;
+    const ISSET_STATUS_PAYMENT_DEFAULT = ref(false);
 
     const toast = useToast();
     const confirmPopup = useConfirm();
     const { handleSubmit } = useForm();
 
     const dataGetStatusPayment = ref([]);
-    const dataPostStatusPayment = ref([]);
+    const dataPostStatusPayment = ref({
+        description: '',
+        color: COLOR_DEFAULT,
+        default: false
+    });
 
     const getStatusPayment = async () => {
         loadingOpen();
@@ -25,6 +36,9 @@ export function useStatusPayment() {
             dataGetStatusPayment.value.forEach((value) => {
                 if (value.color) {
                     value.color = JSON.parse(value.color);
+                }
+                if (value.is_default === true) {
+                    ISSET_STATUS_PAYMENT_DEFAULT.value = true;
                 }
             });
         } catch (error) {
@@ -60,17 +74,20 @@ export function useStatusPayment() {
         });
     };
 
-    const clearFields = () => {
-        dataPostStatusPayment.value = [];
+    const clearFields = () => dataPostStatusPayment.value = {
+        description: '',
+        color: COLOR_DEFAULT,
+        default: false
     };
 
-    const postStatusPayment = async () => {
+
+    const postStatusPayment = async (statusPayment) => {
         loadingOpen();
         try {
             const response = await Axios.post(URI_STATUS_PAYMENT, {
-                description: dataPostStatusPayment.value.description,
-                cod: dataPostStatusPayment.value.cod,
-                color: JSON.stringify(dataPostStatusPayment.value.color)
+                description: statusPayment.description,
+                color: JSON.stringify(statusPayment.color),
+                default: statusPayment.default
             });
             toast.add({ severity: 'success', summary: 'Adicionado', detail: response.msg, life: 5000 });
             clearFields();
@@ -83,19 +100,22 @@ export function useStatusPayment() {
     };
 
     const onSubmit = handleSubmit(async () => {
-        if (dataPostStatusPayment.value.description && dataPostStatusPayment.value.cod && dataPostStatusPayment.value.color) {
-            await postStatusPayment();
+        if (dataPostStatusPayment.value.description && dataPostStatusPayment.value.color) {
+            MODEL_STATUS_PAYMENT.description = dataPostStatusPayment.value.description;
+            MODEL_STATUS_PAYMENT.color.hex = `#${dataPostStatusPayment.value.color}`;
+            MODEL_STATUS_PAYMENT.default = dataPostStatusPayment.value.default == true;
+            await postStatusPayment(MODEL_STATUS_PAYMENT);
         } else {
             toast.add({ severity: 'error', summary: 'Erro', detail: 'Preencha todos os campos!', life: 5000 });
         }
     });
 
     return {
-        colorTypes,
         dataGetStatusPayment,
         dataPostStatusPayment,
         getStatusPayment,
         confirmDeleteStatusPayment,
-        onSubmit
+        onSubmit, 
+        ISSET_STATUS_PAYMENT_DEFAULT
     };
 }

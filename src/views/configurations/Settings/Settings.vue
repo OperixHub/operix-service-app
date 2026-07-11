@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import Axios from '@/service/Axios';
 import { API_CONFIG } from '@/config/api.config';
-import { getAccessContext, getCurrentUser, updateCurrentUser } from '@/service/AuthSession';
+import { getCurrentUser } from '@/service/AuthSession';
 
 const toast = useToast();
 const loading = ref(false);
@@ -15,7 +15,7 @@ const moduleLabels = {
     dashboard: 'Dashboard',
     operational: 'Operacional',
     inventory: 'Inventário',
-    organization: 'Organização',
+    configurations: 'Configurações',
     notifications: 'Notificações'
 };
 
@@ -29,7 +29,7 @@ const loadSettings = async () => {
         ]);
         profile.value = profileResponse.data || profileResponse || getCurrentUser() || {};
         company.value = companyResponse.data || companyResponse || {};
-        system.value = systemResponse.data || systemResponse || { access: getAccessContext() };
+        system.value = systemResponse.data || systemResponse || {};
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao carregar configurações.', life: 5000 });
     } finally {
@@ -47,7 +47,6 @@ const saveProfile = async () => {
             preferences: profile.value.preferences || {}
         });
         const payload = response.data || response;
-        updateCurrentUser(payload);
         toast.add({ severity: 'success', summary: 'Salvo', detail: 'Perfil atualizado.', life: 4000 });
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao salvar perfil.', life: 5000 });

@@ -101,6 +101,13 @@ import TriStateCheckbox from 'primevue/tristatecheckbox';
 import VirtualScroller from 'primevue/virtualscroller';
 
 import '@/assets/styles.scss';
+import '@/assets/layout/layout.scss';
+import 'primeflex/primeflex.css';
+import 'primeicons/primeicons.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
 
 const app = createApp(App);
 
