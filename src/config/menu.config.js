@@ -2,43 +2,31 @@ export const MENU_SECTIONS = [
     {
         items: [
             {
-                label: 'Início',
-                icon: 'pi pi-fw pi-home',
+                label: 'Monitor',
+                icon: 'pi pi-fw pi-desktop',
                 to: '/dashboard',
                 permission: 'dashboard.access'
             },
             {
-                label: 'Operacional',
+                label: 'Serviços',
                 icon: 'pi pi-fw pi-wrench',
-                items: [
-                    {
-                        label: 'Serviços',
-                        icon: 'pi pi-fw pi-ticket',
-                        to: '/operacional/servicos',
-                        permission: 'operational.services.access'
-                    }
-                ]
+                to: '/operacional/servicos',
+                permission: 'services.access'
             },
             {
-                label: 'Inventário',
+                label: 'Vendas',
+                icon: 'pi pi-fw pi-shopping-cart',
+                to: '/inventario/vendas',
+                permission: 'vendas.access'
+            },
+            {
+                label: 'Estoque',
                 icon: 'pi pi-fw pi-box',
-                items: [
-                    {
-                        label: 'Vendas',
-                        icon: 'pi pi-fw pi-shopping-cart',
-                        to: '/inventario/vendas',
-                        permission: 'inventory.sales.access'
-                    },
-                    {
-                        label: 'Garantias',
-                        icon: 'pi pi-fw pi-shield',
-                        to: '/inventario/garantias',
-                        permission: 'inventory.warranties.access'
-                    }
-                ]
+                to: '/inventario/estoque',
+                permission: 'estoque.access'
             },
             {
-                label: 'Configurações',
+                label: 'Definições',
                 icon: 'pi pi-fw pi-cog',
                 items: [
                     {

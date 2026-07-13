@@ -11,15 +11,22 @@ onMounted(() => {
 });
 </script>
 <template>
-    <Dialog header="Adicionar Serviço" v-model:visible="displayModalAdd" position="top" :breakpoints="{ '960px': '85vw', '640px': '100vw' }" :style="{ width: 'clamp(22rem, 70vw, 58rem)' }" :modal="true">
+    <Dialog 
+        header="Adicionar Serviço" 
+        v-model:visible="displayModalAdd" 
+        position="top" 
+        :breakpoints="{ '960px': '85vw', '640px': '100vw' }" 
+        :style="{ width: 'clamp(22rem, 70vw, 58rem)' }" 
+        :modal="true"  
+    >
         <transition-group tag="div">
             <Message v-for="msg of messageAddService" :severity="msg.severity" :key="msg.content">{{ msg.content }}</Message>
         </transition-group>
-        <div class="grid p-fluid mt-1">
+        <div class="grid p-fluid mt-3">
             <div class="field col-12 md:col-4">
                 <span class="p-float-label">
-                    <Dropdown id="addProduct" :options="typesProductOptions" v-model="dataPostService.product" />
-                    <label for="addProduct"><span style="color: red">*</span> Produto</label>
+                    <Dropdown v-model="dataPostService.product" :options="typesProductOptions" aria-labelledby="addProductLabel"/>
+                    <label id="addProductLabel"><span class="text-red-500">*</span> Produto</label>
                 </span>
             </div>
             <div class="field col-12 md:col-4">
@@ -30,7 +37,7 @@ onMounted(() => {
             </div>
             <div class="field col-12 md:col-4">
                 <span class="p-float-label">
-                    <InputText t id="addTelephone" :maxlength="11" :inputStyle="{ 'text-transform': 'none' }" v-model="dataPostService.telephone" />
+                    <InputText id="addTelephone" :maxlength="11" :inputStyle="{ 'text-transform': 'none' }" v-model="dataPostService.telephone" />
                     <label for="addTelephone"><span style="color: red">*</span> Telefone</label>
                 </span>
             </div>
@@ -42,19 +49,20 @@ onMounted(() => {
             </div>
             <div class="field col-12 md:col-4">
                 <span class="p-float-label">
-                    <Dropdown id="addStatus" :options="statusServiceMapping" v-model="dataPostService.status" optionLabel="description" />
-                    <label for="addStatus"><span style="color: red">*</span> Situação</label>
+                    <Dropdown inputId="addStatus" :options="statusServiceMapping" v-model="dataPostService.status" aria-labelledby="addStatusLabel" optionLabel="description" />
+                    <label id="addStatusLabel"><span style="color: red">*</span> Situação</label>
                 </span>
             </div>
             <div class="field col-12 md:col-9">
                 <span class="p-float-label">
-                    <Textarea inputId="addObservation" rows="1" cols="10" v-model="dataPostService.observation" />
+                    <Textarea id="addObservation" rows="1" cols="10" v-model="dataPostService.observation" />
                     <label for="addObservation">Observação</label>
                 </span>
             </div>
             <div class="field col-12 md:col-3">
                 <span class="p-float-label">
-                    <InputText type="date" v-model="dataPostService.created_at" />
+                    <InputText type="date" id="addDate" v-model="dataPostService.created_at" />
+                    <label for="addDate" ><span style="color: red">*</span> Data</label>
                 </span>
             </div>
         </div>

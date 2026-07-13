@@ -36,7 +36,7 @@ const paymentStatus = computed({
         <transition-group tag="div">
             <Message v-for="msg of messages" :severity="msg.severity" :key="msg.content">{{ msg.content }}</Message>
         </transition-group>
-        <div class="grid p-fluid mt-1">
+        <div class="grid p-fluid mt-3">
             <div class="field col-12 md:col-12">
                 <span class="p-float-label">
                     <Dropdown id="editPaymentStatus" v-model="paymentStatus" :options="statusOptions" class="p-column-filter" :showClear="true" optionLabel="label">

@@ -36,7 +36,7 @@ onMounted(() => {
             </template>
         </Toolbar>
         <DataTable :value="dataGetStatusPayment" :rowHover="true" :rows="10" showGridlines>
-            <Column bodyClass="text-center" field="description" header="Descrição">
+            <Column bodyClass="text-center" field="description" header="Opções">
                 <template #body="{ data }">
                     <Tag :value="data.description" :style="{ background: data.color.hex }" />
                     <i v-if="data.is_default === true" class="pi pi-check-square"></i>

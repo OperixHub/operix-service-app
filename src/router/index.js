@@ -74,6 +74,12 @@ const router = createRouter({
                     component: () => import('@/views/configurations/BasicData/BasicData.vue')
                 },
                 {
+                    path: '/inventario/estoque',
+                    name: 'inventory-stock',
+                    meta: { permission: 'inventory.sales.access' },
+                    component: () => import('@/views/inventory/Stock/Stock.vue')
+                },
+                {
                     path: '/inventario/vendas',
                     name: 'inventory-sales',
                     meta: { permission: 'inventory.sales.access' },
