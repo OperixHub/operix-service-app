@@ -48,7 +48,7 @@ const router = createRouter({
                     path: '/painel',
                     name: 'painel',
                     meta: { permission: 'painel.access' },
-                    component: () => import('@/views/dashboards/Dashboard.vue')
+                    component: () => import('@/views/dashboard/Dashboard.vue')
                 },
                 {
                     path: '/servicos',
