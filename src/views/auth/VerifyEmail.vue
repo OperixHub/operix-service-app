@@ -1,7 +1,7 @@
 <script setup>
-import Axios, { loadCurrentSession } from '@/service/Axios';
-import { API_CONFIG } from '@/config/api.config';
-import { setSession } from '@/service/AuthSession';
+import Axios, { loadCurrentSession } from '@/services/axios';
+import { API_CONFIG } from '@/services/api';
+import { setSession } from '@/services/authSession';
 import { connectSocket } from '@/views/utils/computeds';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -28,7 +28,7 @@ onMounted(async () => {
         const session = await loadCurrentSession();
         connectSocket();
         toast.add({ severity: 'success', summary: 'E-mail verificado', detail: 'Complete seu onboarding para começar.', life: 5000 });
-        router.replace(session.user?.onboarding_required ? '/onboarding' : '/dashboard');
+        router.replace(session.user?.onboarding_required ? '/integracao' : '/painel');
     } catch (error) {
         errorMessage.value = error.response?.data?.msg || 'Não foi possível verificar seu e-mail.';
     } finally {

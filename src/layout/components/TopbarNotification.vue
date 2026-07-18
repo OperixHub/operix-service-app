@@ -1,12 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import Axios from '../../service/Axios';
-import { formatData } from '../../views/utils/computeds.js';
+import Axios from '@/services/axios';
+import { formatData } from '@views/utils/computeds.js';
 
-import { API_CONFIG } from '../../config/api.config';
+import { API_CONFIG } from '@/services/api';
 
-const URI_STATUS_SERVICE = API_CONFIG.OPERATIONAL.STATUS_SERVICE;
-const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS.SYSTEM_INFO;
+const URI_STATUS_SERVICE = API_CONFIG.STATUS_SERVICE;
+const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS;
 
 const statusServiceOptions = ref([]);
 const statusServiceMapping = ref([]);

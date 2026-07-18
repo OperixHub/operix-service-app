@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
-import { sessionState } from '@/service/AuthSession';
-import { buildMenu } from '@/config/menu.config';
+import { sessionState } from '@/services/authSession';
+import { buildMenu } from '@/layout/composables/menu';
 
 const model = computed(() => buildMenu(sessionState.currentUser.value, sessionState.currentPermissions.value));
 </script>

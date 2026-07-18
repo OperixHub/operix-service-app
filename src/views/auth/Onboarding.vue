@@ -1,8 +1,8 @@
 <script setup>
-import Axios, { refreshAccessToken, loadCurrentSession } from '@/service/Axios';
-import { API_CONFIG } from '@/config/api.config';
-import { getFirstAllowedMenuPath } from '@/config/menu.config';
-import { getCurrentPermissions, getCurrentUser } from '@/service/AuthSession';
+import Axios, { refreshAccessToken, loadCurrentSession } from '@/services/axios';
+import { API_CONFIG } from '@/services/api';
+import { getFirstAllowedMenuPath } from '@/layout/composables/menu';
+import { getCurrentPermissions, getCurrentUser } from '@/services/authSession';
 import { loadingClose, loadingOpen } from '@/views/utils/computeds';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';

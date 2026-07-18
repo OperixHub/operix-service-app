@@ -1,14 +1,14 @@
-import Axios, { loadCurrentSession } from '@/service/Axios';
+import Axios, { loadCurrentSession } from '@/services/axios';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useLayout } from '@/layout/composables/layout';
 import { loadingOpen, loadingClose } from '../../utils/computeds';
 import { messageLogin, messageRegister, addMessage } from '../../utils/messages.js';
-import { API_CONFIG } from '@/config/api.config';
-import { setSession } from '@/service/AuthSession';
+import { API_CONFIG } from '@/services/api';
+import { setSession } from '@/services/authSession';
 import { connectSocket } from '@/views/utils/computeds';
-import { getFirstAllowedMenuPath } from '@/config/menu.config';
+import { getFirstAllowedMenuPath } from '@/layout/composables/menu';
 import { isEmail } from 'validator';
 
 const base64UrlEncode = (buffer) => {
@@ -92,7 +92,7 @@ export function useLogin() {
                 setSession(payload);
                 await loadCurrentSession();
                 connectSocket();
-                router.push('/onboarding');
+                router.push('/integracao');
             } else {
                 toast.add({ severity: 'error', summary: 'Erro no Cadastro', detail: 'Resposta inválida do servidor.', life: 5000 });
             }

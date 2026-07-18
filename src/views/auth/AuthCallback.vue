@@ -2,11 +2,11 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import Axios, { loadCurrentSession } from '@/service/Axios';
-import { API_CONFIG } from '@/config/api.config';
-import { setSession } from '@/service/AuthSession';
+import Axios, { loadCurrentSession } from '@/services/axios';
+import { API_CONFIG } from '@/services/api';
+import { setSession } from '@/services/authSession';
 import { connectSocket } from '@/views/utils/computeds';
-import { getFirstAllowedMenuPath } from '@/config/menu.config';
+import { getFirstAllowedMenuPath } from '@/layout/composables/menu';
 
 const router = useRouter();
 const toast = useToast();
@@ -41,9 +41,8 @@ onMounted(async () => {
         sessionStorage.removeItem('operix_oauth_verifier');
         sessionStorage.removeItem('operix_oauth_redirect_uri');
 
-        // Novo usuário Google → redireciona para onboarding
         if (payload.is_new_user) {
-            router.replace('/onboarding');
+            router.replace('/integracao');
         } else {
             router.replace(getFirstAllowedMenuPath(snapshot.user, snapshot.permissions));
         }

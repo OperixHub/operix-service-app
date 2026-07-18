@@ -3,9 +3,9 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import TopbarNotification from './components/TopbarNotification.vue';
 import { useRouter } from 'vue-router';
-import Axios from '@/service/Axios';
-import { API_CONFIG } from '@/config/api.config';
-import { clearSession } from '@/service/AuthSession';
+import Axios from '@/services/axios';
+import { API_CONFIG } from '@/services/api';
+import { clearSession } from '@/services/authSession';
 import { disconnectSocket } from '@/views/utils/computeds';
 const router = useRouter();
 

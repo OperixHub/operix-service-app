@@ -1,6 +1,6 @@
 <script setup>
-import Axios from '@/service/Axios';
-import { API_CONFIG } from '@/config/api.config';
+import Axios from '@/services/axios';
+import { API_CONFIG } from '@/services/api';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

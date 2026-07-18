@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import Swal from 'sweetalert2';
 import { io } from 'socket.io-client';
-import { getAccessToken } from '@/service/AuthSession';
+import { getAccessToken } from '@/services/authSession';
 
 const socket = io(import.meta.env.VITE_BASE_URL_API.replace('/api', ''), {
     autoConnect: false,
