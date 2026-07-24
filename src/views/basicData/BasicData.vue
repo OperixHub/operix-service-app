@@ -2,19 +2,20 @@
 import TableStatusPayment from './components/TableStatusPayment.vue';
 import TableStatusServices from './components/TableStatusServices.vue';
 import TableTypesProducts from './components/TableTypesProducts.vue';
+import { hasPermission } from '@/services/authSession';
 </script>
 
 <template>
     <ConfirmPopup />
     <Toast />
     <div class="grid p-fluid">
-        <div class="field col-12 md:col-4">
+        <div v-if="hasPermission('tipos-produto.acesso')" class="field col-12 md:col-4">
             <TableTypesProducts />
         </div>
-        <div class="field col-12 md:col-4">
+        <div v-if="hasPermission('status-servico.acesso')" class="field col-12 md:col-4">
             <TableStatusServices />
         </div>
-        <div class="field col-12 md:col-4">
+        <div v-if="hasPermission('status-pagamento.acesso')" class="field col-12 md:col-4">
             <TableStatusPayment />
         </div>
     </div>

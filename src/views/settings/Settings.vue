@@ -13,10 +13,20 @@ const system = ref({});
 
 const moduleLabels = {
     painel: 'Painel',
-    operational: 'Operacional',
-    inventory: 'Inventário',
-    configurations: 'Configurações',
-    notifications: 'Notificações'
+    servicos: 'Serviços',
+    'status-servico': 'Status de Serviço',
+    'status-pagamento': 'Status de Pagamento',
+    'tipos-produto': 'Tipos de Produto',
+    estoque: 'Estoque',
+    vendas: 'Vendas',
+    organizacao: 'Organização',
+    notificacoes: 'Notificações'
+};
+
+const copyAccessCode = async () => {
+    if (!company.value.access_code) return;
+    await navigator.clipboard.writeText(company.value.access_code);
+    toast.add({ severity: 'success', summary: 'Copiado', detail: 'Código da empresa copiado.', life: 2500 });
 };
 
 const loadSettings = async () => {
@@ -40,13 +50,12 @@ const loadSettings = async () => {
 const saveProfile = async () => {
     loading.value = true;
     try {
-        const response = await Axios.patch(API_CONFIG.PROFILE_ME, {
+        await Axios.patch(API_CONFIG.PROFILE_ME, {
             name: profile.value.name,
             avatar_url: profile.value.avatar_url || null,
             role_title: profile.value.role_title || null,
             preferences: profile.value.preferences || {}
         });
-        const payload = response.data || response;
         toast.add({ severity: 'success', summary: 'Salvo', detail: 'Perfil atualizado.', life: 4000 });
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao salvar perfil.', life: 5000 });
@@ -120,6 +129,13 @@ onMounted(loadSettings);
                     <div class="field col-12 md:col-6">
                         <label for="companyCnpj" class="block text-900 font-medium mb-2">CNPJ</label>
                         <InputText id="companyCnpj" v-model="company.cnpj" />
+                    </div>
+                    <div class="field col-12 md:col-6">
+                        <label for="companyAccessCode" class="block text-900 font-medium mb-2">Código para acesso interno</label>
+                        <div class="p-inputgroup">
+                            <InputText id="companyAccessCode" :modelValue="company.access_code || ''" readonly />
+                            <Button icon="pi pi-copy" v-tooltip.top="'Copiar código'" @click="copyAccessCode" />
+                        </div>
                     </div>
                     <div class="field col-12">
                         <label for="companyLogo" class="block text-900 font-medium mb-2">Logo URL</label>

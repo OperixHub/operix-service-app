@@ -12,21 +12,58 @@ export function useUserForm(getUsers) {
         modules: []
     });
     const displayModalAdd = ref(false);
+    const companyAccessCode = ref('');
     const moduleOptions = [
         {
-            label: 'Operacional',
-            value: 'operational',
-            description: 'Serviços, situações e tipos de produto'
+            label: 'Serviços',
+            value: 'servicos',
+            description: 'Atendimentos e ordens de serviço'
+        },
+        {
+            label: 'Status de Serviço',
+            value: 'status-servico',
+            description: 'Cadastro de status do atendimento'
+        },
+        {
+            label: 'Status de Pagamento',
+            value: 'status-pagamento',
+            description: 'Cadastro de status financeiros'
+        },
+        {
+            label: 'Tipos de Produto',
+            value: 'tipos-produto',
+            description: 'Cadastro dos produtos atendidos'
+        },
+        {
+            label: 'Estoque',
+            value: 'estoque',
+            description: 'Itens e saldos do estoque'
+        },
+        {
+            label: 'Vendas',
+            value: 'vendas',
+            description: 'Registro de vendas'
         },
         {
             label: 'Organização',
-            value: 'organization',
+            value: 'organizacao',
             description: 'Gestão de usuários'
+        },
+        {
+            label: 'Notificações',
+            value: 'notificacoes',
+            description: 'Alertas da operação'
         }
     ];
 
-    const openModalAdd = () => {
+    const openModalAdd = async () => {
         messageAddUser.value.length = 0;
+        try {
+            const response = await Axios.get(API_CONFIG.PROFILE_COMPANY);
+            companyAccessCode.value = response.data?.access_code || response.access_code || '';
+        } catch {
+            companyAccessCode.value = '';
+        }
         displayModalAdd.value = true;
     };
 
@@ -46,7 +83,6 @@ export function useUserForm(getUsers) {
             await Axios.post(API_CONFIG.USERS, {
                 name: dataPostUser.value.name || dataPostUser.value.username,
                 username: dataPostUser.value.username,
-                email: dataPostUser.value.email,
                 password: dataPostUser.value.password,
                 admin: Boolean(dataPostUser.value.admin),
                 modules: dataPostUser.value.admin ? [] : dataPostUser.value.modules
@@ -63,8 +99,12 @@ export function useUserForm(getUsers) {
     };
 
     const validatePostUser = async () => {
-        if (!dataPostUser.value.name || !dataPostUser.value.username || !dataPostUser.value.email || !dataPostUser.value.password || !dataPostUser.value.confirmPassword) {
+        if (!dataPostUser.value.name || !dataPostUser.value.username || !dataPostUser.value.password || !dataPostUser.value.confirmPassword) {
             addMessage('addUser', 'error', 'Preencha todos os campos obrigatórios.');
+        } else if (!/^[A-Za-z0-9._-]{3,50}$/.test(dataPostUser.value.username)) {
+            addMessage('addUser', 'error', 'O usuário deve ter de 3 a 50 caracteres e usar apenas letras, números, ponto, hífen ou sublinhado.');
+        } else if (dataPostUser.value.password.length < 8) {
+            addMessage('addUser', 'error', 'A senha deve ter no mínimo 8 caracteres.');
         } else if (dataPostUser.value.password !== dataPostUser.value.confirmPassword) {
             addMessage('addUser', 'error', 'Senhas incoerentes.');
         } else if (!dataPostUser.value.admin && !dataPostUser.value.modules?.length) {
@@ -76,6 +116,7 @@ export function useUserForm(getUsers) {
 
     return {
         dataPostUser,
+        companyAccessCode,
         moduleOptions,
         displayModalAdd,
         openModalAdd,

@@ -191,10 +191,8 @@ const completePrice = computed({
     justify-content: space-between;
     gap: 1rem;
     padding: 1.25rem 1.25rem 1rem;
-    border-radius: 1.25rem;
-    background:
-        linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(16, 185, 129, 0.08)),
-        var(--surface-card);
+    border-radius: 8px;
+    background: var(--surface-card);
     border: 1px solid var(--surface-border);
 }
 
@@ -247,8 +245,8 @@ const completePrice = computed({
 
 .estimate-form-card {
     padding: 1rem;
-    border-radius: 1rem;
-    background: var(--surface-50);
+    border-radius: 8px;
+    background: var(--surface-section);
     border: 1px solid var(--surface-border);
 }
 

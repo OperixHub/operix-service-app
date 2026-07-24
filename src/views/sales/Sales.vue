@@ -13,7 +13,7 @@ const form = ref({
     customer_document: '',
     customer_phone: '',
     notes: '',
-    items: [{ stock_id: null, quantity: 1, unit_price: null, warranty_months: 0, serial_number: '' }]
+    items: [{ stock_id: null, quantity: 1, unit_price: null, serial_number: '' }]
 });
 
 const stockOptions = computed(() =>
@@ -40,7 +40,7 @@ const onStockChange = (item) => {
 };
 
 const addItem = () => {
-    form.value.items.push({ stock_id: null, quantity: 1, unit_price: null, warranty_months: 0, serial_number: '' });
+    form.value.items.push({ stock_id: null, quantity: 1, unit_price: null, serial_number: '' });
 };
 
 const removeItem = (index) => {
@@ -55,7 +55,7 @@ const resetForm = () => {
         customer_document: '',
         customer_phone: '',
         notes: '',
-        items: [{ stock_id: null, quantity: 1, unit_price: null, warranty_months: 0, serial_number: '' }]
+        items: [{ stock_id: null, quantity: 1, unit_price: null, serial_number: '' }]
     };
 };
 
@@ -68,7 +68,7 @@ const submit = async () => {
     loading.value = true;
     try {
         await Axios.post(API_CONFIG.SALES, form.value);
-        toast.add({ severity: 'success', summary: 'Venda registrada', detail: 'Estoque e garantias foram atualizados.', life: 5000 });
+        toast.add({ severity: 'success', summary: 'Venda registrada', detail: 'Estoque atualizado com sucesso.', life: 5000 });
         resetForm();
         await loadData();
     } catch (error) {
@@ -83,11 +83,11 @@ onMounted(loadData);
 
 <template>
     <Toast />
-    <div class="grid inventory-page">
+    <div class="grid sales-page">
         <div class="col-12 xl:col-5">
             <div class="card">
                 <h2 class="m-0 mb-2">Nova venda</h2>
-                <p class="text-600 mt-0 mb-4">Registre peças vendidas avulsas. Itens com garantia geram registros automaticamente.</p>
+                <p class="text-600 mt-0 mb-4">Registre peças vendidas avulsas e atualize o saldo do estoque.</p>
 
                 <label class="block font-medium mb-2">Cliente</label>
                 <InputText v-model="form.customer_name" class="w-full mb-3" placeholder="Nome do cliente" />
@@ -113,19 +113,15 @@ onMounted(loadData);
                     <Dropdown v-model="item.stock_id" :options="stockOptions" optionLabel="label" optionValue="value" filter class="w-full mb-3" placeholder="Selecione a peça" @change="onStockChange(item)" />
 
                     <div class="formgrid grid">
-                        <div class="field col-6 md:col-3">
+                        <div class="field col-12 md:col-4">
                             <label class="block font-medium mb-2">Qtd.</label>
                             <InputNumber v-model="item.quantity" showButtons :min="1" class="w-full" />
                         </div>
-                        <div class="field col-6 md:col-3">
+                        <div class="field col-12 md:col-4">
                             <label class="block font-medium mb-2">Preço</label>
                             <InputNumber v-model="item.unit_price" mode="currency" currency="BRL" locale="pt-BR" class="w-full" />
                         </div>
-                        <div class="field col-6 md:col-3">
-                            <label class="block font-medium mb-2">Garantia</label>
-                            <InputNumber v-model="item.warranty_months" suffix=" meses" :min="0" class="w-full" />
-                        </div>
-                        <div class="field col-6 md:col-3">
+                        <div class="field col-12 md:col-4">
                             <label class="block font-medium mb-2">Série</label>
                             <InputText v-model="item.serial_number" class="w-full" />
                         </div>

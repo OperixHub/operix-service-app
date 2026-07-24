@@ -1,4 +1,3 @@
-import { ref } from 'vue';
 import Swal from 'sweetalert2';
 import { io } from 'socket.io-client';
 import { getAccessToken } from '@/services/authSession';

@@ -1,7 +1,6 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useServices } from '@views/services/composables/useServices';
-import Chart from 'primevue/chart';
 
 const { dataGetService, getServices, getStatusService, statusServiceMapping } = useServices();
 
@@ -27,63 +26,9 @@ const stats = computed(() => {
     return { total, inProgress, completed, urgent };
 });
 
-const chartData = ref(null);
-const chartOptions = ref({
-    plugins: {
-        legend: {
-            labels: {
-                color: '#495057'
-            }
-        }
-    },
-    scales: {
-        y: {
-            beginAtZero: true,
-            ticks: {
-                color: '#495057'
-            },
-            grid: {
-                color: '#ebedef'
-            }
-        },
-        x: {
-            ticks: {
-                color: '#495057'
-            },
-            grid: {
-                color: '#ebedef'
-            }
-        }
-    }
-});
-
-const setChartData = () => {
-    // Agrupar por status
-    const counts = {};
-    (dataGetService.value || []).forEach(s => {
-        const status = (statusServiceMapping.value || []).find(m => m.cod === s.status);
-        const name = status?.description || 'Outros';
-        counts[name] = (counts[name] || 0) + 1;
-    });
-
-    chartData.value = {
-        labels: Object.keys(counts),
-        datasets: [
-            {
-                label: 'Serviços por Status',
-                data: Object.values(counts),
-                backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#26C6DA', '#7E57C2', '#EC407A', '#FF7043', '#D4E157', '#9CCC65', '#26A69A'],
-                borderColor: '#fff',
-                borderWidth: 2
-            }
-        ]
-    };
-};
-
 onMounted(async () => {
     await getStatusService();
     await getServices();
-    setChartData();
 });
 </script>
 
@@ -182,7 +127,7 @@ onMounted(async () => {
 .card {
     background: var(--surface-card);
     padding: 2rem;
-    border-radius: 10px;
+    border-radius: 8px;
     margin-bottom: 2rem;
 }
 </style>

@@ -4,7 +4,7 @@ import { useStatusPayment } from '../composables/useStatusPayment';
 
 const popup = ref(null);
 
-const { colorTypes, dataGetStatusPayment, dataPostStatusPayment, getStatusPayment, confirmDeleteStatusPayment, onSubmit, ISSET_STATUS_PAYMENT_DEFAULT } = useStatusPayment();
+const { dataGetStatusPayment, dataPostStatusPayment, getStatusPayment, confirmDeleteStatusPayment, onSubmit, ISSET_STATUS_PAYMENT_DEFAULT } = useStatusPayment();
 
 onMounted(() => {
     getStatusPayment();

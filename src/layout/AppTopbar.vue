@@ -5,7 +5,7 @@ import TopbarNotification from './components/TopbarNotification.vue';
 import { useRouter } from 'vue-router';
 import Axios from '@/services/axios';
 import { API_CONFIG } from '@/services/api';
-import { clearSession } from '@/services/authSession';
+import { clearSession, sessionState } from '@/services/authSession';
 import { disconnectSocket } from '@/views/utils/computeds';
 const router = useRouter();
 
@@ -21,6 +21,8 @@ const logout = async () => {
 };
 
 const { changeThemeSettings, layoutConfig, onMenuToggle } = useLayout();
+const currentUserName = computed(() => sessionState.currentUser.value?.name || sessionState.currentUser.value?.username || 'Usuário');
+const currentUserInitial = computed(() => currentUserName.value.charAt(0).toUpperCase());
 
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
@@ -64,9 +66,7 @@ const isOutsideClicked = (event) => {
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
 
-let modeSelected = null;
 const onChangeTheme = (theme, mode) => {
-    modeSelected = mode;
     const elementId = 'theme-css';
     const linkElement = document.getElementById(elementId);
     const cloneLinkElement = linkElement.cloneNode(true);
@@ -84,27 +84,55 @@ const onChangeTheme = (theme, mode) => {
 
 <template>
     <div class="layout-topbar">
-        <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
+        <button class="p-link layout-menu-button layout-topbar-button" v-tooltip.bottom="'Abrir menu'" aria-label="Abrir menu" @click="onMenuToggle()">
             <i class="pi pi-bars"></i>
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <div class="col-3" style="margin: auto">
-                <TopbarNotification />
+            <div class="topbar-user">
+                <Avatar :label="currentUserInitial" shape="circle" />
+                <span>{{ currentUserName }}</span>
             </div>
-            <div class="col-3 ml-2" style="margin: auto">
-                <i v-if="modeSelected == 'dark'" class="pi pi-sun" style="cursor: pointer; font-size: 20px" @click="onChangeTheme('lara-light-blue', 'light')"> </i>
-                <i v-else class="pi pi-moon" style="cursor: pointer; font-size: 20px" @click="onChangeTheme('lara-dark-blue', 'dark')"> </i>
-            </div>
-            <div class="col-3 ml-2" style="margin: auto">
-                <i class="pi pi-sign-out" v-tooltip.top="'Sair'" style="cursor: pointer; font-size: 20px; color: red" @click="logout()"> </i>
-            </div>
+            <TopbarNotification />
+            <button
+                class="p-link layout-topbar-button"
+                :aria-label="layoutConfig.darkTheme.value ? 'Ativar modo claro' : 'Ativar modo escuro'"
+                v-tooltip.bottom="layoutConfig.darkTheme.value ? 'Modo claro' : 'Modo escuro'"
+                @click="layoutConfig.darkTheme.value ? onChangeTheme('lara-light-blue', 'light') : onChangeTheme('lara-dark-blue', 'dark')"
+            >
+                <i :class="layoutConfig.darkTheme.value ? 'pi pi-sun' : 'pi pi-moon'" />
+            </button>
+            <button class="p-link layout-topbar-button logout-button" aria-label="Sair" v-tooltip.bottom="'Sair'" @click="logout()">
+                <i class="pi pi-sign-out" />
+            </button>
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
-.img-container {
+.topbar-user {
+    display: flex;
     align-items: center;
+    gap: .65rem;
+    max-width: 16rem;
+    margin-right: .5rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.topbar-user span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logout-button {
+    color: var(--red-500) !important;
+}
+
+@media (max-width: 640px) {
+    .topbar-user span {
+        display: none;
+    }
 }
 </style>

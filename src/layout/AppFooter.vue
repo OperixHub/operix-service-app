@@ -1,12 +1,13 @@
 <template>
     <div class="layout-footer">
-        <img src="/favicon.ico" alt="Logo" height="20" class="mr-2" />
-        Desenvolvido por
-        <a href="#"> <span class="font-medium ml-2">DevX</span> </a>
+        <img src="/layout/images/opeflow-icon.png" alt="" height="20" class="mr-2" />
+        <span>Opeflow</span>
+        <span class="footer-separator">·</span>
+        <span class="text-600">Gestão de serviços</span>
     </div>
 </template>
 <style lang="scss" scoped>
-a {
-  text-decoration: none;
+.footer-separator {
+    margin: 0 .5rem;
 }
 </style>

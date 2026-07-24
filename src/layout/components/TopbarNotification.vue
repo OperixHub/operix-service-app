@@ -4,6 +4,7 @@ import Axios from '@/services/axios';
 import { formatData } from '@views/utils/computeds.js';
 
 import { API_CONFIG } from '@/services/api';
+import { hasPermission } from '@/services/authSession';
 
 const URI_STATUS_SERVICE = API_CONFIG.STATUS_SERVICE;
 const URI_NOTIFICATIONS = API_CONFIG.NOTIFICATIONS;
@@ -13,7 +14,7 @@ const statusServiceMapping = ref([]);
 const getStatusService = async () => {
     try {
         const response = await Axios.get(URI_STATUS_SERVICE);
-        statusServiceOptions.value = response.data.map((item) => item.cod.toString());
+        statusServiceOptions.value = response.data.map((item) => item.id.toString());
         statusServiceMapping.value = response.data;
         statusServiceMapping.value.forEach((value) => {
             if (value.color) {
@@ -26,8 +27,8 @@ const getStatusService = async () => {
     }
 };
 
-const getStyleStatusService = (cod) => {
-    const statusService = statusServiceMapping.value.find((item) => item.cod === cod);
+const getStyleStatusService = (id) => {
+    const statusService = statusServiceMapping.value.find((item) => item.id === id);
     return statusService || null;
 };
 
@@ -49,16 +50,23 @@ const getNotifications = async () => {
 };
 
 onMounted(() => {
-    getStatusService();
-    getNotifications();
+    if (hasPermission('status-servico.acesso')) getStatusService();
+    if (hasPermission('notificacoes.acesso')) getNotifications();
 });
 </script>
 <template>
-    <i v-if="notifications.length != 0" v-badge="notifications.length" class="pi pi-bell p-overlay-badge" style="cursor: pointer; font-size: 25px" label="Toggle" @click="toggle" aria-haspopup="true" />
+    <button
+        class="p-link layout-topbar-button"
+        aria-label="Notificações"
+        aria-haspopup="true"
+        v-tooltip.bottom="'Notificações'"
+        @click="toggle"
+    >
+        <i v-if="notifications.length" v-badge="notifications.length" class="pi pi-bell p-overlay-badge" />
+        <i v-else class="pi pi-bell" />
+    </button>
 
-    <i v-else class="pi pi-bell p-overlay-badge" style="cursor: pointer; font-size: 20px" label="Toggle" @click="toggle" aria-haspopup="true" />
-
-    <OverlayPanel ref="overlayNotification" appendTo="body" style="width: auto; max-width: 30%">
+    <OverlayPanel ref="overlayNotification" appendTo="body" class="notification-panel">
         <DataTable scrollable scrollHeight="800px" :value="notifications" selectionMode="single" :paginator="false">
             <template #empty> Você não tem notificações. </template>
 
@@ -78,8 +86,8 @@ onMounted(() => {
             <Column header="Status" style="text-align: center">
                 <template #body="slotProps">
                     <Tag
-                        :value="getStyleStatusService(slotProps.data.status)?.description || String(slotProps.data.status || '-')"
-                        :style="getStyleStatusService(slotProps.data.status)?.color?.hex ? { background: getStyleStatusService(slotProps.data.status).color.hex } : {}"
+                        :value="getStyleStatusService(slotProps.data.status_id)?.description || String(slotProps.data.status_id || '-')"
+                        :style="getStyleStatusService(slotProps.data.status_id)?.color?.hex ? { background: getStyleStatusService(slotProps.data.status_id).color.hex } : {}"
                     />
                 </template>
             </Column>

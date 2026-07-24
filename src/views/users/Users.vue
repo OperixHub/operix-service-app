@@ -27,7 +27,9 @@ onBeforeMount(() => {
         </Toolbar>
         <DataTable :value="dataGetUsers" :rowHover="true" showGridlines responsiveLayout="scroll" tableStyle="min-width: 42rem">
             <Column bodyClass="text-center" field="username" header="Nome de Usuário"></Column>
-            <Column bodyClass="text-center" field="email" header="Email"></Column>
+            <Column bodyClass="text-center" field="email" header="Email">
+                <template #body="{ data }">{{ data.email || '-' }}</template>
+            </Column>
             <Column bodyClass="text-center" field="admin" header="Administrador">
                 <template #body="{ data }">
                     <Badge v-if="data.admin" severity="success"><i class="pi pi-check mt-1" /></Badge>

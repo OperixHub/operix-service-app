@@ -1,8 +1,7 @@
 import Axios, { loadCurrentSession } from '@/services/axios';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import { useLayout } from '@/layout/composables/layout';
 import { loadingOpen, loadingClose } from '../../utils/computeds';
 import { messageLogin, messageRegister, addMessage } from '../../utils/messages.js';
 import { API_CONFIG } from '@/services/api';
@@ -41,27 +40,13 @@ export function useLogin() {
 
     const toast = useToast();
     const router = useRouter();
-    const { layoutConfig } = useLayout();
-
     const email = ref('');
     const remember = ref(false);
     const password = ref('');
     const confirmPassword = ref('');
-    const verificationUrl = ref('');
 
     messageLogin.value.length = 0;
     messageRegister.value.length = 0;
-
-    const logoUrl = computed(() => {
-        return `layout/images/logo-completo-transparente.png`;
-    });
-
-    const passwordsMatch = computed(() => {
-        if (!password.value || !confirmPassword.value) {
-            return null;
-        }
-        return password.value === confirmPassword.value;
-    });
 
     /**
      * Verifica na API se o e-mail já está cadastrado e ativo.
@@ -90,9 +75,13 @@ export function useLogin() {
             const payload = response.data;
             if (payload && payload.token) {
                 setSession(payload);
-                await loadCurrentSession();
+                const snapshot = await loadCurrentSession();
                 connectSocket();
-                router.push('/integracao');
+                router.push(
+                    snapshot.user?.onboarding_required
+                        ? '/onboarding'
+                        : getFirstAllowedMenuPath(snapshot.user, snapshot.permissions)
+                );
             } else {
                 toast.add({ severity: 'error', summary: 'Erro no Cadastro', detail: 'Resposta inválida do servidor.', life: 5000 });
             }
@@ -105,7 +94,7 @@ export function useLogin() {
 
     /**
      * Realiza login de usuário existente.
-     * Vai direto ao app (não passa pelo onboarding pois o tenant já existe).
+     * Usa o estado persistido para retomar o onboarding quando necessário.
      */
     const login = async () => {
         loadingOpen();
@@ -121,7 +110,11 @@ export function useLogin() {
                 setSession(payload);
                 const snapshot = await loadCurrentSession();
                 connectSocket();
-                router.push(getFirstAllowedMenuPath(snapshot.user, snapshot.permissions));
+                router.push(
+                    snapshot.user?.onboarding_required
+                        ? '/onboarding'
+                        : getFirstAllowedMenuPath(snapshot.user, snapshot.permissions)
+                );
             } else {
                 toast.add({ severity: 'error', summary: 'Erro no Login', detail: 'Token inválido ou ausente.', life: 5000 });
             }
@@ -140,9 +133,9 @@ export function useLogin() {
             const codeChallenge = base64UrlEncode(await sha256(codeVerifier));
             const redirectUri = new URL('/oauth/callback.html', window.location.origin).toString();
 
-            sessionStorage.setItem('operix_oauth_state', state);
-            sessionStorage.setItem('operix_oauth_verifier', codeVerifier);
-            sessionStorage.setItem('operix_oauth_redirect_uri', redirectUri);
+            sessionStorage.setItem('opeflow_oauth_state', state);
+            sessionStorage.setItem('opeflow_oauth_verifier', codeVerifier);
+            sessionStorage.setItem('opeflow_oauth_redirect_uri', redirectUri);
 
             const response = await Axios.post(API_CONFIG.AUTH.AUTHORIZE, {
                 redirect_uri: redirectUri,
@@ -220,16 +213,7 @@ export function useLogin() {
         window.location.hash = '/recuperar-senha';
     };
 
-    const openVerificationUrl = () => {
-        if (verificationUrl.value) {
-            window.location.href = verificationUrl.value;
-        }
-    };
-
     return {
-        ref,
-        COD_REGISTER,
-        COD_LOGIN,
         TYPE_FORM_INITIAL,
         TYPE_FORM_REGISTER,
         TYPE_FORM_LOGIN,
@@ -237,16 +221,11 @@ export function useLogin() {
         email,
         password,
         confirmPassword,
-        passwordsMatch,
-        verificationUrl,
         messageRegister,
         messageLogin,
-        remember,
-        logoUrl,
         validate,
         loginWithGoogle,
         goToLogin,
-        openVerificationUrl,
         goToForgotPassword,
     };
 }

@@ -13,7 +13,7 @@ export function useServices() {
     const URI_STATUS_PAYMENT = API_CONFIG.STATUS_PAYMENT;
     const URI_TYPES_PRODUCT = API_CONFIG.TYPES_PRODUCT;
     const URI_SERVICES = API_CONFIG.SERVICES;
-    const URI_ORDER_OF_SERVICE = API_CONFIG.ORDER_OF_SERVICE;
+    const URI_ORDER_OF_SERVICE = API_CONFIG.ORDERS_OF_SERVICE;
     const URI_STOCK = API_CONFIG.STOCK;
 
     const toast = useToast();
@@ -69,7 +69,7 @@ export function useServices() {
         }
     };
 
-    /* Service parts / warranties */
+    /* Service parts */
     const stockOptions = ref([]);
     const rawStock = ref([]);
     const displayModalServicePart = ref(false);
@@ -80,9 +80,7 @@ export function useServices() {
         stock_id: null,
         quantity: 1,
         unit_price: null,
-        warranty_months: 3,
-        serial_number: '',
-        notes: ''
+        serial_number: ''
     });
 
     const resetServicePartForm = () => {
@@ -90,9 +88,7 @@ export function useServices() {
             stock_id: null,
             quantity: 1,
             unit_price: null,
-            warranty_months: 3,
-            serial_number: '',
-            notes: ''
+            serial_number: ''
         };
     };
 
@@ -142,9 +138,7 @@ export function useServices() {
                 stock_id: dataServicePart.value.stock_id,
                 quantity: dataServicePart.value.quantity,
                 unit_price: dataServicePart.value.unit_price,
-                warranty_months: dataServicePart.value.warranty_months,
-                serial_number: dataServicePart.value.serial_number || null,
-                notes: dataServicePart.value.notes || null
+                serial_number: dataServicePart.value.serial_number || null
             });
             toast.add({ severity: 'success', summary: 'Peça registrada', detail: response.msg, life: 5000 });
             closeModalServicePart();
@@ -213,31 +207,6 @@ export function useServices() {
         }
     };
 
-    const getServicesWarehouse = async () => {
-        loadingOpen();
-        try {
-            const response = await Axios.get(URI_SERVICES + '/almoxarifado');
-            dataGetService.value = response.data;
-            initFilters();
-        } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar serviços do depósito', life: 5000 });
-            console.error(error);
-        } finally {
-            loadingClose();
-        }
-    };
-
-    const confirmUpdateForServices = (event, idService) => {
-        confirmPopup.require({
-            target: event.target,
-            message: 'Deseja levar este serviço de volta?',
-            icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Sim',
-            rejectLabel: 'Não',
-            accept: () => { updateWarehouseForService(idService); }
-        });
-    };
-
     const deleteService = async (idService, cod_order) => {
         loadingOpen();
         try {
@@ -258,29 +227,6 @@ export function useServices() {
             acceptLabel: 'Sim',
             rejectLabel: 'Não',
             accept: () => { deleteService(data.id, data.order_of_service); }
-        });
-    };
-
-    const updateWarehouse = async (id) => {
-        loadingOpen();
-        try {
-            const response = await Axios.put(URI_SERVICES + '/almoxarifado/' + id + '/false');
-            toast.add({ severity: 'success', summary: 'Enviado', detail: response.msg, life: 5000 });
-        } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao enviar serviço ao depósito', life: 5000 });
-            console.error(error);
-        } finally {
-            loadingClose();
-        }
-    };
-    const confirmUpdateWarehouse = (event, idService) => {
-        confirmPopup.require({
-            target: event.target,
-            message: 'Deseja enviar este serviço ao depósito?',
-            icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Sim',
-            rejectLabel: 'Não',
-            accept: () => { updateWarehouse(idService); }
         });
     };
 
@@ -470,7 +416,7 @@ export function useServices() {
             } else {
                 dataPutOrderOfService.value = dataPutOrderOfServiceComplete.value;
             }
-            const response = await Axios.put(URI_ORDER_OF_SERVICE + '/orcamento/' + data.order_of_service, {
+            const response = await Axios.put(URI_ORDER_OF_SERVICE + '/' + data.order_of_service + '/orcamento', {
                 type: typeOS.value.value,
                 id: !dataPutOrderOfService.value.id ? null : dataPutOrderOfService.value.id,
                 amount: dataPutOrderOfService.value.amount,
@@ -491,7 +437,7 @@ export function useServices() {
     const deleteEstimateOS = async (cod, data) => {
         loadingOpen();
         try {
-            const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/orcamento/' + cod + '/' + data.id);
+            const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/' + cod + '/orcamento/' + data.id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
             const dataOpen = { order_of_service: cod };
             closeModal();
@@ -617,7 +563,7 @@ export function useServices() {
         openModalEditStatus, validateUpdateStatusService,
         openModalEditInfo, validateEditInfoClient, isInfoClientChanged, resetInfoClient,
         openModalServicePart, closeModalServicePart, saveServicePart, onServicePartStockChange,
-        confirmDeleteService, confirmUpdateWarehouse, confirmUpdateForServices,
+        confirmDeleteService,
         toggle, openOverlay, idop, op, copyText
     };
 }

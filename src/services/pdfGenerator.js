@@ -144,7 +144,6 @@ const createHeader = (logo) => {
 
 const createDocumentDefinition = ({
     info,
-    orderService,
     date,
     tableData,
     logo
@@ -214,15 +213,6 @@ const createDocumentDefinition = ({
         '\n\n\n\n',
 
         {
-            color: '#050A4D',
-            text:
-                'OS SERVIÇOS PRESTADOS NESTE PRODUTO ACIMA CITADO, ' +
-                `CONTAM COM GARANTIA DE 90 DIAS A PARTIR DE ${date}.`
-        },
-
-        '\n\n\n\n',
-
-        {
             alignment: 'center',
             columns: [
                 {
@@ -286,7 +276,6 @@ const generateReceipt = (dataInfo, dataOS, logo = null) => {
 
     const documentDefinition = createDocumentDefinition({
         info,
-        orderService,
         date,
         tableData,
         logo

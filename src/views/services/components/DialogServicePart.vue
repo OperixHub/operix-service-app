@@ -55,29 +55,19 @@ const patchForm = (patch) => {
                 />
             </div>
 
-            <div class="field col-12 md:col-3">
+            <div class="field col-12 md:col-4">
                 <label class="block font-medium mb-2">Quantidade</label>
                 <InputNumber :modelValue="localForm.quantity" @update:modelValue="patchForm({ quantity: $event })" showButtons :min="1" class="w-full" />
             </div>
 
-            <div class="field col-12 md:col-3">
+            <div class="field col-12 md:col-4">
                 <label class="block font-medium mb-2">Preço unitário</label>
                 <InputNumber :modelValue="localForm.unit_price" @update:modelValue="patchForm({ unit_price: $event })" mode="currency" currency="BRL" locale="pt-BR" class="w-full" />
             </div>
 
-            <div class="field col-12 md:col-3">
-                <label class="block font-medium mb-2">Garantia</label>
-                <InputNumber :modelValue="localForm.warranty_months" @update:modelValue="patchForm({ warranty_months: $event })" suffix=" meses" :min="0" class="w-full" />
-            </div>
-
-            <div class="field col-12 md:col-3">
+            <div class="field col-12 md:col-4">
                 <label class="block font-medium mb-2">Nº de série</label>
                 <InputText :modelValue="localForm.serial_number" @update:modelValue="patchForm({ serial_number: $event })" class="w-full" />
-            </div>
-
-            <div class="field col-12">
-                <label class="block font-medium mb-2">Observações</label>
-                <Textarea :modelValue="localForm.notes" @update:modelValue="patchForm({ notes: $event })" rows="3" autoResize class="w-full" />
             </div>
         </div>
 

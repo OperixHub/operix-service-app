@@ -2,6 +2,14 @@ $gutter: 1rem;
 
 :root {
     --font-family: 'Inter', sans-serif;
+    --primary-color: #0f766e;
+    --primary-color-text: #ffffff;
+    --highlight-bg: rgba(15, 118, 110, .14);
+    --highlight-text-color: #0f766e;
+    --opeflow-accent: #0f766e;
+    --opeflow-accent-strong: #115e59;
+    --opeflow-focus: rgba(15, 118, 110, .2);
+    --opeflow-shadow: 0 8px 24px rgba(15, 23, 42, .08);
 }
 
 html {
@@ -18,8 +26,17 @@ body {
 
 .page-card,
 .card {
-    border-radius: 18px;
-    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--surface-border);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    overflow: visible;
+}
+
+.card > h5:first-child,
+.page-card > h5:first-child {
+    margin-top: 0;
+    font-size: 1.15rem;
+    letter-spacing: 0;
 }
 
 .p-toolbar {
@@ -35,6 +52,9 @@ body {
 
 .p-datatable {
     max-width: 100%;
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .p-datatable-wrapper {
@@ -44,6 +64,8 @@ body {
 
 .p-dialog {
     max-width: calc(100vw - 2rem);
+    border-radius: 8px;
+    box-shadow: var(--opeflow-shadow);
 }
 
 .p-dialog .p-dialog-content {
@@ -57,6 +79,16 @@ body {
     gap: .5rem;
 }
 
+.p-dialog .p-dialog-footer .p-button {
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+}
+
+.p-dialog .p-dialog-footer .p-button-icon-left {
+    margin-right: 0;
+}
+
 .responsive-actions {
     display: flex;
     flex-wrap: wrap;
@@ -67,25 +99,82 @@ body {
 .auth-page {
     min-height: 100vh;
     min-width: 100%;
-    padding: clamp(1rem, 4vw, 2.5rem);
+    padding: clamp(5rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem) 2rem;
     overflow-y: auto;
 }
 
 .auth-shell {
     width: min(100%, 34rem);
-    border-radius: clamp(28px, 8vw, 56px);
-    padding: .3rem;
-    background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%);
+    border-radius: 8px;
+    border: 1px solid var(--surface-border);
+    background: var(--surface-card);
+    box-shadow: var(--opeflow-shadow);
 }
 
 .auth-card {
     width: 100%;
-    border-radius: clamp(24px, 7vw, 53px);
+    border-radius: 8px;
 }
 
-.auth-logo {
-    max-width: min(23rem, 45vw);
-    height: auto;
+.brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    color: var(--text-color);
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.brand-lockup img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 8px;
+}
+
+.p-button {
+    border-radius: 7px;
+    font-weight: 600;
+}
+
+.p-inputtext,
+.p-dropdown,
+.p-multiselect,
+.p-password-input,
+.p-inputnumber-input,
+.p-textarea {
+    border-radius: 7px;
+}
+
+.p-inputtext:focus,
+.p-password-input:focus,
+.p-inputnumber-input:focus,
+.p-textarea:focus {
+    box-shadow: 0 0 0 3px var(--opeflow-focus);
+}
+
+.p-toolbar {
+    border-radius: 8px;
+    border-color: var(--surface-border);
+    background: var(--surface-section);
+}
+
+.p-tabview .p-tabview-nav {
+    gap: .25rem;
+}
+
+.p-overlaypanel.notification-panel {
+    width: min(38rem, calc(100vw - 2rem));
+    max-width: none;
+}
+
+.layout-theme-dark .card,
+.layout-theme-dark .page-card {
+    box-shadow: none;
+}
+
+.layout-theme-dark .layout-sidebar,
+.layout-theme-dark .layout-topbar {
+    background: var(--surface-card);
 }
 
 .compact-form-row {
@@ -114,7 +203,7 @@ body {
 
     .card {
         padding: 1rem;
-        border-radius: 14px;
+        border-radius: 8px;
     }
 
     .p-toolbar {
@@ -175,5 +264,10 @@ body {
 
     .compact-form-row .compact-action {
         width: 100%;
+    }
+
+    .p-datatable .p-datatable-thead > tr > th,
+    .p-datatable .p-datatable-tbody > tr > td {
+        white-space: nowrap;
     }
 }

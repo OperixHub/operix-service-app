@@ -18,9 +18,9 @@ onMounted(async () => {
         const params = searchParams.toString() ? searchParams : hashParams;
         const code = params.get('code');
         const state = params.get('state');
-        const expectedState = sessionStorage.getItem('operix_oauth_state');
-        const codeVerifier = sessionStorage.getItem('operix_oauth_verifier');
-        const redirectUri = sessionStorage.getItem('operix_oauth_redirect_uri');
+        const expectedState = sessionStorage.getItem('opeflow_oauth_state');
+        const codeVerifier = sessionStorage.getItem('opeflow_oauth_verifier');
+        const redirectUri = sessionStorage.getItem('opeflow_oauth_redirect_uri');
 
         if (!code || !state || state !== expectedState || !codeVerifier || !redirectUri) {
             throw new Error('Retorno Google inválido.');
@@ -37,12 +37,12 @@ onMounted(async () => {
         const snapshot = await loadCurrentSession();
         connectSocket();
 
-        sessionStorage.removeItem('operix_oauth_state');
-        sessionStorage.removeItem('operix_oauth_verifier');
-        sessionStorage.removeItem('operix_oauth_redirect_uri');
+        sessionStorage.removeItem('opeflow_oauth_state');
+        sessionStorage.removeItem('opeflow_oauth_verifier');
+        sessionStorage.removeItem('opeflow_oauth_redirect_uri');
 
-        if (payload.is_new_user) {
-            router.replace('/integracao');
+        if (snapshot.user?.onboarding_required) {
+            router.replace('/onboarding');
         } else {
             router.replace(getFirstAllowedMenuPath(snapshot.user, snapshot.permissions));
         }

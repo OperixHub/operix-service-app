@@ -1,8 +1,7 @@
 <script setup>
-import Axios, { refreshAccessToken, loadCurrentSession } from '@/services/axios';
+import Axios, { loadCurrentSession } from '@/services/axios';
 import { API_CONFIG } from '@/services/api';
 import { getFirstAllowedMenuPath } from '@/layout/composables/menu';
-import { getCurrentPermissions, getCurrentUser } from '@/services/authSession';
 import { loadingClose, loadingOpen } from '@/views/utils/computeds';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -59,7 +58,7 @@ const submit = async () => {
 
                 <div class="mt-4">
                     <label for="companyName" class="block text-900 text-left font-medium mb-2"> NOME DA EMPRESA </label>
-                    <InputText id="companyName" v-model="companyName" placeholder="Ex: Operix Ltda" class="w-full mb-4" style="padding: 1rem" />
+                    <InputText id="companyName" v-model="companyName" placeholder="Ex: Opeflow Ltda" class="w-full mb-4" style="padding: 1rem" />
 
                     <label for="name" class="block text-900 text-left font-medium mb-2"> SEU NOME COMPLETO </label>
                     <InputText id="name" v-model="name" placeholder="Como quer ser chamado" class="w-full mb-4" style="padding: 1rem" />

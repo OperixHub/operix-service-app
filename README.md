@@ -1,6 +1,6 @@
-# Operix Service App
+# Opeflow App
 
-Painel administrativo e interface de usuário do Operix Service. Desenvolvido em Vue 3 com Vite e estilizado com PrimeVue e PrimeFlex.
+Painel administrativo e interface de usuário do Opeflow. Desenvolvido em Vue 3 com Vite e estilizado com PrimeVue e PrimeFlex.
 
 ---
 
@@ -14,7 +14,7 @@ Painel administrativo e interface de usuário do Operix Service. Desenvolvido em
 ### Passo a Passo
 ```bash
 # 1. Clone o repositório e acesse a pasta
-cd operix-service-app
+cd opeflow-app
 
 # 2. Configure a URL da API no arquivo .env
 cp .env.example .env

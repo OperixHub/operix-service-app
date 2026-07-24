@@ -22,6 +22,7 @@ const model = computed(() => buildMenu(sessionState.currentUser.value, sessionSt
 .sidebar {
     display: flex;
     flex-direction: column;
-    height: 90%;
+    height: calc(100% - 4.5rem);
+    padding-top: .75rem;
 }
 </style>

@@ -1,26 +1,39 @@
 <script setup>
 import { useLogin } from './composables/useLogin';
+import { ref } from 'vue';
+import InternalAccessDialog from './components/InternalAccessDialog.vue';
+import { useLayout } from '@/layout/composables/layout';
+
+const internalAccessDialog = ref(null);
+const { changeThemeSettings, layoutConfig } = useLayout();
+
+const toggleTheme = () => {
+    const darkTheme = !layoutConfig.darkTheme.value;
+    const theme = darkTheme ? 'lara-dark-blue' : 'lara-light-blue';
+    const linkElement = document.getElementById('theme-css');
+    const cloneLinkElement = linkElement.cloneNode(true);
+    cloneLinkElement.id = 'theme-css-clone';
+    cloneLinkElement.href = linkElement.href.replace(layoutConfig.theme.value, theme);
+    cloneLinkElement.addEventListener('load', () => {
+        linkElement.remove();
+        cloneLinkElement.id = 'theme-css';
+        changeThemeSettings(theme, darkTheme);
+    });
+    linkElement.parentNode.insertBefore(cloneLinkElement, linkElement.nextSibling);
+};
 
 const {
-    ref,
     TYPE_FORM_INITIAL,
     TYPE_FORM_REGISTER,
     TYPE_FORM_LOGIN,
     typeForm,
-    COD_REGISTER,
-    COD_LOGIN,
     email,
     password,
-    remember,
-    logoUrl,
     messageLogin,
     confirmPassword,
-    passwordsMatch,
-    verificationUrl,
     messageRegister,
     validate,
     goToLogin,
-    openVerificationUrl,
     loginWithGoogle,
     goToForgotPassword
 } = useLogin();
@@ -28,11 +41,31 @@ const {
 
 <template>
     <Toast />
+    <div class="auth-quick-actions">
+        <Button
+            label="Acesso interno"
+            icon="pi pi-users"
+            class="p-button-outlined"
+            @click="internalAccessDialog.open()"
+        />
+        <Button
+            :icon="layoutConfig.darkTheme.value ? 'pi pi-sun' : 'pi pi-moon'"
+            class="p-button-outlined p-button-icon-only"
+            :aria-label="layoutConfig.darkTheme.value ? 'Ativar modo claro' : 'Ativar modo escuro'"
+            v-tooltip.bottom="layoutConfig.darkTheme.value ? 'Modo claro' : 'Modo escuro'"
+            @click="toggleTheme"
+        />
+    </div>
+    <InternalAccessDialog ref="internalAccessDialog" />
     <div class="auth-page surface-ground flex align-items-center justify-content-center">
         <div class="auth-shell">
             <div class="auth-card surface-card py-6 px-5 sm:px-8">
                 <div class="text-center mb-6">
-                    <img :src="logoUrl" alt="Operix Logo" class="auth-logo mb-3" />
+                    <div class="brand-lockup justify-content-center">
+                        <img src="/layout/images/opeflow-icon.png" alt="" />
+                        <span>Opeflow</span>
+                    </div>
+                    <p class="text-600 mt-3 mb-0">Acesse a gestão da sua operação</p>
                 </div>
 
                 <transition-group tag="div">
@@ -77,7 +110,6 @@ const {
                     />
 
                     <Button v-if="typeForm === TYPE_FORM_INITIAL" label="Continuar com e-mail" class="w-full p-3 text-lg" @click="validate(typeForm)" />
-                    <Button v-if="typeForm === TYPE_FORM_REGISTER && verificationUrl" label="Abrir link de verificação" class="w-full p-3 mt-4 p-button-outlined" @click="openVerificationUrl()" />
                     <Button v-if="typeForm !== TYPE_FORM_INITIAL" label="Entrar" icon="pi pi-sign-in" class="w-full p-3 text-lg mt-4" @click="validate(typeForm)" />
                 </div>
             </div>
@@ -100,7 +132,7 @@ const {
     display: flex;
     align-items: center;
     text-align: center;
-    color: #6b7280;
+    color: var(--text-color-secondary);
     margin: 24px 0;
 }
 
@@ -108,12 +140,28 @@ const {
 .divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--surface-border);
 }
 
 .divider span {
     padding: 0 12px;
     font-size: 14px;
-    background: #fff; /* mesma cor do fundo */
+    background: var(--surface-card);
+}
+
+.auth-quick-actions {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    display: flex;
+    gap: .5rem;
+}
+
+@media (max-width: 480px) {
+    .auth-quick-actions {
+        top: 0.75rem;
+        right: 0.75rem;
+    }
 }
 </style>

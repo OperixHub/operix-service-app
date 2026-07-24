@@ -1,17 +1,21 @@
 import { toRefs, reactive, computed } from 'vue';
 
+const storedTheme = localStorage.getItem('opeflow_theme');
+const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+const initialDarkTheme = storedTheme ? storedTheme === 'dark' : Boolean(prefersDark);
+
 const layoutConfig = reactive({
-    ripple: false,
-    darkTheme: false,
+    ripple: true,
+    darkTheme: initialDarkTheme,
     inputStyle: 'outlined',
     menuMode: 'static',
-    theme: 'lara-light-blue',
+    theme: initialDarkTheme ? 'lara-dark-blue' : 'lara-light-blue',
     scale: 14,
     activeMenuItem: null
 });
 
 const layoutState = reactive({
-    staticMenuDesktopInactive: true,
+    staticMenuDesktopInactive: false,
     overlayMenuActive: false,
     profileSidebarVisible: false,
     configSidebarVisible: false,
@@ -23,6 +27,8 @@ export function useLayout() {
     const changeThemeSettings = (theme, darkTheme) => {
         layoutConfig.darkTheme = darkTheme;
         layoutConfig.theme = theme;
+        localStorage.setItem('opeflow_theme', darkTheme ? 'dark' : 'light');
+        document.documentElement.style.colorScheme = darkTheme ? 'dark' : 'light';
     };
 
     const setScale = (scale) => {

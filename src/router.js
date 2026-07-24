@@ -19,11 +19,6 @@ const router = createRouter({
             component: () => import('@/views/auth/AuthCallback.vue')
         },
         {
-            path: '/verificar-email',
-            name: 'verify-email',
-            component: () => import('@/views/auth/VerifyEmail.vue')
-        },
-        {
             path: '/recuperar-senha',
             name: 'forgot-password',
             component: () => import('@/views/auth/ForgotPassword.vue')
@@ -34,32 +29,32 @@ const router = createRouter({
             component: () => import('@/views/auth/ResetPassword.vue')
         },
         {
+            path: '/onboarding',
+            name: 'onboarding',
+            meta: { requiresAuth: true, allowOnboarding: true },
+            component: () => import('@/views/auth/Onboarding.vue')
+        },
+        {
             path: '/',
             component: AppLayout,
             meta: { requiresAuth: true },
             children: [
                 {
-                    path: '/integracao',
-                    name: 'integracao',
-                    meta: { allowOnboarding: true },
-                    component: () => import('@/views/auth/Onboarding.vue')
-                },
-                {
                     path: '/painel',
                     name: 'painel',
-                    meta: { permission: 'painel.access' },
+                    meta: { permission: 'painel.acesso' },
                     component: () => import('@/views/dashboard/Dashboard.vue')
                 },
                 {
                     path: '/servicos',
                     name: 'servicos',
-                    meta: { permission: 'servicos.access' },
+                    meta: { permission: 'servicos.acesso' },
                     component: () => import('@/views/services/Services.vue')
                 },
                 {
                     path: '/usuarios',
                     name: 'usuarios',
-                    meta: { permission: 'usuarios.access' },
+                    meta: { permission: 'usuarios.acesso' },
                     component: () => import('@/views/users/Users.vue')
                 },
                 {
@@ -70,26 +65,20 @@ const router = createRouter({
                 {
                     path: '/dados-basicos',
                     name: 'dados-basicos',
-                    meta: { permission: 'dadosbasicos.access' },
+                    meta: { permissionsAny: ['status-servico.acesso', 'status-pagamento.acesso', 'tipos-produto.acesso'] },
                     component: () => import('@/views/basicData/BasicData.vue')
                 },
                 {
                     path: '/estoque',
                     name: 'estoque',
-                    meta: { permission: 'estoque.access' },
+                    meta: { permission: 'estoque.acesso' },
                     component: () => import('@/views/Stock/Stock.vue')
                 },
                 {
-                    path: 'vendas',
+                    path: '/vendas',
                     name: 'vendas',
-                    meta: { permission: 'vendas.access' },
+                    meta: { permission: 'vendas.acesso' },
                     component: () => import('@/views/sales/Sales.vue')
-                },
-                {
-                    path: '/garantias',
-                    name: 'garantias',
-                    meta: { permission: 'garantias.access' },
-                    component: () => import('@/views/Warranties.vue')
                 }
             ]
         }
@@ -112,16 +101,21 @@ router.beforeEach(async (to) => {
     }
 
     const requiredPermission = to.meta.permission || getRoutePermission(to.path);
+    const permissionsAny = to.meta.permissionsAny || (Array.isArray(requiredPermission) ? requiredPermission : null);
     const currentUser = getCurrentUser();
     if (currentUser?.onboarding_required && !to.meta.allowOnboarding) {
-        return '/integracao';
+        return '/onboarding';
     }
 
-    if (!currentUser?.onboarding_required && to.path === '/integracao') {
+    if (!currentUser?.onboarding_required && to.path === '/onboarding') {
         return getFirstAllowedMenuPath(currentUser, getCurrentPermissions());
     }
 
-    if (requiredPermission && !hasPermission(requiredPermission)) {
+    if (permissionsAny && !permissionsAny.some((permission) => hasPermission(permission))) {
+        return getFirstAllowedMenuPath(currentUser, getCurrentPermissions());
+    }
+
+    if (!permissionsAny && requiredPermission && !hasPermission(requiredPermission)) {
         return getFirstAllowedMenuPath(currentUser, getCurrentPermissions());
     }
 

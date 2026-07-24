@@ -9,7 +9,7 @@ import DialogEditInfoClient from './components/DialogEditInfoClient.vue';
 import DialogServicePart from './components/DialogServicePart.vue';
 
 const {
-    optionsTypesTables, formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator, formatTelephone,
+    formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator, formatTelephone,
     loading, filters, typeOS, typeOsOptions,
     messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient,
     messageUpdateStatusService, messageUpdateStatusPayment,
@@ -26,14 +26,14 @@ const {
     displayModalServicePart, positionModalServicePart, selectedServicePartContext,
     dataServicePart, stockOptions, servicePartLoading,
     getStatusService, getStatusPayment, getTypesProduct, getServices,
-    clearFilter, changeTable, openModalAdd, closeModal,
+    clearFilter, openModalAdd, closeModal,
     openModalOS, validateUpdateEstimateOS, deleteEstimateOS,
     openModalViewObservation, openModalViewAdress,
     openModalEditPaymentStatus, validateUpdateStatusPayment,
     openModalEditStatus, validateUpdateStatusService,
     openModalEditInfo, validateEditInfoClient, isInfoClientChanged, resetInfoClient,
     openModalServicePart, closeModalServicePart, saveServicePart, onServicePartStockChange,
-    confirmDeleteService, confirmUpdateWarehouse, confirmUpdateForServices,
+    confirmDeleteService,
     toggle, openOverlay, op, copyText
 } = useServices();
 

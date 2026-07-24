@@ -1,17 +1,17 @@
 {
-    "name": "Operix",
-    "short_name": "Operix",
+    "name": "Opeflow",
+    "short_name": "Opeflow",
     "description": "Sistema de gestão inteligente para prestadores de serviço",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "orientation": "portrait",
-    "background_color": "#ffffff",
-    "theme_color": "#1e40af",
+    "background_color": "#f8fafc",
+    "theme_color": "#0f766e",
     "icons": [
         {
-            "src": "/layout/images/logo-icone-transparente.png",
-            "sizes": "72x72",
+            "src": "/layout/images/opeflow-icon.png",
+            "sizes": "1254x1254",
             "type": "image/png"
         }
     ]

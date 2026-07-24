@@ -4,7 +4,7 @@ import { useStatusServices } from '../composables/useStatusServices';
 
 const popup = ref(null);
 
-const { colorTypes, dataGetStatusServices, dataPostStatusServices, getStatusServices, confirmDeleteStatusServices, onSubmit } = useStatusServices();
+const { dataGetStatusServices, dataPostStatusServices, getStatusServices, confirmDeleteStatusServices, onSubmit } = useStatusServices();
 
 onMounted(() => {
     getStatusServices();
