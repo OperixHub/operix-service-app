@@ -1,9 +1,9 @@
 import Axios from '@/services/axios';
 import pdfGenerator from '@/services/pdfGenerator';
-import { ref, provide } from 'vue';
+import { computed, ref, provide } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
-import { messageAddService, messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient, messageUpdateStatusService, messageUpdateStatusPayment, addMessage } from '@views/utils/messages.js';
+import { messageAddService, messageAddEstimateOSComplete, messageEditInfoClient, messageUpdateStatusService, messageUpdateStatusPayment, addMessage } from '@views/utils/messages.js';
 import { socket, formatData, sendWhatsAppMessage, sendInfoClientsWhats, loadingOpen, loadingClose, formatTelephone} from '@views/utils/computeds.js';
 
 import { API_CONFIG } from '@/services/api';
@@ -72,10 +72,9 @@ export function useServices() {
     /* Service parts */
     const stockOptions = ref([]);
     const rawStock = ref([]);
-    const displayModalServicePart = ref(false);
-    const positionModalServicePart = ref('top');
-    const selectedServicePartContext = ref({});
     const servicePartLoading = ref(false);
+    const serviceParts = ref([]);
+    const serviceContextOS = ref({});
     const dataServicePart = ref({
         stock_id: null,
         quantity: 1,
@@ -96,9 +95,22 @@ export function useServices() {
         const response = await Axios.get(URI_STOCK);
         rawStock.value = response.data || [];
         stockOptions.value = rawStock.value.map((item) => ({
-            label: `${item.name} (${item.code}) - saldo ${item.quantity}`,
-            value: item.id
+            label: `${item.name} - ${item.code}`,
+            value: item.id,
+            code: item.code,
+            name: item.name,
+            quantity: item.quantity,
+            warranty_days: item.warranty_days
         }));
+    };
+
+    const getServiceParts = async (serviceId) => {
+        if (!serviceId) {
+            serviceParts.value = [];
+            return;
+        }
+        const response = await Axios.get(API_CONFIG.SERVICE_PARTS(serviceId));
+        serviceParts.value = response.data || [];
     };
 
     const onServicePartStockChange = () => {
@@ -108,56 +120,14 @@ export function useServices() {
         }
     };
 
-    const openModalServicePart = async (position, data) => {
-        resetServicePartForm();
-        selectedServicePartContext.value = data;
-        positionModalServicePart.value = position;
-        try {
-            await getStockOptions();
-            displayModalServicePart.value = true;
-        } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao carregar estoque', life: 5000 });
-        }
-    };
-
-    const closeModalServicePart = () => {
-        displayModalServicePart.value = false;
-        selectedServicePartContext.value = {};
-        resetServicePartForm();
-    };
-
-    const saveServicePart = async () => {
-        if (!selectedServicePartContext.value.id || !dataServicePart.value.stock_id || !dataServicePart.value.quantity) {
-            toast.add({ severity: 'warn', summary: 'Dados incompletos', detail: 'Informe peça e quantidade.', life: 4000 });
-            return;
-        }
-
-        servicePartLoading.value = true;
-        try {
-            const response = await Axios.post(API_CONFIG.SERVICE_PARTS(selectedServicePartContext.value.id), {
-                stock_id: dataServicePart.value.stock_id,
-                quantity: dataServicePart.value.quantity,
-                unit_price: dataServicePart.value.unit_price,
-                serial_number: dataServicePart.value.serial_number || null
-            });
-            toast.add({ severity: 'success', summary: 'Peça registrada', detail: response.msg, life: 5000 });
-            closeModalServicePart();
-            await getServices();
-        } catch (error) {
-            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao registrar peça do serviço', life: 5000 });
-        } finally {
-            servicePartLoading.value = false;
-        }
-    };
-
     /* Filters */
-    const loading = ref(null);
+    const tableLoading = ref(false);
     const filters = ref(null);
     const initFilters = () => {
         filters.value = {
             order_of_service: { value: null },
             product: { value: null },
-            client: { value: null },
+            client_filter: { value: null, matchMode: 'contains' },
             telephone: { value: null },
             adress: { value: null },
             status: { value: null },
@@ -167,13 +137,6 @@ export function useServices() {
         };
     };
     const clearFilter = () => initFilters();
-
-    /* OS type */
-    const typeOS = ref({ label: 'Simplificada', value: 'simples' });
-    const typeOsOptions = ref([
-        { label: 'Simplificada', value: 'simples' },
-        { label: 'Detalhada', value: 'completa' }
-    ]);
 
     /* Services data */
     const dataGetOS = ref([]);
@@ -191,10 +154,14 @@ export function useServices() {
     };
 
     const dataGetService = ref([]);
+    const dataGetServiceTable = computed(() => dataGetService.value.map((service) => ({
+        ...service,
+        client_filter: `${service.client || ''} ${service.telephone || ''} ${String(service.telephone || '').replace(/\D/g, '')}`.trim()
+    })));
     socket.on('reloadDataService', (data) => { dataGetService.value = data; });
 
     const getServices = async () => {
-        loadingOpen();
+        tableLoading.value = true;
         try {
             const response = await Axios.get(URI_SERVICES);
             dataGetService.value = response.data;
@@ -203,7 +170,7 @@ export function useServices() {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar serviços', life: 5000 });
             console.error(error);
         } finally {
-            loadingClose();
+            tableLoading.value = false;
         }
     };
 
@@ -235,6 +202,9 @@ export function useServices() {
     const dataEditInfoClient = ref({});
     const displayModalEditInfo = ref(false);
     const positionModalEditInfo = ref(false);
+    const dataEditProduct = ref({ id: null, product: '' });
+    const displayModalEditProduct = ref(false);
+    const positionModalEditProduct = ref(false);
 
     const isInfoClientChanged = () => JSON.stringify(dataEditInfoClient.value) !== JSON.stringify(originalInfoClient.value);
     const resetInfoClient = () => { dataEditInfoClient.value = { ...originalInfoClient.value }; };
@@ -247,6 +217,19 @@ export function useServices() {
             originalInfoClient.value[k] = data[k];
         });
     };
+
+    const openModalEditProduct = (position, data) => {
+        displayModalEditProduct.value = true;
+        positionModalEditProduct.value = position;
+        dataEditProduct.value = {
+            id: data.id,
+            product: data.product || '',
+            client: data.client || '',
+            telephone: data.telephone || '',
+            adress: data.adress || '',
+            observation: data.observation || ''
+        };
+    };
     const updateInfoClient = async () => {
         loadingOpen();
         try {
@@ -258,19 +241,36 @@ export function useServices() {
                 observation: dataEditInfoClient.value.observation
             });
             toast.add({ severity: 'success', summary: 'Editado', detail: response.msg, life: 5000 });
-            closeModal();
+            originalInfoClient.value = { ...dataEditInfoClient.value };
+            return true;
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao editar as informações do cliente', life: 5000 });
             console.error(error);
+            return false;
         } finally {
             loadingClose();
         }
     };
     const validateEditInfoClient = async () => {
-        if (!dataEditInfoClient.value.product || !dataEditInfoClient.value.client || !dataEditInfoClient.value.telephone) {
+        if (!dataEditInfoClient.value.client || !dataEditInfoClient.value.telephone) {
             addMessage('editInfoClient', 'error', 'Preencha todos os campos obrigatórios.', true);
         } else {
-            await updateInfoClient();
+            return await updateInfoClient();
+        }
+        return false;
+    };
+
+    const validateEditProduct = async () => {
+        if (!dataEditProduct.value.product) return;
+        loadingOpen();
+        try {
+            const response = await Axios.put(URI_SERVICES + '/info/cliente/' + dataEditProduct.value.id, dataEditProduct.value);
+            toast.add({ severity: 'success', summary: 'Salvo', detail: response.msg, life: 5000 });
+            closeModal();
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao editar o produto', life: 5000 });
+        } finally {
+            loadingClose();
         }
     };
 
@@ -361,67 +361,72 @@ export function useServices() {
     };
 
     /* Estimate OS */
-    const dataPutOrderOfServiceSimple = ref({});
     const dataPutOrderOfServiceComplete = ref({});
+    const serviceWarrantyDays = ref(0);
+    const serviceWarrantyLoading = ref(false);
     const displayModalOS = ref(false);
     const positionModalOS = ref(false);
     const dataViewEstimateOS = ref([]);
-    const displayButtonRemoveOS = ref(false);
+
+    const addServicePartToOS = async () => {
+        if (!serviceContextOS.value.id || !dataServicePart.value.stock_id || !dataServicePart.value.quantity) {
+            toast.add({ severity: 'warn', summary: 'Dados incompletos', detail: 'Informe peça e quantidade.', life: 4000 });
+            return;
+        }
+
+        servicePartLoading.value = true;
+        try {
+            const response = await Axios.post(API_CONFIG.SERVICE_PARTS(serviceContextOS.value.id), {
+                stock_id: dataServicePart.value.stock_id,
+                quantity: dataServicePart.value.quantity,
+                unit_price: dataServicePart.value.unit_price,
+                serial_number: dataServicePart.value.serial_number || null
+            });
+            toast.add({ severity: 'success', summary: 'Peça registrada', detail: response.msg, life: 4000 });
+            resetServicePartForm();
+            await Promise.all([getServiceParts(serviceContextOS.value.id), getStockOptions(), getServices()]);
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao registrar peça do serviço', life: 5000 });
+        } finally {
+            servicePartLoading.value = false;
+        }
+    };
 
     const openModalOS = async (position, data) => {
+        serviceContextOS.value = data;
         const dataOS = await getUniqueOS(data.order_of_service);
-        displayButtonRemoveOS.value = data.status !== 13;
         if (dataOS) {
-            messageAddEstimateOSSimple.value.length = 0;
             messageAddEstimateOSComplete.value.length = 0;
-            dataViewEstimateOS.value = JSON.parse(dataOS.estimate);
-            dataPutOrderOfServiceSimple.value = dataViewEstimateOS.value && dataViewEstimateOS.value.length > 0
-                ? dataViewEstimateOS.value
-                : { 0: { id: null, description: '', price: null } };
+            dataViewEstimateOS.value = JSON.parse(dataOS.estimate || '[]');
+            dataPutOrderOfServiceComplete.value = { amount: null, description: '', price: null };
+            serviceWarrantyDays.value = Number(dataOS.warranty_days || 0);
+            await Promise.all([getServiceParts(data.id), getStockOptions()]);
             displayModalOS.value = true;
             positionModalOS.value = position;
-            const firstEstimate = dataViewEstimateOS.value[0];
-            typeOS.value = firstEstimate && firstEstimate.amount !== undefined && firstEstimate.amount !== ''
-                ? { label: 'Detalhada', value: 'completa' }
-                : { label: 'Simplificada', value: 'simples' };
         } else {
             toast.add({ severity: 'info', summary: 'Sem Orçamento', detail: 'Não foi encontrado o orçamento desse serviço.', life: 5000 });
         }
     };
 
     const validateUpdateEstimateOS = async (data) => {
-        if (typeOS.value.value === 'simples') {
-            if (!dataPutOrderOfServiceSimple.value[0].description || !dataPutOrderOfServiceSimple.value[0].price) {
-                addMessage('addEstimateOSSimple', 'error', 'Preencha todos os campos obrigatórios.');
-            } else {
-                await updateEstimateOS(data);
-            }
+        if (!dataPutOrderOfServiceComplete.value.amount || !dataPutOrderOfServiceComplete.value.description || !dataPutOrderOfServiceComplete.value.price) {
+            addMessage('addEstimateOSComplete', 'error', 'Preencha quantidade, descrição e preço do item avulso.');
         } else {
-            if (!dataPutOrderOfServiceComplete.value.amount || !dataPutOrderOfServiceComplete.value.description || !dataPutOrderOfServiceComplete.value.price) {
-                addMessage('addEstimateOSComplete', 'error', 'Preencha todos os campos obrigatórios.');
-            } else {
-                await updateEstimateOS(data);
-            }
+            await updateEstimateOS(data);
         }
     };
 
     const updateEstimateOS = async (data) => {
         loadingOpen();
         try {
-            const dataPutOrderOfService = ref({});
-            if (typeOS.value.value === 'simples') {
-                dataPutOrderOfService.value.amount = '';
-                dataPutOrderOfService.value.description = dataPutOrderOfServiceSimple.value[0].description;
-                dataPutOrderOfService.value.price = dataPutOrderOfServiceSimple.value[0].price;
-            } else {
-                dataPutOrderOfService.value = dataPutOrderOfServiceComplete.value;
-            }
+            const dataPutOrderOfService = dataPutOrderOfServiceComplete.value;
             const response = await Axios.put(URI_ORDER_OF_SERVICE + '/' + data.order_of_service + '/orcamento', {
-                type: typeOS.value.value,
-                id: !dataPutOrderOfService.value.id ? null : dataPutOrderOfService.value.id,
-                amount: dataPutOrderOfService.value.amount,
-                description: dataPutOrderOfService.value.description,
-                price: dataPutOrderOfService.value.price
+                type: 'completa',
+                id: !dataPutOrderOfService.id ? null : dataPutOrderOfService.id,
+                amount: dataPutOrderOfService.amount,
+                description: dataPutOrderOfService.description,
+                price: dataPutOrderOfService.price,
+                warranty_days: serviceWarrantyDays.value
             });
             closeModal();
             await openModalOS('top', data);
@@ -434,14 +439,41 @@ export function useServices() {
         }
     };
 
+    const saveServiceWarranty = async () => {
+        if (!serviceContextOS.value.order_of_service) return;
+        serviceWarrantyLoading.value = true;
+        try {
+            await Axios.patch(`${URI_ORDER_OF_SERVICE}/${serviceContextOS.value.order_of_service}/garantia`, { warranty_days: Number(serviceWarrantyDays.value || 0) });
+            toast.add({ severity: 'success', summary: 'Garantia atualizada', detail: 'Garantia do serviço salva.', life: 3000 });
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao salvar a garantia do serviço.', life: 5000 });
+        } finally {
+            serviceWarrantyLoading.value = false;
+        }
+    };
+
+    const deleteServicePartFromOS = async (part) => {
+        if (!serviceContextOS.value.id) return;
+        servicePartLoading.value = true;
+        try {
+            const response = await Axios.delete(`${API_CONFIG.SERVICE_PARTS(serviceContextOS.value.id)}/${part.id}`);
+            toast.add({ severity: 'success', summary: 'Removida', detail: response.msg, life: 4000 });
+            await Promise.all([getServiceParts(serviceContextOS.value.id), getStockOptions(), getServices()]);
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao remover peça do serviço', life: 5000 });
+        } finally {
+            servicePartLoading.value = false;
+        }
+    };
+
     const deleteEstimateOS = async (cod, data) => {
         loadingOpen();
         try {
+            const serviceContext = { ...serviceContextOS.value };
             const response = await Axios.delete(URI_ORDER_OF_SERVICE + '/' + cod + '/orcamento/' + data.id);
             toast.add({ severity: 'success', summary: 'Deletado', detail: response.msg, life: 5000 });
-            const dataOpen = { order_of_service: cod };
             closeModal();
-            await openModalOS('top', dataOpen);
+            await openModalOS('top', serviceContext);
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao deletar registro de OS', life: 5000 });
             console.error(error);
@@ -483,9 +515,10 @@ export function useServices() {
     /* Close modal (centralizado) */
     const closeModal = () => {
         if (displayModalOS.value === true) {
-            dataPutOrderOfServiceComplete.value.amount = null;
-            dataPutOrderOfServiceComplete.value.description = '';
-            dataPutOrderOfServiceComplete.value.price = null;
+            dataPutOrderOfServiceComplete.value = { amount: null, description: '', price: null };
+            serviceWarrantyDays.value = 0;
+            serviceParts.value = [];
+            serviceContextOS.value = {};
         }
         if (displayModalEditPaymentStatus.value === true) {
             messageUpdateStatusPayment.value.length = 0;
@@ -502,8 +535,9 @@ export function useServices() {
             displayModalEditInfo.value = false;
             Object.assign(dataEditInfoClient.value, { id: '', product: '', client: '', telephone: '', adress: '', observation: '' });
         }
-        if (displayModalServicePart.value === true) {
-            closeModalServicePart();
+        if (displayModalEditProduct.value === true) {
+            displayModalEditProduct.value = false;
+            dataEditProduct.value = { id: null, product: '' };
         }
     };
 
@@ -532,37 +566,38 @@ export function useServices() {
         // utils
         formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator, formatTelephone,
         // state
-        loading, filters, typeOS, typeOsOptions,
+        tableLoading, filters,
         // messages
-        messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient,
+        messageAddEstimateOSComplete, messageEditInfoClient,
         messageUpdateStatusService, messageUpdateStatusPayment, messageAddService,
         // status
         statusServiceOptions, statusServiceMapping, statusPaymentOptions,
         getStyleStatusService, getStyleStatusPayment,
         // data
-        dataGetOS, dataGetService,
+        dataGetOS, dataGetService, dataGetServiceTable,
         typesProductOptions,
         // modals
-        displayModalOS, positionModalOS, dataViewEstimateOS, displayButtonRemoveOS,
-        dataPutOrderOfServiceSimple, dataPutOrderOfServiceComplete,
+        displayModalOS, positionModalOS, dataViewEstimateOS,
+        dataPutOrderOfServiceComplete,
         displayModalViewObservation, positionModalViewObservation, dataViewObservation,
         displayModalViewAdress, positionModalViewAdress, dataViewAdress,
         displayModalEditPaymentStatus, positionModalEditPaymentStatus, dataEditPaymentStatus,
         displayModalEditStatus, positionModalEditStatus, dataEditStatus,
         displayModalEditInfo, positionModalEditInfo, dataEditInfoClient,
-        displayModalServicePart, positionModalServicePart, selectedServicePartContext,
-        dataServicePart, stockOptions, servicePartLoading,
+        displayModalEditProduct, positionModalEditProduct, dataEditProduct,
+        dataServicePart, stockOptions, servicePartLoading, serviceParts, serviceContextOS, serviceWarrantyDays, serviceWarrantyLoading,
         displayModalAdd,
         // methods - data fetch
         getStatusService, getStatusPayment, getTypesProduct, getServices,
         // methods - actions
         clearFilter, openModalAdd, closeModal,
-        openModalOS, validateUpdateEstimateOS, deleteEstimateOS,
+        openModalOS, validateUpdateEstimateOS, deleteEstimateOS, addServicePartToOS, deleteServicePartFromOS, saveServiceWarranty,
         openModalViewObservation, openModalViewAdress,
         openModalEditPaymentStatus, validateUpdateStatusPayment,
         openModalEditStatus, validateUpdateStatusService,
         openModalEditInfo, validateEditInfoClient, isInfoClientChanged, resetInfoClient,
-        openModalServicePart, closeModalServicePart, saveServicePart, onServicePartStockChange,
+        openModalEditProduct, validateEditProduct,
+        onServicePartStockChange, getServiceParts,
         confirmDeleteService,
         toggle, openOverlay, idop, op, copyText
     };

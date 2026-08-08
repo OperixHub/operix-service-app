@@ -54,10 +54,10 @@ const formatData = (dataString) => {
 
 /* Message Whatsapp Client */
 const sendWhatsAppMessage = (data, dataEstimate) => {
-    const jsonData = JSON.parse(dataEstimate.estimate);
+    const jsonData = JSON.parse(dataEstimate.estimate || '[]');
     const list = jsonData.map((item) => {
-        const description = item.description.replace(/\n/g, ' ');
-        return `${item.amount} - ${description}`;
+        const description = String(item.description || '').replace(/\n/g, ' ');
+        return `${item.amount || 1} - ${description}`;
     });
     const listString = list.join('\n');
     const phoneNumber = data.telephone;
@@ -76,10 +76,11 @@ const sendWhatsAppMessage = (data, dataEstimate) => {
     }
 
     let message = '';
+    const total = Number(dataEstimate.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     if (data.product == 'Outros') {
-        message = `${initMessage}!\n\n${listString}.\n\nFica no valor de R$${dataEstimate.value},00.`;
+        message = `${initMessage}!\n\n${listString}.\n\nFica no valor de R$ ${total}.`;
     } else {
-        message = `Olá, vim passar o orçamento do conserto ${connection} ${data.product}!\n\n${listString}.\n\nFica no valor de R$${dataEstimate.value},00.`;
+        message = `Olá, vim passar o orçamento do conserto ${connection} ${data.product}!\n\n${listString}.\n\nFica no valor de R$ ${total}.`;
     }
 
     const encodedPhoneNumber = encodeURIComponent(phoneNumber);

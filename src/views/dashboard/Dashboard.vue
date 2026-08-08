@@ -2,7 +2,7 @@
 import { onMounted, computed } from 'vue';
 import { useServices } from '@views/services/composables/useServices';
 
-const { dataGetService, getServices, getStatusService, statusServiceMapping } = useServices();
+const { dataGetService, tableLoading, getServices, getStatusService, statusServiceMapping } = useServices();
 
 const statusCodeByDescription = computed(() => {
     const mapping = {};
@@ -93,8 +93,11 @@ onMounted(async () => {
 
         <div class="col-12 xl:col-6">
             <div class="card shadow-2">
-                <h5>Últimos Serviços</h5>
-                <DataTable :value="dataGetService.slice(0, 5)" responsiveLayout="scroll" paginator :rows="5"> 
+                <div class="page-title-row">
+                    <h5 class="page-title">Últimos Serviços</h5>
+                    <i class="pi pi-info-circle page-title-info" tabindex="0" v-tooltip.top="'Acompanhe os serviços mais recentes cadastrados no sistema.'" aria-label="Informações sobre os últimos serviços" />
+                </div>
+                <DataTable :value="dataGetService.slice(0, 5)" :loading="tableLoading" responsiveLayout="scroll" paginator :rows="5">
                     <Column field="order_of_service" header="OS" :sortable="true" style="width: 15%"></Column>
                     <Column field="client" header="Cliente" :sortable="true" style="width: 35%"></Column>
                     <Column field="product" header="Produto" :sortable="true" style="width: 35%"></Column>
@@ -108,7 +111,10 @@ onMounted(async () => {
         </div>
         <div class="col-12 xl:col-6">
             <div class="card">
-                <h5 class="m-0 mb-4">Últimas Vendas</h5>
+                <div class="page-title-row mb-4">
+                    <h5 class="page-title">Últimas Vendas</h5>
+                    <i class="pi pi-info-circle page-title-info" tabindex="0" v-tooltip.top="'Veja um resumo das vendas mais recentes realizadas.'" aria-label="Informações sobre as últimas vendas" />
+                </div>
                 <DataTable :value="sales" responsiveLayout="scroll" paginator :rows="10">
                     <Column field="id" header="#" />
                     <Column field="customer_name" header="Cliente" />

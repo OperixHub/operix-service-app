@@ -24,6 +24,11 @@ body {
     font-family: var(--font-family);
 }
 
+// Keep a consistent breathing space above every floating-label field.
+.p-float-label {
+    margin-top: 10px;
+}
+
 .page-card,
 .card {
     border-radius: 8px;
@@ -35,8 +40,70 @@ body {
 .card > h5:first-child,
 .page-card > h5:first-child {
     margin-top: 0;
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     letter-spacing: 0;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.page-title-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .75rem;
+}
+
+.page-title-info {
+    color: var(--text-color-secondary);
+    font-size: .9rem;
+    cursor: help;
+}
+
+.basic-data-add-button {
+    width: auto !important;
+    flex: 0 0 auto;
+    align-self: flex-end;
+    margin-top: 0;
+}
+
+.basic-data-default-option {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-left: .5rem;
+}
+
+.basic-data-color-picker {
+    width: 2.5rem !important;
+    height: 2.5rem;
+    box-sizing: border-box;
+}
+
+.basic-data-color-picker .p-colorpicker-preview {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    box-sizing: border-box;
+}
+
+.service-warranty-field {
+    width: auto;
+}
+
+.service-warranty-field .p-inputnumber {
+    width: 9rem !important;
+    margin-left: 10px;
+}
+
+.service-warranty-field .p-inputnumber-input {
+    width: 100% !important;
 }
 
 .p-toolbar {
@@ -66,6 +133,12 @@ body {
     max-width: calc(100vw - 2rem);
     border-radius: 8px;
     box-shadow: var(--opeflow-shadow);
+}
+
+.p-dialog .p-dialog-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-transform: none;
 }
 
 .p-dialog .p-dialog-content {
@@ -99,7 +172,8 @@ body {
 .auth-page {
     min-height: 100vh;
     min-width: 100%;
-    padding: clamp(5rem, 8vw, 7rem) clamp(1rem, 4vw, 2.5rem) 2rem;
+    box-sizing: border-box;
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
     overflow-y: auto;
 }
 
@@ -150,6 +224,20 @@ body {
 .p-inputnumber-input:focus,
 .p-textarea:focus {
     box-shadow: 0 0 0 3px var(--opeflow-focus);
+}
+
+.stock-part-field {
+    min-width: 0;
+}
+
+.stock-part-select {
+    min-height: 2.75rem;
+}
+
+.stock-part-select .p-dropdown-label {
+    align-items: center;
+    display: flex;
+    min-height: 2.75rem;
 }
 
 .p-toolbar {
@@ -270,4 +358,27 @@ body {
     .p-datatable .p-datatable-tbody > tr > td {
         white-space: nowrap;
     }
+}
+.barcode-scanner-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: #111827;
+    min-height: 16rem;
+}
+
+.barcode-scanner-video {
+    display: block;
+    width: 100%;
+    min-height: 16rem;
+    object-fit: cover;
+}
+
+.barcode-scanner-guide {
+    position: absolute;
+    inset: 25% 10%;
+    border: 2px solid #3b82f6;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 9999px rgb(0 0 0 / 25%);
+    pointer-events: none;
 }

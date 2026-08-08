@@ -4,7 +4,7 @@ import AppMenu from './AppMenu.vue';
 
 <template>
     <div class="sidebar-brand">
-        <img src="/layout/images/opeflow-icon.png" alt="" />
+        <img src="/layout/images/opeflow-icon.svg" alt="" />
         <span>Opeflow</span>
     </div>
     <app-menu></app-menu>
@@ -24,8 +24,8 @@ import AppMenu from './AppMenu.vue';
 }
 
 .sidebar-brand img {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 7px;
 }
 </style>

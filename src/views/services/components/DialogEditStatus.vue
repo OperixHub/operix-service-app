@@ -58,8 +58,8 @@ const status = computed({
             </div>
         </div>
         <template #footer>
-            <Button label="Cancelar" icon="pi pi-times" class="p-button-danger" @click="emit('cancel')" />
-            <Button label="Atualizar" icon="pi pi-check" class="p-button-warning" @click="emit('save')" />
+            <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="emit('cancel')" />
+            <Button label="Atualizar" icon="pi pi-check" @click="emit('save')" />
         </template>
     </Dialog>
 </template>

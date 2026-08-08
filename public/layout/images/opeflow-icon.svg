@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Opeflow</title>
+  <desc id="desc">Fluxo de operação com engrenagens conectadas</desc>
+
+  <defs>
+    <mask id="gear-hole" maskUnits="userSpaceOnUse" x="-110" y="-110" width="220" height="220">
+      <rect x="-110" y="-110" width="220" height="220" fill="white" />
+      <circle r="48" fill="black" />
+    </mask>
+
+    <g id="gear-shape" mask="url(#gear-hole)" fill="#2563EB">
+      <circle r="82" />
+      <g>
+        <rect x="-13" y="-104" width="26" height="38" rx="5" />
+        <rect x="-13" y="66" width="26" height="38" rx="5" />
+        <rect x="-104" y="-13" width="38" height="26" rx="5" />
+        <rect x="66" y="-13" width="38" height="26" rx="5" />
+        <rect x="-13" y="-104" width="26" height="38" rx="5" transform="rotate(45)" />
+        <rect x="-13" y="66" width="26" height="38" rx="5" transform="rotate(45)" />
+        <rect x="-104" y="-13" width="38" height="26" rx="5" transform="rotate(45)" />
+        <rect x="66" y="-13" width="38" height="26" rx="5" transform="rotate(45)" />
+      </g>
+    </g>
+  </defs>
+
+  <g fill="none" stroke="#2563EB" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M300 300V112" />
+    <path d="M300 300H170C128 300 112 328 112 370V420" />
+    <path d="M300 300H430C472 300 488 328 488 370V420" />
+  </g>
+
+  <g transform="translate(300 300)">
+    <circle r="64" fill="#2563EB" mask="url(#gear-hole)" />
+  </g>
+
+  <g transform="translate(300 100)"><use href="#gear-shape" /></g>
+  <g transform="translate(112 470)"><use href="#gear-shape" /></g>
+
+  <g transform="translate(488 470)">
+    <use href="#gear-shape" />
+    <circle r="67" fill="#14b8a6" />
+    <path d="M-34 2l23 23 48-52" fill="none" stroke="white" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

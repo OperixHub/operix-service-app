@@ -12,6 +12,7 @@ export const API_CONFIG = {
     NOTIFICATIONS: '/notificacoes',
     STOCK: '/estoque',
     SALES: '/vendas',
+    CLIENTS: '/clientes',
     SERVICE_PARTS: (serviceId) => `/servicos/${serviceId}/pecas`,
     AUTH: {
         LOGIN: '/autenticacao/login',

@@ -63,11 +63,9 @@ const submit = async () => {
 
                 <Message v-if="message" :severity="success ? 'success' : 'error'">{{ message }}</Message>
 
-                <label for="password" class="block text-900 font-medium text-left mb-2 mt-4"> NOVA SENHA </label>
-                <Password id="password" v-model="password" toggleMask placeholder="Nova senha" class="w-full mb-4" :feedback="true" :inputStyle="{ padding: '1rem', width: '100%' }" />
+                <span class="p-float-label mt-5 mb-4"><Password id="password" v-model="password" toggleMask class="w-full" :feedback="true" :inputStyle="{ padding: '1rem', width: '100%' }" /><label for="password"><span class="text-red-500">*</span> Nova senha</label></span>
 
-                <label for="confirmPassword" class="block text-900 font-medium text-left mb-2"> CONFIRME A NOVA SENHA </label>
-                <Password id="confirmPassword" v-model="confirmPassword" toggleMask placeholder="Digite novamente" class="w-full mb-2" :feedback="false" :inputStyle="{ padding: '1rem', width: '100%' }" />
+                <span class="p-float-label mb-2"><Password id="confirmPassword" v-model="confirmPassword" toggleMask class="w-full" :feedback="false" :inputStyle="{ padding: '1rem', width: '100%' }" /><label for="confirmPassword"><span class="text-red-500">*</span> Confirme a nova senha</label></span>
 
                 <div class="password-compatibility mb-5" :class="{ ok: passwordsMatch === true, error: passwordsMatch === false }">
                     <i :class="passwordsMatch === true ? 'pi pi-check-circle' : passwordsMatch === false ? 'pi pi-times-circle' : 'pi pi-info-circle'" />

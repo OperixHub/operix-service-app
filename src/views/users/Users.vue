@@ -5,7 +5,7 @@ import DialogAddUser from './components/DialogAddUser.vue';
 
 const dialogAddUser = ref(null);
 
-const { dataGetUsers, getUsers, confirmDeleteUser } = useUsers();
+const { dataGetUsers, tableLoading, getUsers, confirmDeleteUser } = useUsers();
 
 onBeforeMount(() => {
     getUsers();
@@ -16,7 +16,10 @@ onBeforeMount(() => {
     <ConfirmPopup />
     <Toast />
     <div class="card">
-        <h5>USUÁRIOS</h5>
+        <div class="page-title-row">
+            <h5 class="page-title">Usuários</h5>
+            <i class="pi pi-info-circle page-title-info" tabindex="0" v-tooltip.top="'Gerencie os usuários da empresa e defina os módulos aos quais cada um terá acesso.'" aria-label="Informações sobre a tela de usuários" />
+        </div>
         <Toolbar class="mb-4">
             <template v-slot:start>
                 <div class="my-2">
@@ -25,7 +28,7 @@ onBeforeMount(() => {
                 </div>
             </template>
         </Toolbar>
-        <DataTable :value="dataGetUsers" :rowHover="true" showGridlines responsiveLayout="scroll" tableStyle="min-width: 42rem">
+        <DataTable :value="dataGetUsers" :loading="tableLoading" :rowHover="true" showGridlines responsiveLayout="scroll" tableStyle="min-width: 42rem">
             <Column bodyClass="text-center" field="username" header="Nome de Usuário"></Column>
             <Column bodyClass="text-center" field="email" header="Email">
                 <template #body="{ data }">{{ data.email || '-' }}</template>

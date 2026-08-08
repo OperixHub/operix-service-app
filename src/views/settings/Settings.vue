@@ -1,15 +1,54 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import Axios from '@/services/axios';
 import { API_CONFIG } from '@/services/api';
-import { getCurrentUser } from '@/services/authSession';
+import { getCurrentUser, hasPermission } from '@/services/authSession';
+import Users from '@/views/users/Users.vue';
 
 const toast = useToast();
 const loading = ref(false);
 const profile = ref({});
 const company = ref({});
 const system = ref({});
+
+const isAccountAdmin = computed(() => Boolean(
+    profile.value.admin ||
+    profile.value.root ||
+    getCurrentUser()?.admin ||
+    getCurrentUser()?.root
+));
+
+const readImageAsDataUrl = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+});
+
+const selectImage = async (event, target, field) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        toast.add({ severity: 'warn', summary: 'Arquivo inválido', detail: 'Selecione um arquivo de imagem.', life: 4000 });
+        event.target.value = '';
+        return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'Arquivo muito grande', detail: 'Selecione uma imagem de até 2 MB.', life: 4000 });
+        event.target.value = '';
+        return;
+    }
+
+    try {
+        target.value[field] = await readImageAsDataUrl(file);
+    } catch {
+        toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar a imagem.', life: 4000 });
+        event.target.value = '';
+    }
+};
 
 const moduleLabels = {
     painel: 'Painel',
@@ -91,8 +130,10 @@ onMounted(loadSettings);
     <div class="card">
         <div class="flex align-items-center justify-content-between mb-4">
             <div>
-                <h5 class="mb-1">CONFIGURAÇÕES</h5>
-                <span class="text-600">Perfil, empresa, plano, módulos e permissões.</span>
+                <div class="page-title-row">
+                    <h5 class="page-title">Gestão da Conta</h5>
+                    <i class="pi pi-info-circle page-title-info" tabindex="0" v-tooltip.top="'Gerencie seu perfil, os dados da empresa, os usuários, o plano, os módulos e as permissões da conta.'" aria-label="Informações sobre a gestão da conta" />
+                </div>
             </div>
             <ProgressSpinner v-if="loading" style="width: 32px; height: 32px" strokeWidth="4" />
         </div>
@@ -101,88 +142,69 @@ onMounted(loadSettings);
             <TabPanel header="Perfil">
                 <div class="grid p-fluid mt-2">
                     <div class="field col-12 md:col-6">
-                        <label for="profileName" class="block text-900 font-medium mb-2">Nome</label>
-                        <InputText id="profileName" v-model="profile.name" />
+                        <span class="p-float-label"><InputText id="profileName" v-model="profile.name" /><label for="profileName"><span class="text-red-500">*</span> Nome</label></span>
                     </div>
                     <div class="field col-12 md:col-6">
-                        <label for="profileEmail" class="block text-900 font-medium mb-2">Email</label>
-                        <InputText id="profileEmail" v-model="profile.email" disabled />
+                        <span class="p-float-label"><InputText id="profileEmail" v-model="profile.email" disabled /><label for="profileEmail">Email</label></span>
                     </div>
                     <div class="field col-12 md:col-6">
-                        <label for="profileRole" class="block text-900 font-medium mb-2">Cargo/Papel</label>
-                        <InputText id="profileRole" v-model="profile.role_title" />
-                    </div>
-                    <div class="field col-12 md:col-6">
-                        <label for="profileAvatar" class="block text-900 font-medium mb-2">Avatar URL</label>
-                        <InputText id="profileAvatar" v-model="profile.avatar_url" />
+                        <span class="p-float-label"><InputText id="profileRole" v-model="profile.role_title" /><label for="profileRole">Cargo</label></span>
                     </div>
                 </div>
-                <Button label="Salvar Perfil" icon="pi pi-save" :loading="loading" @click="saveProfile()" />
+                <Button label="Salvar" icon="pi pi-check" :loading="loading" @click="saveProfile()" />
             </TabPanel>
 
-            <TabPanel header="Empresa">
+            <TabPanel v-if="isAccountAdmin" header="Empresa">
                 <div class="grid p-fluid mt-2">
                     <div class="field col-12 md:col-6">
-                        <label for="companyName" class="block text-900 font-medium mb-2">Nome</label>
-                        <InputText id="companyName" v-model="company.name" />
+                        <span class="p-float-label"><InputText id="companyName" v-model="company.name" /><label for="companyName"><span class="text-red-500">*</span> Nome</label></span>
                     </div>
                     <div class="field col-12 md:col-6">
-                        <label for="companyCnpj" class="block text-900 font-medium mb-2">CNPJ</label>
-                        <InputText id="companyCnpj" v-model="company.cnpj" />
+                        <span class="p-float-label"><InputText id="companyCnpj" v-model="company.cnpj" /><label for="companyCnpj">CNPJ</label></span>
                     </div>
                     <div class="field col-12 md:col-6">
-                        <label for="companyAccessCode" class="block text-900 font-medium mb-2">Código para acesso interno</label>
-                        <div class="p-inputgroup">
-                            <InputText id="companyAccessCode" :modelValue="company.access_code || ''" readonly />
+                        <div class="flex align-items-end gap-1">
+                            <span class="p-float-label flex-1">
+                                <InputText id="companyAccessCode" :modelValue="company.access_code || ''" readonly class="w-full" />
+                                <label for="companyAccessCode">Código para acesso interno</label>
+                            </span>
                             <Button icon="pi pi-copy" v-tooltip.top="'Copiar código'" @click="copyAccessCode" />
                         </div>
                     </div>
                     <div class="field col-12">
-                        <label for="companyLogo" class="block text-900 font-medium mb-2">Logo URL</label>
-                        <InputText id="companyLogo" v-model="company.logo_url" />
+                        <label for="companyLogo" class="block text-900 font-medium mb-2">Logo</label>
+                        <input id="companyLogo" type="file" accept="image/*" class="p-inputtext p-component w-full" @change="selectImage($event, company, 'logo_url')" />
                     </div>
                     <div class="field col-12">
-                        <label for="companyDescription" class="block text-900 font-medium mb-2">Descrição</label>
-                        <Textarea id="companyDescription" v-model="company.description" rows="4" />
+                        <span class="p-float-label"><Textarea id="companyDescription" v-model="company.description" rows="4" /><label for="companyDescription">Descrição</label></span>
                     </div>
                 </div>
-                <Button label="Salvar Empresa" icon="pi pi-save" :loading="loading" @click="saveCompany()" />
+                <Button label="Salvar" icon="pi pi-check" :loading="loading" @click="saveCompany()" />
             </TabPanel>
 
-            <TabPanel header="Sistema">
+            <TabPanel v-if="isAccountAdmin" header="Sistema">
                 <div class="grid mt-2">
-                    <div class="col-12 md:col-4">
+                    <div class="col-12 md:col-3">
                         <div class="surface-border border-1 border-round p-3 h-full">
                             <div class="text-600 mb-2">Plano atual</div>
                             <div class="text-900 text-xl font-medium">{{ system.access?.plan?.label || company.plan_key || '-' }}</div>
                             <Tag v-if="system.access?.trial?.active" severity="info" class="mt-3" :value="`Trial: ${system.access.trial.days_remaining} dias`" />
                         </div>
                     </div>
-                    <div class="col-12 md:col-4">
+                    <div class="col-12 md:col-5">
                         <div class="surface-border border-1 border-round p-3 h-full">
-                            <div class="text-600 mb-2">Modo</div>
-                            <div class="text-900 text-xl font-medium">{{ system.access?.full_access ? 'Acesso completo' : 'Controlado por plano' }}</div>
-                        </div>
-                    </div>
-                    <div class="col-12 md:col-4">
-                        <div class="surface-border border-1 border-round p-3 h-full">
-                            <div class="text-600 mb-2">Permissões efetivas</div>
-                            <div class="text-900 text-xl font-medium">{{ system.effective_permissions?.length || 0 }}</div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <h6>Módulos habilitados</h6>
-                        <div class="flex flex-wrap gap-2">
-                            <Tag v-for="moduleKey in system.access?.enabled_modules || []" :key="moduleKey" severity="success" :value="moduleLabels[moduleKey] || moduleKey" />
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <h6>Feature flags</h6>
-                        <div class="flex flex-wrap gap-2">
-                            <Tag v-for="flag in system.access?.feature_flags || []" :key="flag" severity="info" :value="flag" />
+                            <div class="text-600 mb-2">Módulos habilitados</div>
+                            <div class="flex flex-wrap gap-2">
+                                <Tag v-for="moduleKey in system.access?.enabled_modules || []" :key="moduleKey" severity="success" :value="moduleLabels[moduleKey] || moduleKey" />
+                                <span v-if="!(system.access?.enabled_modules || []).length" class="text-600">Nenhum módulo habilitado</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </TabPanel>
+
+            <TabPanel v-if="isAccountAdmin && hasPermission('usuarios.acesso')" header="Usuários">
+                <Users />
             </TabPanel>
         </TabView>
     </div>

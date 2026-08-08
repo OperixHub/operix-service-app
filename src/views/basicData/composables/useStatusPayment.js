@@ -22,6 +22,7 @@ export function useStatusPayment() {
     const { handleSubmit } = useForm();
 
     const dataGetStatusPayment = ref([]);
+    const tableLoading = ref(false);
     const dataPostStatusPayment = ref({
         description: '',
         color: COLOR_DEFAULT,
@@ -29,7 +30,7 @@ export function useStatusPayment() {
     });
 
     const getStatusPayment = async () => {
-        loadingOpen();
+        tableLoading.value = true;
         try {
             const response = await Axios.get(URI_STATUS_PAYMENT);
             dataGetStatusPayment.value = response.data;
@@ -44,7 +45,7 @@ export function useStatusPayment() {
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar status de pagamento', life: 5000 });
         } finally {
-            loadingClose();
+            tableLoading.value = false;
         }
     };
 
@@ -112,6 +113,7 @@ export function useStatusPayment() {
 
     return {
         dataGetStatusPayment,
+        tableLoading,
         dataPostStatusPayment,
         getStatusPayment,
         confirmDeleteStatusPayment,

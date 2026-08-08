@@ -57,20 +57,15 @@ const submit = async () => {
                 <Message v-if="message" severity="error">{{ message }}</Message>
 
                 <div class="mt-4">
-                    <label for="companyName" class="block text-900 text-left font-medium mb-2"> NOME DA EMPRESA </label>
-                    <InputText id="companyName" v-model="companyName" placeholder="Ex: Opeflow Ltda" class="w-full mb-4" style="padding: 1rem" />
+                    <span class="p-float-label mb-4"><InputText id="companyName" v-model="companyName" class="w-full" style="padding: 1rem" /><label for="companyName">Nome da empresa</label></span>
 
-                    <label for="name" class="block text-900 text-left font-medium mb-2"> SEU NOME COMPLETO </label>
-                    <InputText id="name" v-model="name" placeholder="Como quer ser chamado" class="w-full mb-4" style="padding: 1rem" />
+                    <span class="p-float-label mb-4"><InputText id="name" v-model="name" class="w-full" style="padding: 1rem" /><label for="name">Seu nome completo</label></span>
 
-                    <label for="username" class="block text-900 text-left font-medium mb-2"> NOME DE USUÁRIO </label>
-                    <InputText id="username" v-model="username" placeholder="usuario123" class="w-full mb-4" style="padding: 1rem" />
+                    <span class="p-float-label mb-4"><InputText id="username" v-model="username" class="w-full" style="padding: 1rem" /><label for="username">Nome de usuário</label></span>
 
-                    <label for="cnpj" class="block text-900 text-left font-medium mb-2"> CNPJ <span class="text-500">(opcional)</span></label>
-                    <InputText id="cnpj" v-model="cnpj" placeholder="00.000.000/0000-00" class="w-full mb-4" style="padding: 1rem" />
+                    <span class="p-float-label mb-4"><InputText id="cnpj" v-model="cnpj" class="w-full" style="padding: 1rem" /><label for="cnpj">CNPJ <span class="text-500">(opcional)</span></label></span>
 
-                    <label for="description" class="block text-900 text-left font-medium mb-2"> DESCRIÇÃO <span class="text-500">(opcional)</span></label>
-                    <Textarea id="description" v-model="description" rows="3" autoResize class="w-full mb-5" />
+                    <span class="p-float-label mb-5"><Textarea id="description" v-model="description" rows="3" autoResize class="w-full" /><label for="description">Descrição <span class="text-500">(opcional)</span></label></span>
 
                     <Button label="Concluir" icon="pi pi-check" class="w-full p-3 text-xl" @click="submit()" />
                     <Button label="Pular por agora" icon="pi pi-arrow-right" class="w-full p-3 mt-3 p-button-text p-button-secondary" @click="submit()" />

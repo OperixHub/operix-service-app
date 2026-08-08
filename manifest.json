@@ -10,9 +10,9 @@
     "theme_color": "#0f766e",
     "icons": [
         {
-            "src": "/layout/images/opeflow-icon.png",
+            "src": "/layout/images/opeflow-icon.svg",
             "sizes": "1254x1254",
-            "type": "image/png"
+            "type": "image/svg"
         }
     ]
 }

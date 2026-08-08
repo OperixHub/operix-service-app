@@ -79,6 +79,12 @@ const router = createRouter({
                     name: 'vendas',
                     meta: { permission: 'vendas.acesso' },
                     component: () => import('@/views/sales/Sales.vue')
+                },
+                {
+                    path: '/clientes',
+                    name: 'clientes',
+                    meta: { permission: 'clientes.acesso' },
+                    component: () => import('@/views/clients/Clients.vue')
                 }
             ]
         }

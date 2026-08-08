@@ -49,8 +49,7 @@ const submit = async () => {
 
                 <Message v-if="message" :severity="resetUrl || message.includes('enviaremos') ? 'success' : 'error'">{{ message }}</Message>
 
-                <label for="email" class="block text-900 font-medium text-left mb-2 mt-4"> E-MAIL </label>
-                <InputText id="email" v-model="email" type="email" placeholder="seu@email.com" class="w-full mb-4" style="padding: 1rem" />
+                <span class="p-float-label mt-5 mb-4"><InputText id="email" v-model="email" type="email" class="w-full" style="padding: 1rem" /><label for="email"><span class="text-red-500">*</span> E-mail</label></span>
 
                 <Button :loading="loading" label="Enviar link" icon="pi pi-send" class="w-full p-3 text-xl mb-4" @click="submit()" />
                 <Button v-if="resetUrl" label="Abrir link de redefinição" icon="pi pi-external-link" class="w-full p-3 mb-4 p-button-outlined" @click="openResetUrl()" />

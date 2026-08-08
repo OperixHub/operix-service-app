@@ -20,13 +20,14 @@ export function useStatusServices() {
     const { handleSubmit } = useForm();
 
     const dataGetStatusServices = ref([]);
+    const tableLoading = ref(false);
     const dataPostStatusServices = ref({
         description: '',
         color: '3B82F6'
     });
 
     const getStatusServices = async () => {
-        loadingOpen();
+        tableLoading.value = true;
         try {
             const response = await Axios.get(URI_STATUS_SERVICE);
             dataGetStatusServices.value = response.data;
@@ -38,7 +39,7 @@ export function useStatusServices() {
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar status de serviço', life: 5000 });
         } finally {
-            loadingClose();
+            tableLoading.value = false;
         }
     };
 
@@ -103,6 +104,7 @@ export function useStatusServices() {
 
     return {
         dataGetStatusServices,
+        tableLoading,
         dataPostStatusServices,
         getStatusServices,
         confirmDeleteStatusServices,

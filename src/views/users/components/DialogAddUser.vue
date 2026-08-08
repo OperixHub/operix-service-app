@@ -87,8 +87,8 @@ defineExpose({ open: openModalAdd });
             </div>
         </div>
         <template #footer>
-            <Button label="Cancelar" icon="pi pi-times" class="p-button-danger" @click="closeModal()" />
-            <Button label="Adicionar" icon="pi pi-check" class="p-button-success" @click="validatePostUser()" />
+            <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="closeModal()" />
+            <Button label="Adicionar" icon="pi pi-check" @click="validatePostUser()" />
         </template>
     </Dialog>
 </template>

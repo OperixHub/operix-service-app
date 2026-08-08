@@ -2,6 +2,7 @@ const routeConfig = {
     '/painel': { label: 'Painel', to: '/painel', icon: 'pi pi-fw pi-desktop', permission: 'painel.acesso' },
     '/servicos': { label: 'Serviços', to: '/servicos', icon: 'pi pi-fw pi-wrench', permission: 'servicos.acesso' },
     '/vendas': { label: 'Vendas', to: '/vendas', icon: 'pi pi-fw pi-shopping-cart', permission: 'vendas.acesso' },
+    '/clientes': { label: 'Clientes', to: '/clientes', icon: 'pi pi-fw pi-users', permission: 'clientes.acesso' },
     '/estoque': { label: 'Estoque', to: '/estoque', icon: 'pi pi-fw pi-box', permission: 'estoque.acesso' },
     '/usuarios': { label: 'Usuários', to: '/usuarios', icon: 'pi pi-fw pi-user', permission: 'usuarios.acesso' },
     '/dados-basicos': {
@@ -19,14 +20,14 @@ export const MENU_SECTIONS = [
             { ...routeConfig['/painel'], plain: true },
             routeConfig['/servicos'],
             routeConfig['/vendas'],
+            routeConfig['/clientes'],
             routeConfig['/estoque'],
             {
                 label: 'Definições',
                 icon: 'pi pi-fw pi-cog',
                 items: [
-                    routeConfig['/usuarios'],
-                    routeConfig['/configuracoes'],
-                    routeConfig['/dados-basicos']
+                    { ...routeConfig['/configuracoes'], icon: null },
+                    { ...routeConfig['/dados-basicos'], icon: null }
                 ]
             }
         ]

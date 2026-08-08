@@ -15,10 +15,11 @@ export function useTypesProducts() {
     const { handleSubmit } = useForm();
 
     const dataGetTypesProduct = ref([]);
+    const tableLoading = ref(false);
     const dataPostTypesProduct = ref([]);
 
     const getTypesProduct = async () => {
-        loadingOpen();
+        tableLoading.value = true;
         try {
             const response = await Axios.get(URI_TYPES_PRODUCT);
             dataGetTypesProduct.value = response.data;
@@ -26,7 +27,7 @@ export function useTypesProducts() {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response.data.msg, life: 5000 });
             console.error(error);
         } finally {
-            loadingClose();
+            tableLoading.value = false;
         }
     };
 
@@ -88,6 +89,7 @@ export function useTypesProducts() {
 
     return {
         dataGetTypesProduct,
+        tableLoading,
         dataPostTypesProduct,
         getTypesProduct,
         confirmDeleteTypesProduct,

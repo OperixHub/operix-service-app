@@ -9,13 +9,13 @@ import { hasPermission } from '@/services/authSession';
     <ConfirmPopup />
     <Toast />
     <div class="grid p-fluid">
-        <div v-if="hasPermission('tipos-produto.acesso')" class="field col-12 md:col-4">
+        <div v-if="hasPermission('tipos-produto.acesso')" class="field col-12 md:col-12">
             <TableTypesProducts />
         </div>
-        <div v-if="hasPermission('status-servico.acesso')" class="field col-12 md:col-4">
+        <div v-if="hasPermission('status-servico.acesso')" class="field col-12 md:col-6">
             <TableStatusServices />
         </div>
-        <div v-if="hasPermission('status-pagamento.acesso')" class="field col-12 md:col-4">
+        <div v-if="hasPermission('status-pagamento.acesso')" class="field col-12 md:col-6">
             <TableStatusPayment />
         </div>
     </div>

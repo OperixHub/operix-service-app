@@ -10,9 +10,10 @@ export function useUsers() {
     const confirmPopup = useConfirm();
 
     const dataGetUsers = ref([]);
+    const tableLoading = ref(false);
 
     const getUsers = async () => {
-        loadingOpen();
+        tableLoading.value = true;
         try {
             const response = await Axios.get(API_CONFIG.USERS);
             dataGetUsers.value = response.data;
@@ -20,7 +21,7 @@ export function useUsers() {
             toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao buscar usuários.', life: 5000 });
             console.error(error);
         } finally {
-            loadingClose();
+            tableLoading.value = false;
         }
     };
 
@@ -53,6 +54,7 @@ export function useUsers() {
 
     return {
         dataGetUsers,
+        tableLoading,
         getUsers,
         deleteUser,
         confirmDeleteUser

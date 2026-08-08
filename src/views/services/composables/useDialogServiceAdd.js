@@ -9,6 +9,7 @@ export function useDialogServiceAdd() {
     const toast = useToast();
     const displayModalAdd = inject('displayDialogAdd');
     const dataPostService = ref({});
+    const clients = ref([]);
 
     const statusServiceMapping = ref([]);
     const getStatusService = async () => {
@@ -35,11 +36,25 @@ export function useDialogServiceAdd() {
         }
     };
 
+    const getClients = async () => {
+        try {
+            clients.value = (await Axios.get(API_CONFIG.CLIENTS)).data || [];
+        } catch (error) { console.error(error); }
+    };
+
+    const selectClient = (client) => {
+        if (!client) return;
+        dataPostService.value.client = client.full_name;
+        dataPostService.value.telephone = client.phone;
+        dataPostService.value.adress = client.address || '';
+    };
+
     const closeModal = () => {
         if (displayModalAdd.value === true) {
             messageAddService.value.length = 0;
             displayModalAdd.value = false;
             dataPostService.value.product = '';
+            dataPostService.value.client_id = null;
             dataPostService.value.client = '';
             dataPostService.value.telephone = '';
             dataPostService.value.adress = '';
@@ -53,6 +68,7 @@ export function useDialogServiceAdd() {
         try {
             await Axios.post(API_CONFIG.SERVICES, {
                 product: dataPostService.value.product,
+                client_id: dataPostService.value.client_id,
                 client: dataPostService.value.client,
                 telephone: dataPostService.value.telephone,
                 adress: dataPostService.value.adress,
@@ -71,7 +87,7 @@ export function useDialogServiceAdd() {
     };
 
     const validatePostService = async () => {
-        if (!dataPostService.value.product || !dataPostService.value.client || !dataPostService.value.telephone || !dataPostService.value.status.id) {
+        if (!dataPostService.value.product || !dataPostService.value.client_id || !dataPostService.value.telephone || !dataPostService.value.status.id) {
             addMessage('addService', 'error', 'Preencha todos os campos obrigatórios.');
         } else {
             await postService();
@@ -90,6 +106,9 @@ export function useDialogServiceAdd() {
         messageAddService,
         getStatusService,
         getTypesProduct,
+        clients,
+        getClients,
+        selectClient,
         validatePostService,
         closeModal,
         initDate

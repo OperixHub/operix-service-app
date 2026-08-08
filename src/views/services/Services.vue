@@ -6,35 +6,35 @@ import DialogViewOS from './components/DialogViewOS.vue';
 import DialogEditStatus from './components/DialogEditStatus.vue';
 import DialogEditPaymentStatus from './components/DialogEditPaymentStatus.vue';
 import DialogEditInfoClient from './components/DialogEditInfoClient.vue';
-import DialogServicePart from './components/DialogServicePart.vue';
+import DialogEditProduct from './components/DialogEditProduct.vue';
 
 const {
     formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator, formatTelephone,
-    loading, filters, typeOS, typeOsOptions,
-    messageAddEstimateOSSimple, messageAddEstimateOSComplete, messageEditInfoClient,
+    tableLoading, filters,
+    messageAddEstimateOSComplete, messageEditInfoClient,
     messageUpdateStatusService, messageUpdateStatusPayment,
     statusServiceOptions, statusPaymentOptions,
     getStyleStatusService, getStyleStatusPayment,
-    dataGetOS, dataGetService, typesProductOptions,
-    displayModalOS, positionModalOS, dataViewEstimateOS, displayButtonRemoveOS,
-    dataPutOrderOfServiceSimple, dataPutOrderOfServiceComplete,
+    dataGetOS, dataGetServiceTable, typesProductOptions,
+    displayModalOS, positionModalOS, dataViewEstimateOS,
+    dataPutOrderOfServiceComplete,
+    serviceParts, serviceContextOS, dataServicePart, stockOptions, servicePartLoading, serviceWarrantyDays, serviceWarrantyLoading,
     displayModalViewObservation, positionModalViewObservation, dataViewObservation,
-    displayModalViewAdress, positionModalViewAdress, dataViewAdress,
     displayModalEditPaymentStatus, positionModalEditPaymentStatus, dataEditPaymentStatus,
     displayModalEditStatus, positionModalEditStatus, dataEditStatus,
     displayModalEditInfo, positionModalEditInfo, dataEditInfoClient,
-    displayModalServicePart, positionModalServicePart, selectedServicePartContext,
-    dataServicePart, stockOptions, servicePartLoading,
+    displayModalEditProduct, positionModalEditProduct, dataEditProduct,
     getStatusService, getStatusPayment, getTypesProduct, getServices,
     clearFilter, openModalAdd, closeModal,
-    openModalOS, validateUpdateEstimateOS, deleteEstimateOS,
-    openModalViewObservation, openModalViewAdress,
+    openModalOS, validateUpdateEstimateOS, deleteEstimateOS, addServicePartToOS, deleteServicePartFromOS,
+    openModalViewObservation,
     openModalEditPaymentStatus, validateUpdateStatusPayment,
     openModalEditStatus, validateUpdateStatusService,
-    openModalEditInfo, validateEditInfoClient, isInfoClientChanged, resetInfoClient,
-    openModalServicePart, closeModalServicePart, saveServicePart, onServicePartStockChange,
+    openModalEditInfo, validateEditInfoClient, resetInfoClient,
+    openModalEditProduct, validateEditProduct,
+    onServicePartStockChange, saveServiceWarranty,
     confirmDeleteService,
-    toggle, openOverlay, op, copyText
+    toggle, openOverlay, op
 } = useServices();
 
 onBeforeMount(() => {
@@ -57,24 +57,26 @@ onBeforeMount(() => {
         :position="String(positionModalOS)"
         :dataGetOS="dataGetOS"
         :dataViewEstimateOS="dataViewEstimateOS"
-        :typeOS="typeOS"
-        :row-data="dataGetOS"
-        :data-get-os="dataGetOS"
-        :data-view-estimate-os="dataViewEstimateOS"
-        :type-os="typeOS"
-        :type-os-options="typeOsOptions"
-        :data-put-order-of-service-simple="dataPutOrderOfServiceSimple"
+        :row-data="serviceContextOS"
         :data-put-order-of-service-complete="dataPutOrderOfServiceComplete"
-        :display-button-remove-os="displayButtonRemoveOS"
-        :message-simple="messageAddEstimateOSSimple"
+        :service-parts="serviceParts"
+        :stock-options="stockOptions"
+        :data-service-part="dataServicePart"
+        :service-part-loading="servicePartLoading"
+        :on-service-part-stock-change="onServicePartStockChange"
+        :warranty-days="serviceWarrantyDays"
+        :warranty-loading="serviceWarrantyLoading"
+        :on-save-warranty="saveServiceWarranty"
         :message-complete="messageAddEstimateOSComplete"
         :send-whats-app-message="sendWhatsAppMessage"
         :pdf-generator="pdfGenerator"
-        @update:typeOS="typeOS = $event"
-        @update:data-put-order-of-service-simple="dataPutOrderOfServiceSimple = $event"
         @update:data-put-order-of-service-complete="dataPutOrderOfServiceComplete = $event"
+        @update:data-service-part="dataServicePart = $event"
+        @update:warranty-days="serviceWarrantyDays = $event"
         @save="validateUpdateEstimateOS"
+        @add-service-part="addServicePartToOS"
         @delete="deleteEstimateOS"
+        @delete-part="deleteServicePartFromOS"
     />
 
     <DialogEditStatus
@@ -109,32 +111,30 @@ onBeforeMount(() => {
         v-model="displayModalEditInfo"
         :position="String(positionModalEditInfo)"
         :data-edit-info-client="dataEditInfoClient"
-        :types-product-options="typesProductOptions"
         :messages="messageEditInfoClient"
-        :is-info-client-changed="isInfoClientChanged"
+        :save="validateEditInfoClient"
         @update:data-edit-info-client="dataEditInfoClient = $event"
-        @save="validateEditInfoClient"
         @cancel="closeModal"
         @reset="resetInfoClient"
     />
 
-    <DialogServicePart
-        v-model="displayModalServicePart"
-        :position="String(positionModalServicePart)"
-        :service="selectedServicePartContext"
-        :form="dataServicePart"
-        :stock-options="stockOptions"
-        :loading="servicePartLoading"
-        @update:form="dataServicePart = $event"
-        @stock-change="onServicePartStockChange"
-        @save="saveServicePart"
-        @cancel="closeModalServicePart"
+    <DialogEditProduct
+        v-model="displayModalEditProduct"
+        :position="String(positionModalEditProduct)"
+        :data="dataEditProduct"
+        :types-product-options="typesProductOptions"
+        @update:data="dataEditProduct = $event"
+        @save="validateEditProduct"
+        @cancel="closeModal"
     />
 
     <div class="grid">
         <div class="col-12">
             <div class="card">
-                <h5>Serviços</h5>
+                <div class="page-title-row">
+                    <h5 class="page-title">Serviços</h5>
+                    <i class="pi pi-info-circle page-title-info" tabindex="0" v-tooltip.top="'Cadastre, acompanhe e atualize ordens de serviço, clientes, situações e pagamentos.'" aria-label="Informações sobre a tela de serviços" />
+                </div>
                 <Toolbar class="mb-4">
                     <template v-slot:start>
                         <div class="my-2">
@@ -148,7 +148,7 @@ onBeforeMount(() => {
                     </template>
                 </Toolbar>
                 <DataTable
-                    :value="dataGetService"
+                    :value="dataGetServiceTable"
                     :paginator="true"
                     class="p-datatable-gridlines"
                     :rows="10"
@@ -156,9 +156,12 @@ onBeforeMount(() => {
                     :rowHover="true"
                     v-model:filters="filters"
                     filterDisplay="menu"
-                    :loading="loading"
+                    :loading="tableLoading"
                     :filters="filters"
                     responsiveLayout="scroll"
+                    :rowsPerPageOptions="[5, 10, 20, 50]"
+                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+                    currentPageReportTemplate="{first} a {last} de {totalRecords}"
                     :globalFilterFields="['order_of_service', 'product', 'client', 'telephone', 'created_at', 'adress', 'observation']"
                 >
                     <template #empty> Nenhum registro encontrado. </template>
@@ -203,10 +206,12 @@ onBeforeMount(() => {
                     <!-- Produto -->
                     <Column bodyClass="text-center" field="product" header="Produto" :showFilterMatchModes="false">
                         <template #body="{ data }">
-                            {{ data.product }}
+                            <div class="flex align-items-center justify-content-center gap-2">
+                                <span @click="openModalEditProduct('top', data)" v-tooltip.top="'Editar produto'" style="cursor: pointer">{{ data.product }}</span>
+                            </div>
                         </template>
                         <template #filter="{ filterModel }">
-                            <Dropdown v-model="filterModel.value" :options="typesProductOptions" placeholder="Todos" class="p-column-filter" :showClear="true">
+                            <Dropdown v-model="filterModel.value" :options="typesProductOptions" placeholder="Todos" class="p-column-filter" :showClear="true" filter>
                                 <template #value="slotProps">
                                     <div v-if="slotProps.value">
                                         <Badge :value="slotProps.value" severity="primary" />
@@ -221,31 +226,18 @@ onBeforeMount(() => {
                     </Column>
 
                     <!-- Cliente -->
-                    <Column bodyClass="text-center" field="client" header="Informações do Cliente" :showFilterMatchModes="false" dataType="text" style="width: auto">
+                    <Column bodyClass="text-center" field="client_filter" header="Cliente" :showFilterMatchModes="false" dataType="text" style="width: auto">
                         <template #body="{ data }">
-                            {{ data.client }}
-                            <Dialog v-if="data.id == dataViewAdress.id" header="Endereço" v-model:visible="displayModalViewAdress" :position="String(positionModalViewAdress)" :breakpoints="{ '960px': '75vw' }" :style="{ width: '25vw' }" :modal="true">
-                                <h6 class="line-height-3 m-0">{{ data.adress }}</h6>
-                            </Dialog>
-                            <i v-if="data.adress" @click="openModalViewAdress('top', data)" class="text-green-500 pi pi-map-marker" v-tooltip.top="'Visualizar Endereço'" style="cursor: pointer"></i>
+                            <div class="flex align-items-center justify-content-center gap-2 flex-wrap">
+                                <div class="flex flex-column align-items-center">
+                                    <span>{{ data.client }}</span>
+                                    <span class="text-600 text-sm">{{ formatTelephone(data.telephone) }}</span>
+                                </div>
+                                <i @click="openModalEditInfo('top', data)" class="text-blue-500 pi pi-info-circle text-xl" v-tooltip.top="'Informações do cliente'" style="cursor: pointer"></i>
+                            </div>
                         </template>
                         <template #filter="{ filterModel }">
-                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Nome" />
-                        </template>
-                    </Column>
-
-                    <!-- Telefone -->
-                    <Column bodyClass="text-center" field="telephone" header="Contato" :showFilterMatchModes="false" dataType="text" style="width: auto">
-                        <template #body="{ data }">
-                            <a @click="copyText(data.telephone)" style="cursor: pointer; margin-right: 5px;">
-                                {{ formatTelephone(data.telephone) }}
-                            </a>
-                            <a :href="`https://wa.me/${data.telephone}`" target="_blank">
-                                <Tag severity="success" v-tooltip.top="'Abrir no Whatsapp'"><i class="pi pi-whatsapp"></i></Tag>
-                            </a>
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="" />
+                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Nome ou telefone" />
                         </template>
                     </Column>
 
@@ -306,9 +298,7 @@ onBeforeMount(() => {
                         <template #body="{ data }">
                             <Button v-tooltip.top="'Ações'" icon="pi pi-ellipsis-v" @click="toggle($event, data.id)" class="p-button-rounded surface-500 surface-border" />
                             <OverlayPanel v-if="openOverlay(data.id)" ref="op">
-                                <Button icon="pi pi-user-edit" @click="openModalEditInfo('top', data)" class="p-button-rounded p-button-warning" v-tooltip.top="'Ver informações'" />
-                                <Button icon="pi pi-box" @click="openModalServicePart('top', data)" class="ml-1 p-button-rounded p-button-help" v-tooltip.top="'Registrar peça usada'" />
-                                <Button icon="pi pi-share-alt" @click="sendInfoClientsWhats(data)" class="ml-1 p-button-rounded p-button-success" v-tooltip.top="'Enviar informações'" />
+                                <Button icon="pi pi-share-alt" @click="sendInfoClientsWhats(data)" class="ml-1 p-button-rounded p-button-success" v-tooltip.top="'Compartilhar informações do serviço'" />
                                 <Button @click="confirmDeleteService($event, data)" icon="pi pi-trash" class="ml-1 p-button-rounded p-button-danger" v-tooltip.top="'Excluir'" />
                             </OverlayPanel>
                         </template>

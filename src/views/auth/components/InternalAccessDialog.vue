@@ -77,35 +77,13 @@ defineExpose({ open });
     >
         <div class="p-fluid pt-2">
             <div class="field">
-                <label for="internalCompanyCode" class="block text-900 font-medium mb-2">Código da empresa</label>
-                <InputText
-                    id="internalCompanyCode"
-                    v-model="companyCode"
-                    autocomplete="organization"
-                    placeholder="OPE-XXXX-XXXX"
-                    class="w-full"
-                />
+                <span class="p-float-label"><InputText id="internalCompanyCode" v-model="companyCode" autocomplete="organization" class="w-full" /><label for="internalCompanyCode"><span class="text-red-500">*</span> Código da empresa</label></span>
             </div>
             <div class="field">
-                <label for="internalUsername" class="block text-900 font-medium mb-2">Usuário</label>
-                <InputText
-                    id="internalUsername"
-                    v-model="username"
-                    autocomplete="username"
-                    class="w-full"
-                />
+                <span class="p-float-label"><InputText id="internalUsername" v-model="username" autocomplete="username" class="w-full" /><label for="internalUsername"><span class="text-red-500">*</span> Usuário</label></span>
             </div>
             <div class="field mb-0">
-                <label for="internalPassword" class="block text-900 font-medium mb-2">Senha</label>
-                <Password
-                    id="internalPassword"
-                    v-model="password"
-                    autocomplete="current-password"
-                    toggleMask
-                    :feedback="false"
-                    :inputStyle="{ width: '100%' }"
-                    class="w-full"
-                />
+                <span class="p-float-label"><Password id="internalPassword" v-model="password" autocomplete="current-password" toggleMask :feedback="false" :inputStyle="{ width: '100%' }" class="w-full" /><label for="internalPassword"><span class="text-red-500">*</span> Senha</label></span>
             </div>
         </div>
         <template #footer>
