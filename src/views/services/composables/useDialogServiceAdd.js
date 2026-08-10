@@ -10,6 +10,7 @@ export function useDialogServiceAdd() {
     const displayModalAdd = inject('displayDialogAdd');
     const dataPostService = ref({});
     const clients = ref([]);
+    const users = ref([]);
 
     const statusServiceMapping = ref([]);
     const getStatusService = async () => {
@@ -41,6 +42,7 @@ export function useDialogServiceAdd() {
             clients.value = (await Axios.get(API_CONFIG.CLIENTS)).data || [];
         } catch (error) { console.error(error); }
     };
+    const getUsers = async () => { try { users.value = (await Axios.get(API_CONFIG.USERS)).data || []; } catch (error) { console.error(error); } };
 
     const selectClient = (client) => {
         if (!client) return;
@@ -60,6 +62,7 @@ export function useDialogServiceAdd() {
             dataPostService.value.adress = '';
             dataPostService.value.status = '';
             dataPostService.value.observation = '';
+            dataPostService.value.responsible_user_id = null;
         }
     };
 
@@ -74,6 +77,7 @@ export function useDialogServiceAdd() {
                 adress: dataPostService.value.adress,
                 status_id: dataPostService.value.status.id,
                 observation: dataPostService.value.observation,
+                responsible_user_id: dataPostService.value.responsible_user_id,
                 created_at: dataPostService.value.created_at
             });
             toast.add({ severity: 'success', summary: 'Adicionado', detail: 'Serviço adicionado com sucesso', life: 5000 });
@@ -108,6 +112,8 @@ export function useDialogServiceAdd() {
         getTypesProduct,
         clients,
         getClients,
+        users,
+        getUsers,
         selectClient,
         validatePostService,
         closeModal,

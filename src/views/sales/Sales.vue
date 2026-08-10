@@ -5,6 +5,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import DialogClientForm from '@/views/clients/components/DialogClientForm.vue';
 import BarcodeScannerDialog from '@/components/BarcodeScannerDialog.vue';
+import ReminderDialog from '@/components/ReminderDialog.vue';
 
 const toast = useToast();
 const loading = ref(false);
@@ -13,12 +14,17 @@ const sales = ref([]);
 const salesFilters = ref({ global: { value: null, matchMode: 'contains' } });
 const stock = ref([]);
 const clients = ref([]);
+const users = ref([]);
 const clientDialogVisible = ref(false);
 const clientLoading = ref(false);
 const scannerVisible = ref(false);
+const reminderVisible = ref(false);
+const reminderSaleId = ref(null);
+const openSaleReminder = (sale) => { reminderSaleId.value = sale.id; reminderVisible.value = true; };
 const scanMessage = ref('');
 const newClient = ref({ full_name: '', document: '', phone: '', address: '' });
 const form = ref({
+    attendant_user_id: null,
     client_id: null,
     customer_name: '',
     customer_document: '',
@@ -51,14 +57,16 @@ const resolveScannedStock = ({ rawValue, data }) => {
 const loadData = async () => {
     tableLoading.value = true;
     try {
-        const [salesResponse, stockResponse, clientsResponse] = await Promise.all([
+        const [salesResponse, stockResponse, clientsResponse, usersResponse] = await Promise.all([
             Axios.get(API_CONFIG.SALES),
             Axios.get(API_CONFIG.STOCK),
-            Axios.get(API_CONFIG.CLIENTS)
+            Axios.get(API_CONFIG.CLIENTS),
+            Axios.get(API_CONFIG.USERS)
         ]);
         sales.value = salesResponse.data || [];
         stock.value = stockResponse.data || [];
         clients.value = clientsResponse.data || [];
+        users.value = usersResponse.data || [];
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao carregar dados da tela de vendas.', life: 5000 });
     } finally {
@@ -113,6 +121,7 @@ const removeItem = (index) => {
 const resetForm = () => {
     form.value = {
         client_id: null,
+        attendant_user_id: null,
         customer_name: '',
         customer_document: '',
         customer_phone: '',
@@ -125,8 +134,8 @@ const resetForm = () => {
 const totalItems = computed(() => form.value.items.reduce((total, item) => total + Number(item.quantity || 0) * Number(item.unit_price || 0), 0));
 
 const submit = async () => {
-    if (!form.value.client_id || !form.value.items.length || form.value.items.some((item) => !item.stock_id || !item.quantity)) {
-        toast.add({ severity: 'warn', summary: 'Dados incompletos', detail: 'Informe cliente e itens da venda.', life: 4000 });
+    if (!form.value.client_id || !form.value.attendant_user_id || !form.value.items.length || form.value.items.some((item) => !item.stock_id || !item.quantity)) {
+        toast.add({ severity: 'warn', summary: 'Dados incompletos', detail: 'Informe cliente, atendente e itens da venda.', life: 4000 });
         return;
     }
 
@@ -150,6 +159,7 @@ onMounted(loadData);
     <Toast />
     <DialogClientForm v-model="clientDialogVisible" v-model:client="newClient" :loading="clientLoading" title="Cadastrar cliente" @save="saveClient" @cancel="clientDialogVisible = false" />
     <BarcodeScannerDialog v-model="scannerVisible" title="Ler código da peça" @detected="resolveScannedStock" />
+    <ReminderDialog v-model="reminderVisible" :sale-id="reminderSaleId" />
     <div class="grid sales-page">
         <div class="col-12">
             <div class="card">
@@ -166,6 +176,9 @@ onMounted(loadData);
                         <Dropdown inputId="saleClient" v-model="form.client_id" :options="clients" optionLabel="full_name" optionValue="id" filter class="w-full" @change="selectClient(clients.find((client) => client.id === form.client_id))" />
                         <label for="saleClient"><span class="text-red-500">*</span> Cliente</label>
                     </span>
+                </div>
+                <div class="mb-3">
+                    <span class="p-float-label"><Dropdown inputId="saleAttendant" v-model="form.attendant_user_id" :options="users" optionLabel="name" optionValue="id" filter showClear class="w-full" /><label for="saleAttendant"><span class="text-red-500">*</span> Atendente</label></span>
                 </div>
 
                 <div class="surface-section border-1 surface-border border-round p-3 mb-3">
@@ -225,7 +238,7 @@ onMounted(loadData);
                         <label for="saleNotes">Observações</label>
                     </span>
                 </div>
-                <Button :loading="loading" label="Registrar" icon="pi pi-check" class="mt-2" @click="submit()" />
+                    <div class="flex gap-2 mt-2"><Button :loading="loading" label="Registrar" icon="pi pi-check" @click="submit()" /></div>
             </div>
         </div>
 
@@ -244,10 +257,14 @@ onMounted(loadData);
                 <DataTable v-model:filters="salesFilters" :value="sales" :loading="tableLoading" :globalFilterFields="['customer_name', 'customer_document', 'customer_phone']" responsiveLayout="scroll" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]" paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport" currentPageReportTemplate="{first} a {last} de {totalRecords}">
                     <Column field="id" header="#" />
                     <Column field="customer_name" header="Cliente" />
+                    <Column field="attendant_user_name" header="Atendente"><template #body="{ data }">{{ data.attendant_user_name || '-' }}</template></Column>
                     <Column field="total_amount" header="Total" />
                     <Column field="sold_at" header="Data" />
                     <Column header="Itens">
                         <template #body="{ data }">{{ data.items?.length || 0 }}</template>
+                    </Column>
+                    <Column header="Ações" bodyClass="text-center" style="width: 5rem">
+                        <template #body="{ data }"><Button icon="pi pi-bell" class="p-button-rounded p-button-outlined" v-tooltip.top="'Adicionar lembrete'" aria-label="Adicionar lembrete" @click="openSaleReminder(data)" /></template>
                     </Column>
                 </DataTable>
             </div>

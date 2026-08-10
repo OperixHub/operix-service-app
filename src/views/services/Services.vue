@@ -7,6 +7,8 @@ import DialogEditStatus from './components/DialogEditStatus.vue';
 import DialogEditPaymentStatus from './components/DialogEditPaymentStatus.vue';
 import DialogEditInfoClient from './components/DialogEditInfoClient.vue';
 import DialogEditProduct from './components/DialogEditProduct.vue';
+import ReminderDialog from '@/components/ReminderDialog.vue';
+import { ref } from 'vue';
 
 const {
     formatData, sendWhatsAppMessage, sendInfoClientsWhats, pdfGenerator, formatTelephone,
@@ -14,6 +16,7 @@ const {
     messageAddEstimateOSComplete, messageEditInfoClient,
     messageUpdateStatusService, messageUpdateStatusPayment,
     statusServiceOptions, statusPaymentOptions,
+    users,
     getStyleStatusService, getStyleStatusPayment,
     dataGetOS, dataGetServiceTable, typesProductOptions,
     displayModalOS, positionModalOS, dataViewEstimateOS,
@@ -24,7 +27,7 @@ const {
     displayModalEditStatus, positionModalEditStatus, dataEditStatus,
     displayModalEditInfo, positionModalEditInfo, dataEditInfoClient,
     displayModalEditProduct, positionModalEditProduct, dataEditProduct,
-    getStatusService, getStatusPayment, getTypesProduct, getServices,
+    getStatusService, getStatusPayment, getTypesProduct, getUsers, getServices,
     clearFilter, openModalAdd, closeModal,
     openModalOS, validateUpdateEstimateOS, deleteEstimateOS, addServicePartToOS, deleteServicePartFromOS,
     openModalViewObservation,
@@ -36,9 +39,13 @@ const {
     confirmDeleteService,
     toggle, openOverlay, op
 } = useServices();
+const reminderVisible = ref(false);
+const reminderServiceId = ref(null);
+const openServiceReminder = (service) => { reminderServiceId.value = service.id; reminderVisible.value = true; };
 
 onBeforeMount(() => {
     getTypesProduct();
+    getUsers();
     getStatusPayment();
     getStatusService();
     getServices();
@@ -51,6 +58,7 @@ onBeforeMount(() => {
     <Toast />
 
     <DialogServiceAdd />
+    <ReminderDialog v-model="reminderVisible" :service-id="reminderServiceId" />
 
     <DialogViewOS
         v-model="displayModalOS"
@@ -110,7 +118,8 @@ onBeforeMount(() => {
     <DialogEditInfoClient
         v-model="displayModalEditInfo"
         :position="String(positionModalEditInfo)"
-        :data-edit-info-client="dataEditInfoClient"
+    :data-edit-info-client="dataEditInfoClient"
+        :users="users"
         :messages="messageEditInfoClient"
         :save="validateEditInfoClient"
         @update:data-edit-info-client="dataEditInfoClient = $event"
@@ -241,6 +250,10 @@ onBeforeMount(() => {
                         </template>
                     </Column>
 
+                    <Column bodyClass="text-center" field="responsible_user_name" header="Responsável técnico" :showFilterMatchModes="false">
+                        <template #body="{ data }">{{ data.responsible_user_name || '-' }}</template>
+                    </Column>
+
                     <!-- Situação -->
                     <Column bodyClass="text-center" field="status_id" header="Situação" :showFilterMatchModes="false" style="width: 7vw">
                         <template #body="{ data }">
@@ -297,6 +310,7 @@ onBeforeMount(() => {
                     <Column bodyClass="text-center" style="width: 4vw">
                         <template #body="{ data }">
                             <Button v-tooltip.top="'Ações'" icon="pi pi-ellipsis-v" @click="toggle($event, data.id)" class="p-button-rounded surface-500 surface-border" />
+                            <Button v-tooltip.top="'Adicionar lembrete'" icon="pi pi-bell" @click="openServiceReminder(data)" class="p-button-rounded p-button-outlined ml-1" aria-label="Adicionar lembrete" />
                             <OverlayPanel v-if="openOverlay(data.id)" ref="op">
                                 <Button icon="pi pi-share-alt" @click="sendInfoClientsWhats(data)" class="ml-1 p-button-rounded p-button-success" v-tooltip.top="'Compartilhar informações do serviço'" />
                                 <Button @click="confirmDeleteService($event, data)" icon="pi pi-trash" class="ml-1 p-button-rounded p-button-danger" v-tooltip.top="'Excluir'" />

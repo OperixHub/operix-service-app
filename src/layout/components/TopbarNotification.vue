@@ -31,6 +31,7 @@ const getStyleStatusService = (id) => {
     const statusService = statusServiceMapping.value.find((item) => item.id === id);
     return statusService || null;
 };
+const formatReminderDate = (value) => value ? new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '-';
 
 const notifications = ref([]);
 
@@ -72,18 +73,20 @@ onMounted(() => {
 
             <Column header="Lembrete">
                 <template #body="slotProps">
-                    O serviço para <strong class="text-600">{{ slotProps.data.client }}</strong> em <strong class="text-600">{{ slotProps.data.product }}</strong> está no sistema a
-                    <strong class="text-600"> {{ slotProps.data.days }} dias </strong>.
+                    <span v-if="slotProps.data.kind === 'agenda'">{{ slotProps.data.title }} <small class="block text-600">{{ slotProps.data.description || 'Lembrete da agenda' }}</small></span>
+                    <span v-else>O serviço para <strong class="text-600">{{ slotProps.data.client }}</strong> em <strong class="text-600">{{ slotProps.data.product }}</strong> está no sistema a <strong class="text-600"> {{ slotProps.data.days }} dias </strong>.</span>
                 </template>
             </Column>
 
-            <Column header="Entrada" style="text-align: center">
+            <Column v-if="notifications.some((item) => item.kind === 'agenda')" header="Data" style="text-align: center"><template #body="slotProps">{{ slotProps.data.kind === 'agenda' ? formatReminderDate(slotProps.data.starts_at) : formatData(slotProps.data.created_at) }}</template></Column>
+
+            <Column v-if="notifications.some((item) => item.kind !== 'agenda')" header="Entrada" style="text-align: center">
                 <template #body="slotProps">
                     {{ formatData(slotProps.data.created_at) }}
                 </template>
             </Column>
 
-            <Column header="Status" style="text-align: center">
+            <Column v-if="notifications.some((item) => item.kind !== 'agenda')" header="Status" style="text-align: center">
                 <template #body="slotProps">
                     <Tag
                         :value="getStyleStatusService(slotProps.data.status_id)?.description || String(slotProps.data.status_id || '-')"

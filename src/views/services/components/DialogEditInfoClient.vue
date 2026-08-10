@@ -7,6 +7,7 @@ const props = defineProps({
     dataEditInfoClient: { type: Object, required: true },
     messages: { type: Array, required: true },
     save: { type: Function, required: true }
+    , users: { type: Array, default: () => [] }
 });
 
 const emit = defineEmits(['update:modelValue', 'update:dataEditInfoClient', 'cancel', 'reset']);
@@ -38,6 +39,10 @@ const adress = computed({
 const observation = computed({
     get: () => props.dataEditInfoClient.observation,
     set: (value) => updateInfoClient({ observation: value })
+});
+const responsibleUserId = computed({
+    get: () => props.dataEditInfoClient.responsible_user_id,
+    set: (value) => updateInfoClient({ responsible_user_id: value })
 });
 
 const whatsappUrl = computed(() => `https://wa.me/${String(props.dataEditInfoClient.telephone || '').replace(/\D/g, '')}`);
@@ -108,6 +113,9 @@ watch(() => props.modelValue, (visible) => {
                     <Textarea inputId="editObservation" rows="1" cols="10" v-model="observation" :disabled="!editing" />
                     <label for="editObservation">Observação</label>
                 </span>
+            </div>
+            <div class="field col-12">
+                <span class="p-float-label"><Dropdown inputId="editResponsible" v-model="responsibleUserId" :options="users" optionLabel="name" optionValue="id" filter showClear class="w-full" :disabled="!editing" /><label for="editResponsible">Responsável técnico</label></span>
             </div>
         </div>
         <template #footer>

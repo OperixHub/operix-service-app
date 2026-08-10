@@ -13,6 +13,7 @@ const router = createRouter({
             name: 'login',
             component: () => import('@/views/auth/Login.vue')
         },
+        { path: '/painel-externo', name: 'painel-externo', component: () => import('@/views/external/ExternalServicePanel.vue') },
         {
             path: '/auth/callback',
             name: 'auth-callback',
@@ -51,6 +52,7 @@ const router = createRouter({
                     meta: { permission: 'servicos.acesso' },
                     component: () => import('@/views/services/Services.vue')
                 },
+                { path: '/ponto', name: 'ponto', meta: { permission: 'ponto.acesso' }, component: () => import('@/views/timeClock/TimeClock.vue') },
                 {
                     path: '/usuarios',
                     name: 'usuarios',
@@ -65,7 +67,7 @@ const router = createRouter({
                 {
                     path: '/dados-basicos',
                     name: 'dados-basicos',
-                    meta: { permissionsAny: ['status-servico.acesso', 'status-pagamento.acesso', 'tipos-produto.acesso'] },
+                    meta: { permissionsAny: ['status-servico.acesso', 'status-pagamento.acesso', 'tipos-produto.acesso', 'fornecedores.acesso', 'cargos.acesso'] },
                     component: () => import('@/views/basicData/BasicData.vue')
                 },
                 {

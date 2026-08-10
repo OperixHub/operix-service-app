@@ -87,6 +87,10 @@ const onChangeTheme = (theme, mode) => {
         <button class="p-link layout-menu-button layout-topbar-button" v-tooltip.bottom="'Abrir menu'" aria-label="Abrir menu" @click="onMenuToggle()">
             <i class="pi pi-bars"></i>
         </button>
+        <div class="topbar-brand" aria-label="Opeflow">
+            <img src="/layout/images/opeflow-icon.svg" alt="" />
+            <span>Opeflow</span>
+        </div>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
             <div class="topbar-user">
@@ -120,6 +124,23 @@ const onChangeTheme = (theme, mode) => {
     font-weight: 600;
 }
 
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-left: .35rem;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.topbar-brand img {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 7px;
+}
+
 .topbar-user span {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -131,6 +152,10 @@ const onChangeTheme = (theme, mode) => {
 }
 
 @media (max-width: 640px) {
+    .topbar-brand span {
+        display: none;
+    }
+
     .topbar-user span {
         display: none;
     }

@@ -6,7 +6,7 @@ import Axios from '@/services/axios';
 import { API_CONFIG } from '@/services/api';
 import DialogClientForm from '@/views/clients/components/DialogClientForm.vue';
 
-const { displayModalAdd, dataPostService, statusServiceMapping, typesProductOptions, clients, messageAddService, getStatusService, getTypesProduct, getClients, selectClient, validatePostService, closeModal, initDate } = useDialogServiceAdd();
+const { displayModalAdd, dataPostService, statusServiceMapping, typesProductOptions, clients, users, messageAddService, getStatusService, getTypesProduct, getClients, getUsers, selectClient, validatePostService, closeModal, initDate } = useDialogServiceAdd();
 const clientDialogVisible = ref(false);
 const clientLoading = ref(false);
 const newClient = ref({ full_name: '', document: '', phone: '', address: '' });
@@ -30,6 +30,7 @@ onMounted(() => {
     getStatusService();
     initDate();
     getClients();
+    getUsers();
 });
 </script>
 <template>
@@ -51,6 +52,9 @@ onMounted(() => {
                     <Dropdown v-model="dataPostService.product" :options="typesProductOptions" filter aria-labelledby="addProductLabel"/>
                     <label id="addProductLabel"><span class="text-red-500">*</span> Produto</label>
                 </span>
+            </div>
+            <div class="field col-12 md:col-4">
+                <span class="p-float-label"><Dropdown inputId="addResponsible" v-model="dataPostService.responsible_user_id" :options="users" optionLabel="name" optionValue="id" filter showClear class="w-full" /><label for="addResponsible">Responsável técnico (opcional)</label></span>
             </div>
             <div class="field col-12 md:col-4 relative">
                 <a href="#" class="text-blue-500 text-sm" style="position: absolute; top: -0.8rem; right: 0.75rem;" @click.prevent="openClientDialog">Cadastrar cliente</a>

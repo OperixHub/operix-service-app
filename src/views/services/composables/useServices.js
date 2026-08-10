@@ -69,6 +69,11 @@ export function useServices() {
         }
     };
 
+    const users = ref([]);
+    const getUsers = async () => {
+        try { users.value = (await Axios.get(API_CONFIG.USERS)).data || []; } catch (error) { console.error(error); }
+    };
+
     /* Service parts */
     const stockOptions = ref([]);
     const rawStock = ref([]);
@@ -212,7 +217,7 @@ export function useServices() {
         messageEditInfoClient.value.length = 0;
         displayModalEditInfo.value = true;
         positionModalEditInfo.value = position;
-        ['id', 'product', 'client', 'telephone', 'adress', 'observation'].forEach((k) => {
+        ['id', 'product', 'client', 'telephone', 'adress', 'observation', 'responsible_user_id'].forEach((k) => {
             dataEditInfoClient.value[k] = data[k];
             originalInfoClient.value[k] = data[k];
         });
@@ -239,6 +244,7 @@ export function useServices() {
                 telephone: dataEditInfoClient.value.telephone,
                 adress: dataEditInfoClient.value.adress,
                 observation: dataEditInfoClient.value.observation
+                , responsible_user_id: dataEditInfoClient.value.responsible_user_id || null
             });
             toast.add({ severity: 'success', summary: 'Editado', detail: response.msg, life: 5000 });
             originalInfoClient.value = { ...dataEditInfoClient.value };
@@ -576,6 +582,7 @@ export function useServices() {
         // data
         dataGetOS, dataGetService, dataGetServiceTable,
         typesProductOptions,
+        users,
         // modals
         displayModalOS, positionModalOS, dataViewEstimateOS,
         dataPutOrderOfServiceComplete,
@@ -588,7 +595,7 @@ export function useServices() {
         dataServicePart, stockOptions, servicePartLoading, serviceParts, serviceContextOS, serviceWarrantyDays, serviceWarrantyLoading,
         displayModalAdd,
         // methods - data fetch
-        getStatusService, getStatusPayment, getTypesProduct, getServices,
+        getStatusService, getStatusPayment, getTypesProduct, getUsers, getServices,
         // methods - actions
         clearFilter, openModalAdd, closeModal,
         openModalOS, validateUpdateEstimateOS, deleteEstimateOS, addServicePartToOS, deleteServicePartFromOS, saveServiceWarranty,

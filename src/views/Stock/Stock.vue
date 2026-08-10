@@ -12,6 +12,7 @@ const confirmPopup = useConfirm();
 const loading = ref(false);
 const tableLoading = ref(false);
 const items = ref([]);
+const suppliers = ref([]);
 const filters = ref({
     name: { value: null, matchMode: 'contains' },
     code: { value: null, matchMode: 'contains' }
@@ -24,6 +25,7 @@ const form = ref({
     code: '',
     description: '',
     supplier_name: '',
+    supplier_id: null,
     quantity: 0,
     purchasePrice: 0,
     salePrice: 0,
@@ -37,6 +39,7 @@ function resetForm() {
         code: '',
         description: '',
         supplier_name: '',
+        supplier_id: null,
         quantity: 0,
         purchasePrice: 0,
         salePrice: 0,
@@ -47,8 +50,9 @@ function resetForm() {
 async function loadStock() {
     tableLoading.value = true;
     try {
-        const response = await Axios.get(API_CONFIG.STOCK);
+        const [response, suppliersResponse] = await Promise.all([Axios.get(API_CONFIG.STOCK), Axios.get(API_CONFIG.SUPPLIERS)]);
         items.value = response.data || [];
+        suppliers.value = suppliersResponse.data || [];
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao carregar estoque.', life: 5000 });
     } finally {
@@ -74,6 +78,7 @@ function openEditDialog(item) {
         code: item.code || '',
         description: item.description || '',
         supplier_name: item.supplier_name || '',
+        supplier_id: item.supplier_id || null,
         quantity: Number(item.quantity || 0),
         purchasePrice: Number(item.purchaseprice ?? item.purchasePrice ?? 0),
         salePrice: Number(item.saleprice ?? item.salePrice ?? 0),
@@ -91,6 +96,7 @@ function applyScannedStock({ rawValue, data }) {
             code: existingItem.code || '',
             description: existingItem.description || '',
             supplier_name: existingItem.supplier_name || '',
+            supplier_id: existingItem.supplier_id || null,
             quantity: Number(existingItem.quantity || 0),
             purchasePrice: Number(existingItem.purchaseprice ?? existingItem.purchasePrice ?? 0),
             salePrice: Number(existingItem.saleprice ?? existingItem.salePrice ?? 0),
@@ -126,6 +132,7 @@ async function saveItem() {
             code: form.value.code,
             description: form.value.description || null,
             supplier_name: form.value.supplier_name || null,
+            supplier_id: form.value.supplier_id || null,
             quantity: Number(form.value.quantity || 0),
             purchasePrice: Number(form.value.purchasePrice || 0),
             salePrice: Number(form.value.salePrice || 0),
@@ -253,7 +260,7 @@ onMounted(loadStock);
                 <span class="p-float-label"><Textarea id="stockDescription" v-model="form.description" rows="3" /><label for="stockDescription">Descrição</label></span>
             </div>
             <div class="field col-12 md:col-6">
-                <span class="p-float-label"><InputText id="stockSupplier" v-model="form.supplier_name" /><label for="stockSupplier">Fornecedor (opcional)</label></span>
+                <span class="p-float-label"><Dropdown inputId="stockSupplier" v-model="form.supplier_id" :options="suppliers" optionLabel="name" optionValue="id" filter showClear class="w-full" /><label for="stockSupplier">Fornecedor (opcional)</label></span>
             </div>
             <div class="field col-12 md:col-4">
                 <span class="p-float-label"><InputNumber inputId="stockQuantity" v-model="form.quantity" :min="0" /><label for="stockQuantity">Quantidade</label></span>

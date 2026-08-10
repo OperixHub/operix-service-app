@@ -6,7 +6,7 @@ const props = defineProps({
     getUsers: { type: Function, required: true }
 });
 
-const { dataPostUser, companyAccessCode, moduleOptions, displayModalAdd, openModalAdd, closeModal, validatePostUser } = useUserForm(props.getUsers);
+const { dataPostUser, companyAccessCode, moduleOptions, roleOptions, displayModalAdd, openModalAdd, closeModal, validatePostUser } = useUserForm(props.getUsers);
 
 const copyAccessCode = async () => {
     if (companyAccessCode.value) {
@@ -40,6 +40,12 @@ defineExpose({ open: openModalAdd });
                 <span class="p-float-label">
                     <InputText type="text" id="addUsername" v-model="dataPostUser.username" />
                     <label for="addUsername"><span style="color: red">*</span> Nome de Usuário </label>
+                </span>
+            </div>
+            <div class="field col-12 md:col-6">
+                <span class="p-float-label">
+                    <Dropdown inputId="addRole" v-model="dataPostUser.role_id" :options="roleOptions" optionLabel="name" optionValue="id" filter class="w-full" />
+                    <label for="addRole"><span class="text-red-500">*</span> Cargo</label>
                 </span>
             </div>
             <div class="field col-12 md:col-6">

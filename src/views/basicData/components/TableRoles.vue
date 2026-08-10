@@ -1,0 +1,19 @@
+<script setup>
+import { onMounted, ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import Axios from '@/services/axios';
+import { API_CONFIG } from '@/services/api';
+const toast = useToast(); const confirm = useConfirm(); const roles = ref([]); const loading = ref(false); const dialog = ref(false); const editingId = ref(null); const form = ref({ name: '', description: '' });
+const load = async () => { loading.value = true; try { const response = await Axios.get(API_CONFIG.ROLES); roles.value = response.data || []; } catch (error) { toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao carregar cargos.', life: 5000 }); } finally { loading.value = false; } };
+const open = (role = null) => { editingId.value = role?.id || null; form.value = { name: role?.name || '', description: role?.description || '' }; dialog.value = true; };
+const save = async () => { if (!form.value.name.trim()) return toast.add({ severity: 'warn', summary: 'Validação', detail: 'Informe o nome do cargo.', life: 4000 }); loading.value = true; try { if (editingId.value) await Axios.put(`${API_CONFIG.ROLES}/${editingId.value}`, form.value); else await Axios.post(API_CONFIG.ROLES, form.value); dialog.value = false; await load(); toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Cargo salvo com sucesso.', life: 4000 }); } catch (error) { toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao salvar cargo.', life: 5000 }); } finally { loading.value = false; } };
+const remove = (event, role) => confirm.require({ target: event.currentTarget, message: `Deseja remover o cargo "${role.name}"?`, icon: 'pi pi-exclamation-triangle', acceptLabel: 'Sim', rejectLabel: 'Não', accept: async () => { try { await Axios.delete(`${API_CONFIG.ROLES}/${role.id}`); await load(); } catch (error) { toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Cargos padrão não podem ser removidos.', life: 5000 }); } } });
+onMounted(load);
+</script>
+<template>
+    <ConfirmPopup /><Toast /><div class="card"><div class="page-title-row"><h5 class="page-title">Cargos</h5><i class="pi pi-info-circle page-title-info" v-tooltip.top="'Cargos padrão são protegidos; cargos personalizados podem ser editados ou removidos.'" /></div>
+        <Toolbar class="mb-4"><template #start><Button label="Adicionar" icon="pi pi-plus" @click="open()" /></template></Toolbar>
+        <DataTable :value="roles" :loading="loading" showGridlines responsiveLayout="scroll"><template #empty>Nenhum cargo cadastrado.</template><Column field="name" header="Cargo" /><Column field="description" header="Descrição"><template #body="{ data }">{{ data.description || '-' }}</template></Column><Column header="Ações" bodyClass="text-center"><template #body="{ data }"><Button v-if="!data.is_system" icon="pi pi-pencil" rounded severity="warning" class="mr-2" @click="open(data)" /><Button v-if="!data.is_system" icon="pi pi-trash" rounded severity="danger" @click="remove($event, data)" /><span v-else class="inline-block w-2rem" aria-hidden="true"></span></template></Column></DataTable>
+    </div><Dialog v-model:visible="dialog" modal :style="{ width: 'clamp(22rem, 42vw, 38rem)' }" :header="editingId ? 'Editar Cargo' : 'Adicionar Cargo'"><div class="grid p-fluid mt-3"><div class="field col-12"><span class="p-float-label"><InputText id="roleName" v-model="form.name" /><label for="roleName"><span class="text-red-500">*</span> Nome</label></span></div><div class="field col-12"><span class="p-float-label"><Textarea id="roleDescription" v-model="form.description" rows="3" /><label for="roleDescription">Descrição</label></span></div></div><template #footer><Button label="Cancelar" text @click="dialog = false" /><Button label="Salvar" icon="pi pi-check" :loading="loading" @click="save" /></template></Dialog>
+</template>

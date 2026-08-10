@@ -11,6 +11,7 @@ const loading = ref(false);
 const profile = ref({});
 const company = ref({});
 const system = ref({});
+const externalLink = ref(null);
 
 const isAccountAdmin = computed(() => Boolean(
     profile.value.admin ||
@@ -50,22 +51,31 @@ const selectImage = async (event, target, field) => {
     }
 };
 
-const moduleLabels = {
-    painel: 'Painel',
-    servicos: 'Serviços',
-    'status-servico': 'Status de Serviço',
-    'status-pagamento': 'Status de Pagamento',
-    'tipos-produto': 'Tipos de Produto',
-    estoque: 'Estoque',
-    vendas: 'Vendas',
-    organizacao: 'Organização',
-    notificacoes: 'Notificações'
-};
+const enabledModuleItems = computed(() => {
+    const enabled = system.value.access?.enabled_modules || [];
+    const catalog = system.value.catalog?.modules || [];
+    return enabled.filter((key) => key !== 'organizacao').map((key) => catalog.find((module) => module.key === key) || (key === 'painel' ? { key, label: 'Painel' } : { key, label: key }));
+});
 
 const copyAccessCode = async () => {
     if (!company.value.access_code) return;
     await navigator.clipboard.writeText(company.value.access_code);
     toast.add({ severity: 'success', summary: 'Copiado', detail: 'Código da empresa copiado.', life: 2500 });
+};
+
+const loadExternalLink = async () => {
+    if (!hasPermission('servicos.acesso')) return;
+    try { const response = await Axios.get(API_CONFIG.EXTERNAL_ACCESS_PROFILE); externalLink.value = response.data || null; } catch { externalLink.value = null; }
+};
+
+const copyExternalLink = async () => {
+    if (!externalLink.value?.url) return;
+    await navigator.clipboard.writeText(externalLink.value.url);
+    toast.add({ severity: 'success', summary: 'Copiado', detail: 'Link do painel externo copiado.', life: 2500 });
+};
+
+const rotateExternalLink = async () => {
+    try { const response = await Axios.post(API_CONFIG.EXTERNAL_ACCESS_ROTATE); externalLink.value = response.data; await copyExternalLink(); toast.add({ severity: 'success', summary: 'Link atualizado', detail: 'O link anterior foi invalidado.', life: 3500 }); } catch (error) { toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Não foi possível gerar o link.', life: 5000 }); }
 };
 
 const loadSettings = async () => {
@@ -79,6 +89,7 @@ const loadSettings = async () => {
         profile.value = profileResponse.data || profileResponse || getCurrentUser() || {};
         company.value = companyResponse.data || companyResponse || {};
         system.value = systemResponse.data || systemResponse || {};
+        await loadExternalLink();
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Erro', detail: error.response?.data?.msg || 'Erro ao carregar configurações.', life: 5000 });
     } finally {
@@ -92,7 +103,6 @@ const saveProfile = async () => {
         await Axios.patch(API_CONFIG.PROFILE_ME, {
             name: profile.value.name,
             avatar_url: profile.value.avatar_url || null,
-            role_title: profile.value.role_title || null,
             preferences: profile.value.preferences || {}
         });
         toast.add({ severity: 'success', summary: 'Salvo', detail: 'Perfil atualizado.', life: 4000 });
@@ -148,7 +158,18 @@ onMounted(loadSettings);
                         <span class="p-float-label"><InputText id="profileEmail" v-model="profile.email" disabled /><label for="profileEmail">Email</label></span>
                     </div>
                     <div class="field col-12 md:col-6">
-                        <span class="p-float-label"><InputText id="profileRole" v-model="profile.role_title" /><label for="profileRole">Cargo</label></span>
+                        <span class="p-float-label"><InputText id="profileRole" :modelValue="profile.role_name || profile.role_title || (profile.root ? 'Proprietário' : '')" readonly /><label for="profileRole">Cargo</label></span>
+                    </div>
+                    <div v-if="hasPermission('servicos.acesso')" class="field col-12">
+                        <label for="externalAccessLink" class="block text-900 font-medium mb-2">Link individual do painel externo</label>
+                        <div class="flex flex-column md:flex-row gap-2">
+                            <InputText id="externalAccessLink" :modelValue="externalLink?.url || 'Nenhum link criado'" readonly class="w-full" />
+                            <div class="flex gap-2">
+                                <Button icon="pi pi-copy" label="Copiar" :disabled="!externalLink?.url" @click="copyExternalLink" />
+                                <Button icon="pi pi-refresh" label="Rotacionar" severity="secondary" @click="rotateExternalLink" v-tooltip.top="'Invalida o link anterior e cria um novo'" />
+                            </div>
+                        </div>
+                        <small class="text-600">O link é exclusivo deste usuário. Ao rotacionar, o link anterior deixa de funcionar.</small>
                     </div>
                 </div>
                 <Button label="Salvar" icon="pi pi-check" :loading="loading" @click="saveProfile()" />
@@ -195,8 +216,8 @@ onMounted(loadSettings);
                         <div class="surface-border border-1 border-round p-3 h-full">
                             <div class="text-600 mb-2">Módulos habilitados</div>
                             <div class="flex flex-wrap gap-2">
-                                <Tag v-for="moduleKey in system.access?.enabled_modules || []" :key="moduleKey" severity="success" :value="moduleLabels[moduleKey] || moduleKey" />
-                                <span v-if="!(system.access?.enabled_modules || []).length" class="text-600">Nenhum módulo habilitado</span>
+                                <Tag v-for="module in enabledModuleItems" :key="module.key" severity="success" :value="module.label" />
+                                <span v-if="!enabledModuleItems.length" class="text-600">Nenhum módulo habilitado</span>
                             </div>
                         </div>
                     </div>

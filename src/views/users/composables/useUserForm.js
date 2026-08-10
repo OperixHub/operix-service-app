@@ -10,10 +10,11 @@ export function useUserForm(getUsers) {
     const dataPostUser = ref({
         admin: false,
         modules: []
+        , role_id: null
     });
     const displayModalAdd = ref(false);
     const companyAccessCode = ref('');
-    const moduleOptions = [
+    const moduleOptions = ref([
         {
             label: 'Serviços',
             value: 'servicos',
@@ -45,22 +46,29 @@ export function useUserForm(getUsers) {
             description: 'Registro de vendas'
         },
         {
-            label: 'Organização',
-            value: 'organizacao',
-            description: 'Gestão de usuários'
+            label: 'Ponto',
+            value: 'ponto',
+            description: 'Lançamentos e solicitações de ajuste de ponto'
         },
         {
             label: 'Notificações',
             value: 'notificacoes',
             description: 'Alertas da operação'
         }
-    ];
+    ]);
+    const roleOptions = ref([]);
 
     const openModalAdd = async () => {
         messageAddUser.value.length = 0;
         try {
+            const rolesResponse = await Axios.get(API_CONFIG.ROLES);
+            roleOptions.value = rolesResponse.data || [];
             const response = await Axios.get(API_CONFIG.PROFILE_COMPANY);
             companyAccessCode.value = response.data?.access_code || response.access_code || '';
+            const systemResponse = await Axios.get(API_CONFIG.PROFILE_SYSTEM);
+            moduleOptions.value = (systemResponse.data?.catalog?.modules || [])
+                .filter((module) => module.key !== 'organizacao' && module.key !== 'painel')
+                .map((module) => ({ label: module.label, value: module.key, description: module.description }));
         } catch {
             companyAccessCode.value = '';
         }
@@ -73,6 +81,7 @@ export function useUserForm(getUsers) {
             dataPostUser.value = {
                 admin: false,
                 modules: []
+                , role_id: null
             };
         }
     };
@@ -85,6 +94,7 @@ export function useUserForm(getUsers) {
                 username: dataPostUser.value.username,
                 password: dataPostUser.value.password,
                 admin: Boolean(dataPostUser.value.admin),
+                role_id: dataPostUser.value.role_id,
                 modules: dataPostUser.value.admin ? [] : dataPostUser.value.modules
             });
             toast.add({ severity: 'success', summary: 'Adicionado', detail: 'Usuário adicionado com sucesso', life: 5000 });
@@ -107,6 +117,8 @@ export function useUserForm(getUsers) {
             addMessage('addUser', 'error', 'A senha deve ter no mínimo 8 caracteres.');
         } else if (dataPostUser.value.password !== dataPostUser.value.confirmPassword) {
             addMessage('addUser', 'error', 'Senhas incoerentes.');
+        } else if (!dataPostUser.value.role_id) {
+            addMessage('addUser', 'error', 'Selecione o cargo do usuário.');
         } else if (!dataPostUser.value.admin && !dataPostUser.value.modules?.length) {
             addMessage('addUser', 'error', 'Selecione ao menos um módulo de acesso ou marque o usuário como administrador.');
         } else {
@@ -118,6 +130,7 @@ export function useUserForm(getUsers) {
         dataPostUser,
         companyAccessCode,
         moduleOptions,
+        roleOptions,
         displayModalAdd,
         openModalAdd,
         closeModal,
